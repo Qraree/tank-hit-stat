@@ -267,7 +267,7 @@ test.addEventListener('click', (e) => {
 
     listItem.addEventListener('mouseleave', () => {
         let index = getIndex(list, listItem)
-        listItem.style.backgroundColor = 'rgba(55, 55, 196, 0.78)'
+        listItem.style.backgroundColor = '#333D79FF'
         test.childNodes[index+1].style.backgroundColor = divColor;
     })
 

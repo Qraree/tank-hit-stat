@@ -1,39 +1,43 @@
 
 body {
     margin: 0;
-    padding: 0;
-    background-color: wheat;
+    --main-bg-color: #333D79FF;
+    --second-bg-color: wheat;
+    background-color: #FAEBEFFF;
+    padding: 10px;
 }
 
 .buttons {
     display: flex;
-    flex-direction: row;
-    width: 450px;
+    flex-direction: column;
+    width: auto;
     justify-content: flex-start;
     align-items: center;
-    margin: 10px;
-    max-height: 50px;
+    height: 500px;
 }
 
 .target-div-wrapper {
     position: relative;
-    border: 5px solid rgba(55, 55, 196, 0.78);
     border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+    /*border: 2px solid blue;*/
 }
 
 button {
-    background-color: rgba(55, 55, 196, 0.78);
-    font-size: 20px;
-    padding: 10px;
-    border-radius: 10px;
+    background-color: var(--main-bg-color);
+    font-size: 14px;
+    padding: 0;
+    border-radius: 5px 0 0 5px;
+
     border: 0;
     color: white;
-    margin-right: 10px;
-    height: 50px;
-    min-width: 150px;
+    height: 30px;
+    min-width: 130px;
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .dot {
@@ -56,6 +60,8 @@ button:hover {
     display: flex;
     flex-direction: row;
     margin-left: 10px;
+    justify-content: space-around;
+    border: 1px solid red;
 }
 
 .gradient-wrapper {
@@ -68,10 +74,8 @@ button:hover {
 }
 
 .list {
-    width: 400px;
+    width: 130px;
     height: auto;
-    border: 3px solid rgba(55, 55, 196, 0.78);
-    border-radius: 5px;
     overflow-y: scroll;
     /*background-color: rgba(10, 10, 44, 0.78);*/
 }
@@ -81,14 +85,15 @@ button:hover {
 }
 
 .listItem {
-    background-color: rgba(55, 55, 196, 0.78);
-    min-width: 150px;
-    height: 40px;
+    background-color: var(--main-bg-color);
+    height: 30px;
+    min-width: 130px;
     display: flex;
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: 18px;
+    border-radius: 0 5px 5px 0;
+    font-size: 14px;
     cursor: pointer;
     transition: 200ms background-color;
 }
@@ -100,7 +105,7 @@ button:hover {
     margin-left: 20px;
     background: linear-gradient(red,yellow, #02ff02);
     border-radius: 15px;
-    border: 2px solid rgba(55, 55, 196, 0.78);
+    border: 2px solid var(--main-bg-color);
 }
 
 .gradient-wrapper:hover .gradient-values {
@@ -136,13 +141,19 @@ button:hover {
 }
 
 .test-container {
+    width: 500px;
+    height: 370px;
+    border: 5px solid var(--main-bg-color);
+    border-radius: 0 0 5px 5px;
 }
 
 .test {
-    width: 500px;
-    height: 500px;
+    width: 100%;
+    height: 100%;
     position: relative;
-    background-image: url("./tank.png");
+    object-fit: cover;
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .content {
@@ -249,7 +260,7 @@ button:hover {
     display: flex;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(55, 55, 197, 0.71);
+    background-color: var(--main-bg-color);
     padding: 10px 10px;
     margin-top: 10px;
 }
@@ -278,7 +289,7 @@ button:hover {
     overflow: hidden;
     position: absolute;
     top: 570px;
-    left: 600px;
+    left: 100px;
 }
 
 .target-cross {
@@ -343,6 +354,9 @@ label {
     border: 0;
     outline: none;
     font-size: 18px;
+}
 
+.parameter-list {
+    background-color: var(--main-bg-color);
 
 }
