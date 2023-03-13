@@ -1,0 +1,348 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: wheat;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    width: 450px;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 10px;
+    max-height: 50px;
+}
+
+.target-div-wrapper {
+    position: relative;
+    border: 5px solid rgba(55, 55, 196, 0.78);
+    border-radius: 5px;
+}
+
+button {
+    background-color: rgba(55, 55, 196, 0.78);
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 0;
+    color: white;
+    margin-right: 10px;
+    height: 50px;
+    min-width: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dot {
+    width: 5px;
+    height: 5px;
+    background-color: black;
+    position: absolute;
+    border-radius: 50%;
+}
+
+sub {
+    font-size: 8px;
+}
+
+button:hover {
+    background: rgba(39,39,147,0.78);
+}
+
+.test-wrapper {
+    display: flex;
+    flex-direction: row;
+    margin-left: 10px;
+}
+
+.gradient-wrapper {
+    display: flex;
+    flex-direction: row;
+    margin-right: 20px;
+    width: 120px;
+    padding: 0 10px;
+
+}
+
+.list {
+    width: 400px;
+    height: auto;
+    border: 3px solid rgba(55, 55, 196, 0.78);
+    border-radius: 5px;
+    overflow-y: scroll;
+    /*background-color: rgba(10, 10, 44, 0.78);*/
+}
+
+.list::-webkit-scrollbar {
+    display: none;
+}
+
+.listItem {
+    background-color: rgba(55, 55, 196, 0.78);
+    min-width: 150px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 200ms background-color;
+}
+
+
+.gradient {
+    height: 400px;
+    width: 25px;
+    margin-left: 20px;
+    background: linear-gradient(red,yellow, #02ff02);
+    border-radius: 15px;
+    border: 2px solid rgba(55, 55, 196, 0.78);
+}
+
+.gradient-wrapper:hover .gradient-values {
+    opacity: 1;
+    margin-left: 5px;
+}
+
+.gradient-values {
+    opacity: 0;
+    height: 400px;
+    width: 50px;
+    margin-left: 0;
+    transition: 200ms all;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.plot {
+    width: 500px;
+    height: 300px;
+    background-color: white;
+    padding-right: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.test-container {
+}
+
+.test {
+    width: 500px;
+    height: 500px;
+    position: relative;
+    background-image: url("./tank.png");
+}
+
+.content {
+    background-color: rgba(0, 255, 0, 0.7);
+    border: 1px solid red;
+    position: absolute;
+    width: 200px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 200ms background-color;
+}
+
+.content:hover .dragHeader {
+    opacity: 1;
+}
+
+.contentValue:hover .delta {
+    width: 35px;
+}
+
+.index {
+    font-size: 10px;
+}
+
+.contentValue {
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    transition: 200ms all;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.input {
+    display: none;
+    width: 30px;
+    font-size: 18px;
+    border: 0;
+    background-color: #a90808;
+    outline: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+}
+
+.inputShow {
+    display: block;
+}
+
+.delta {
+    overflow: hidden;
+    max-height: 20px;
+    width: 0;
+    display: block;
+    transition: 200ms all;
+}
+
+.value {
+    margin: 0 2px;
+}
+
+.valueHide {
+    display: none;
+}
+
+
+
+.dragHeader {
+    opacity: 0;
+    width: 40px;
+    height: 20px;
+    background-color: rgb(255, 255, 255);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    /*margin-left: auto;*/
+    margin-right: auto;
+    cursor: move;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    transition: 200ms all;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.dragHeaderCircle {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: #b7b6b6;
+}
+
+
+
+.hit-stat {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(55, 55, 197, 0.71);
+    padding: 10px 10px;
+    margin-top: 10px;
+}
+
+.target-div {
+    width: 300px;
+    height: 250px;
+    margin-left: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.target {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid red;
+    background-color: transparent;
+    cursor: move;
+    overflow: hidden;
+    position: absolute;
+    top: 570px;
+    left: 600px;
+}
+
+.target-cross {
+    font-size: 40px;
+    color: red;
+    font-weight: bold;
+}
+
+#target-sigma1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+    background-color: rgba(34, 238, 238, 0.56);
+    border-radius: 50%;
+    z-index: 100;
+}
+
+#target-sigma2 {
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 160px;
+    height: 160px;
+    background-color: rgba(90, 209, 253, 0.56);
+    border-radius: 50%;
+}
+
+
+
+
+.parameters {
+    height: 250px;
+    width: 300px;
+    margin-left: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.parameter-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+label {
+    margin-bottom: 10px;
+}
+
+.parameter {
+    width: 70%;
+    padding: 5px;
+    border-radius: 5px;
+    border: 0;
+    outline: none;
+    font-size: 18px;
+
+
+}

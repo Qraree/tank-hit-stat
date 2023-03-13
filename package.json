@@ -1,0 +1,22 @@
+{
+  "name": "atgm_simulation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Qraree/atgm_simulation_app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Qraree/atgm_simulation_app/issues"
+  },
+  "homepage": "https://github.com/Qraree/atgm_simulation_app#readme",
+  "devDependencies": {
+    "electron": "^23.1.3"
+  }
+}
