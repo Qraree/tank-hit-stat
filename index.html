@@ -8,92 +8,84 @@
     <title>A193</title>
 </head>
 <body>
-<div class="test-wrapper">
-    <div class="parameter-list">
-        <div class="parameters">
-            <section class="parameter-section">
-                <label for="distance">Дальность</label>
-                <input
-                        type="text"
-                        class="parameter"
-                        id="distance"
+    <div class="test-wrapper">
+        <div class="parameter-list">
+            <div class="parameters">
+                <section class="parameter-section">
+                    <label for="distance">Дальность</label>
+                    <input
+                            type="text"
+                            class="parameter"
+                            id="distance"
+                    >
+                </section>
+                <section class="parameter-section">
+                    <label for="standard-deviation">
+                        Среднее квадратичное отклонение
+                    </label>
+                    <input
+                            type="text"
+                            class="parameter"
+                            id="standard-deviation"
 
-                >
-            </section>
-            <section class="parameter-section">
-                <label for="standard-deviation">
-                    Среднее квадратичное отклонение
-                </label>
-                <input
-                        type="text"
-                        class="parameter"
-                        id="standard-deviation"
+                    >
+                </section>
+                <section class="parameter-section">
+                    <label for="armor">Бронепробиваемость</label>
+                    <input
+                            type="text"
+                            class="parameter"
+                            id="armor"
 
-                >
-            </section>
-            <section class="parameter-section">
-                <label for="armor">Бронепробиваемость</label>
-                <input
-                        type="text"
-                        class="parameter"
-                        id="armor"
-
-                >
-            </section>
-
-        </div>
-    </div>
-    <div class="target-div-wrapper">
-        <div class="buttons">
-            <button class="drop1">Drop 1</button>
-            <button class="drop100">Drop 100 </button>
-            <button class="reset">Reset dots</button>
-            <button class="console">Show input</button>
-            <a href="secondPage.html"><p>Go to second page</p></a>
-        </div>
-        <div class="test-container">
-            <div class="test" style="background-image: url(tank_pered.png)">
+                    >
+                </section>
 
             </div>
         </div>
-        <div class="target">
-            <div id="target-sigma2">
-                <div id="target-sigma1">
+        <div class="target-div-wrapper">
+            <div class="buttons">
+                <button class="drop1">Drop 1</button>
+                <button class="drop100">Drop 100 </button>
+                <button class="reset">Reset dots</button>
+                <button class="grid">Make grid</button>
+                <button class="console">Show input</button>
+                <a href="secondPage.html"><p>Go to second page</p></a>
+            </div>
+            <div class="test-container">
+                <div class="image-content-section">
+                    <img src="tank.png" class="tank_image">
+                    <div class="test-img-wrapper">
+                        <div class="test">
 
-                    <div class="target-cross">+</div>
+                        </div>
+                    </div>
+                    <div class="target">
+                        <div id="target-sigma2">
+                            <div id="target-sigma1">
+
+                                <div class="target-cross">+</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="list"></div>
-        <div class="gradient-wrapper">
             <div class="gradient"></div>
-            <div class="gradient-values">
-                <div>1000</div>
-                <div>900</div>
-                <div>800</div>
-                <div>600</div>
-                <div>500</div>
-                <div>400</div>
-                <div>300</div>
-                <div>200</div>
-                <div>100</div>
-            </div>
+            <div class="list"></div>
+        </div>
+    </div>
+
+    <h1>Статистика</h1>
+    <div class="hit-stat">
+        <div class="plot">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div class="target-div">
+
         </div>
     </div>
 
 
-</div>
-<div class="hit-stat">
-    <div class="plot">
-        <canvas id="canvas"></canvas>
-    </div>
-    <div class="target-div">
 
-    </div>
-</div>
-
-
-
-<script src="./renderer.js"></script>
+    <script src="./renderer.js"></script>
 </body>
 </html>

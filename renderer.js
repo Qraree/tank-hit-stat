@@ -2,6 +2,7 @@ const button = document.querySelector('.drop1');
 const buttonDropHundred = document.querySelector('.drop100');
 const buttonReset = document.querySelector('.reset');
 const buttonShow = document.querySelector('.console');
+const buttonGrid = document.querySelector('.grid');
 
 
 
@@ -19,6 +20,9 @@ const inputArmor = document.querySelector('#armor');
 let distance;
 let standardDeviation;
 let armorPenetration;
+
+const windowWidth = 600;
+const windowHeight = 491;
 
 const target = targetDivWrapper.querySelector('.target');
 const targetSigma1 = document.querySelector('#target-sigma1')
@@ -114,6 +118,36 @@ let chart = new Chart(canvas, {
     }
 });
 
+const range = function(start, stop, step){
+    step = step || 1;
+    const arr = [];
+    for (let i=start;i<stop;i+=step) {
+        arr.push(i);
+    }
+    return arr;
+};
+
+// MATH
+
+const normalcdf = (x) => {
+    const mean = 0;
+    const sigma = 1;
+    const z = (x-mean)/Math.sqrt(2*sigma*sigma);
+    const t = 1/(1+0.3275911*Math.abs(z));
+    const a1 =  0.254829592;
+    const a2 = -0.284496736;
+    const a3 =  1.421413741;
+    const a4 = -1.453152027;
+    const a5 =  1.061405429;
+    const erf = 1-(((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*Math.exp(-z*z);
+    let sign = 1;
+    if(z < 0)
+    {
+        sign = -1;
+    }
+    return (1/2)*(1+sign*erf) - 0.5;
+}
+
 const gaussianRandom = (mean=0, stdev=1) => {
     let u = 1 - Math.random();
     let v = Math.random();
@@ -121,8 +155,21 @@ const gaussianRandom = (mean=0, stdev=1) => {
     return z * stdev + mean;
 }
 
+const computeProbability = (x_dots, y_dots, standardDeviation) => {
+    // todo this
+    let probabilities = []
+    for (let i = 0; i < x_dots.length; i++) {
+        const dotProbabilities = [];
+        for (let armor of divStack) {
+
+        }
+    }
+}
+
+// DOTS
+
 const resetDots = () => {
-    const contentArray = testContainer.querySelectorAll('.test');
+    const contentArray = testContainer.querySelectorAll('.image-content-section');
     testContainer.replaceChildren(...contentArray)
     clearAllData(chart);
 
@@ -141,10 +188,35 @@ const isDotInContent = (dotTop, dotLeft) => {
 }
 
 
-const dropDot = () => {
-    // stack.push(test)
-    // console.log(stack)
-    const targetLeft = target.offsetLeft+ (target.clientWidth / 2);
+const make_dot_grid = () => {
+    // todo optimize
+
+    const tank_front_dots_x = range(0, windowWidth, 20)
+    const tank_front_dots_y = range(0, windowHeight, 20)
+
+    for (let x_dot of tank_front_dots_x) {
+        for (let y_dot of tank_front_dots_y) {
+            dropGridDot(y_dot, x_dot)
+        }
+    }
+
+}
+
+
+const dropGridDot = (x, y) => {
+    // isDotInContent(x, y)
+    let dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.style.backgroundColor = 'red';
+    dot.style.top = `${x}px`;
+    dot.style.left = `${y}px`;
+    testContainer.appendChild(dot)
+}
+
+
+const dropDot = (x, y) => {
+
+    const targetLeft = target.offsetLeft + (target.clientWidth / 2);
     const targetTop = target.offsetTop + (target.clientHeight / 2);
 
     let randomX = Math.floor(gaussianRandom(targetLeft, 40));
@@ -152,12 +224,11 @@ const dropDot = () => {
 
     isDotInContent(randomY, randomX)
 
-
-
     let dot = document.createElement('div');
     dot.className = 'dot'
     dot.style.top = `${randomY}px`;
     dot.style.left = `${randomX}px`;
+
 
     testContainer.appendChild(dot)
 
@@ -172,6 +243,7 @@ const dropDots = (number) => {
 button.addEventListener('click', dropDot)
 buttonDropHundred.addEventListener('click', () => dropDots(100))
 buttonReset.addEventListener('click', resetDots)
+buttonGrid.addEventListener('click', make_dot_grid)
 
 
 
