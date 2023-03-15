@@ -7,6 +7,14 @@ body {
     padding: 10px;
 }
 
+h1 {
+    color: white;
+    font-weight: bold;
+    margin: 30px 0 10px 10px;
+}
+
+
+
 .buttons {
     display: flex;
     flex-direction: column;
@@ -301,12 +309,12 @@ button:hover {
     cursor: move;
     overflow: hidden;
     position: absolute;
-    top: 570px;
+    top: 640px;
     left: 100px;
 }
 
 .target-cross {
-    font-size: 40px;
+    font-size: 30px;
     color: red;
     font-weight: bold;
 }
@@ -374,4 +382,31 @@ label {
     margin-right: 10px;
     border-radius: 5px;
 
+}
+
+#plotlyDiv {
+    width: 500px;
+    height: 500px;
+    overflow: hidden;
+    border-radius: 5px;
+    margin: 10px 0 0 10px;
+}
+
+#plotlyDiv2d {
+    width: 500px;
+    height: 500px;
+    overflow: hidden;
+    border-radius: 5px;
+    margin: 10px 0 0 10px;
+}
+
+
+.plots {
+    display: flex;
+    flex-direction: row;
+}
+
+.stat {
+    background-color: var(--main-bg-color);
+    box-sizing: content-box;
 }

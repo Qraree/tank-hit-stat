@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="styles.css" >
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <script src="https://cdn.plot.ly/plotly-2.18.2.min.js"></script>
     <title>A193</title>
 </head>
 <body>
@@ -44,11 +44,11 @@
         </div>
         <div class="target-div-wrapper">
             <div class="buttons">
-                <button class="drop1">Drop 1</button>
-                <button class="drop100">Drop 100 </button>
-                <button class="reset">Reset dots</button>
-                <button class="grid">Make grid</button>
-                <button class="console">Show input</button>
+                <button class="drop1">1 точка</button>
+                <button class="drop100">100 точек</button>
+                <button class="reset">Удалить точки</button>
+                <button class="grid">Сетка</button>
+                <button class="console">Подтвердить</button>
                 <a href="secondPage.html"><p>Go to second page</p></a>
             </div>
             <div class="test-container">
@@ -74,15 +74,27 @@
         </div>
     </div>
 
-    <h1>Статистика</h1>
-    <div class="hit-stat">
-        <div class="plot">
-            <canvas id="canvas"></canvas>
-        </div>
-        <div class="target-div">
+    <div class="stat">
+        <h1>Статистика</h1>
+        <div class="hit-stat">
+            <div class="plot">
+                <canvas id="canvas"></canvas>
+            </div>
+            <div class="target-div">
 
+            </div>
+        </div>
+        <div class="plots">
+            <div class="target-div" id="plotlyDiv">
+
+            </div>
+
+            <div class="target-div" id="plotlyDiv2d">
+
+            </div>
         </div>
     </div>
+
 
 
 

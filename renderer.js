@@ -11,10 +11,18 @@ const testWrapper = document.querySelector('.test-wrapper');
 const targetDivWrapper = testWrapper.querySelector('.target-div-wrapper');
 const testContainer = targetDivWrapper.querySelector('.test-container');
 const list = testWrapper.querySelector('.list');
+const plotlyDiv =  document.querySelector('#plotlyDiv');
+const plotlyDiv2d =  document.querySelector('#plotlyDiv2d');
+
 
 const inputDistance = document.querySelector('#distance');
 const inputStandardDeviation = document.querySelector('#standard-deviation');
 const inputArmor = document.querySelector('#armor');
+
+
+
+inputStandardDeviation.value = 40;
+inputArmor.value = 200;
 
 
 let distance;
@@ -39,8 +47,12 @@ buttonShow.addEventListener('click', () => {
     targetSigma2.style.width = `${Number(inputStandardDeviation.value) * 3}px`
     targetSigma2.style.height = `${Number(inputStandardDeviation.value) * 3}px`
 
-    console.log(targetSigma1.style.backgroundColor)
+    divStack.map((armor) => {
+        armor['hit'] = Number(inputArmor.value) - Number(armor.thickness) > 0 ? 1 : 0;
+    })
 })
+
+
 
 
 dragElement(target)
@@ -55,7 +67,6 @@ target.addEventListener('mousedown', (e) => {
 
 let divStack = [];
 const stack = [];
-
 
 //todo modal window when hover list item
 //todo target sigmas and normal distribution plot
@@ -73,6 +84,8 @@ const getIndex = (parent, child) => {
 
 
 // PLOT DATA
+
+
 
 const addData = (chart, label, data) => {
     chart.data.labels.push(label);
@@ -156,14 +169,23 @@ const gaussianRandom = (mean=0, stdev=1) => {
 }
 
 const computeProbability = (x_dots, y_dots, standardDeviation) => {
-    // todo this
-    let probabilities = []
-    for (let i = 0; i < x_dots.length; i++) {
-        const dotProbabilities = [];
-        for (let armor of divStack) {
-
+    return new Promise(function (resolve, reject) {
+        let probabilities = []
+        for (let i = 0; i < x_dots.length; i++) {
+            const dotProbabilities = [];
+            for (let armor of divStack) {
+                const hitProbabilityX = normalcdf((armor.right - x_dots[i]) / standardDeviation) - normalcdf((armor.left - x_dots[i]) / standardDeviation)
+                const hitProbabilityY = normalcdf((armor.bottom - y_dots[i]) / standardDeviation) - normalcdf((armor.top - y_dots[i]) / standardDeviation)
+                const hitProbability = hitProbabilityX * hitProbabilityY;
+                const penetrationProbability = hitProbability * Number(armor['hit']);
+                dotProbabilities.push(penetrationProbability);
+            }
+            const sum = dotProbabilities.reduce((partialSum, a) => partialSum + a, 0)
+            probabilities.push(sum)
         }
-    }
+        resolve(probabilities)
+    })
+    // todo this
 }
 
 // DOTS
@@ -172,6 +194,7 @@ const resetDots = () => {
     const contentArray = testContainer.querySelectorAll('.image-content-section');
     testContainer.replaceChildren(...contentArray)
     clearAllData(chart);
+    console.log(divStack)
 
 }
 
@@ -194,12 +217,75 @@ const make_dot_grid = () => {
     const tank_front_dots_x = range(0, windowWidth, 20)
     const tank_front_dots_y = range(0, windowHeight, 20)
 
+    const front_dots_x = []
+    const front_dots_y = []
+
     for (let x_dot of tank_front_dots_x) {
         for (let y_dot of tank_front_dots_y) {
+            front_dots_x.push(x_dot)
+            front_dots_y.push(y_dot)
             dropGridDot(y_dot, x_dot)
         }
     }
 
+    computeProbability(front_dots_x, front_dots_y, Number(inputStandardDeviation.value)).then((result) => {
+
+        let x = tank_front_dots_x;
+        let y = tank_front_dots_y;
+        let resultZ = result;
+        let z = [];
+
+
+        let data3d =[
+            {
+                opacity:0.9,
+                color:'#333D79FF',
+                type: 'mesh3d',
+                x: front_dots_x,
+                y: front_dots_y,
+                z: resultZ,
+            }
+        ];
+
+        let layout = {
+            title: 'Вероятность попадания ПТУРа',
+            scene: {camera: {eye: {x: 1.86, y: 0.88, z: -0.64}}},
+            autosize: false,
+            width: 500,
+            height: 500,
+            margin: {
+                l: 65,
+                r: 50,
+                b: 65,
+                t: 90,
+            }
+        };
+
+
+        Plotly.newPlot(plotlyDiv, data3d, layout);
+
+        while (result.length) z.push(result.splice(0, 25))
+
+
+
+        let layout2d = {
+            title: 'Вероятность попадания ПТУРа в плоскости'
+        }
+
+        let data2d = [
+            {
+                z: z,
+                x: y,
+                y: x,
+                type: 'heatmap',
+                // hoverongaps: false
+            }
+        ];
+
+
+        Plotly.newPlot(plotlyDiv2d, data2d, layout2d, {displayModeBar: false});
+
+    })
 }
 
 
@@ -310,11 +396,14 @@ test.addEventListener('click', (e) => {
         '<span class="delta">mm</span>' +
         '</div>'
 
+
+
     divStack.push({
         name: `delta_${divStack.length+1}`,
         thickness: 100,
-        height: e.offsetHeight,
-        width: e.offsetWidth,
+        hit: 1,
+        height: 100,
+        width: 200,
         top: e.offsetY,
         left: e.offsetX,
     })
@@ -362,6 +451,8 @@ test.addEventListener('click', (e) => {
             let index = Array.prototype.indexOf.call(test.children, content);
             listItem.innerHTML = `delta_${index + 1} - ${input.value} мм`
             divStack[index].thickness = Number(input.value);
+            divStack[index].hit = (Number(inputArmor.value) - Number(input.value)) > 0 ? 1 : 0;
+            console.log(inputArmor.value);
 
 
             if (Number(value.innerHTML) > 500) {
@@ -371,6 +462,8 @@ test.addEventListener('click', (e) => {
             }
         }
     })
+
+
     dragElement(content);
 
     // RESIZING_CONTENT_WINDOW //
@@ -383,8 +476,9 @@ test.addEventListener('click', (e) => {
     onresize(content, function () {
         let index = Array.prototype.indexOf.call(test.children, content);
         divStack[index].height = content.offsetHeight;
-        divStack[index].width = content.offsetWidth
-        // console.log(divStack)
+        divStack[index].width = content.offsetWidth;
+        divStack[index].bottom = content.offsetHeight + divStack[index].top;
+        divStack[index].right = divStack[index].left + content.offsetWidth;
     });
 
     // content.addEventListener('dblclick', (e) => {
