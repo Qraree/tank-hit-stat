@@ -5,14 +5,51 @@ body {
     --second-bg-color: wheat;
     background-color: #FAEBEFFF;
     padding: 10px;
+    font-family: "Segoe UI", serif;
 }
 
 h1 {
-    color: white;
+    color: var(--main-bg-color);
     font-weight: bold;
-    margin: 30px 0 10px 10px;
+    /*margin: 30px 0 10px 10px;*/
+    margin: 0;
 }
 
+.distance {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 30px;
+    align-items: center;
+}
+
+.input-distance {
+    width: 70%;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+
+}
+
+.distance-input {
+    width: 400px;
+    height: 250px;
+    padding: 10px;
+    color: white;
+    box-sizing: border-box;
+    border-radius: 5px;
+    background-color: var(--main-bg-color);
+    display: flex;
+    flex-direction: column;
+}
+
+#canvas_distance {
+    /*border: 1px solid red;*/
+}
 
 
 .buttons {
@@ -22,6 +59,18 @@ h1 {
     justify-content: flex-start;
     align-items: center;
     height: 500px;
+}
+
+.console {
+    background-color: white;
+    color: var(--main-bg-color);
+    border-radius: 5px;
+    transition: 200ms;
+    margin-top: 30px;
+}
+
+.console:hover {
+    background-color: #b7b6b6;
 }
 
 .target-div-wrapper {
@@ -187,6 +236,7 @@ button:hover {
     justify-content: center;
     align-items: center;
     transition: 200ms background-color;
+    font-family: initial;
 }
 
 .content:hover .dragHeader {
@@ -283,7 +333,6 @@ button:hover {
     align-items: center;
     background-color: var(--main-bg-color);
     padding: 10px 10px;
-    margin-top: 10px;
 }
 
 .target-div {
@@ -347,12 +396,11 @@ button:hover {
 .parameters {
     height: 250px;
     width: 300px;
-    margin-left: 50px;
+    margin: auto;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: flex-start;
-    padding: 10px;
     color: white;
     font-weight: bold;
     font-size: 18px;
@@ -381,6 +429,8 @@ label {
     background-color: var(--main-bg-color);
     margin-right: 10px;
     border-radius: 5px;
+    box-sizing: content-box;
+    padding: 20px 0 0 20px;
 
 }
 

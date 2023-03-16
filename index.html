@@ -8,6 +8,46 @@
     <title>A193</title>
 </head>
 <body>
+    <div class="distance">
+        <canvas id="canvas_distance" width="700px" height="300px"></canvas>
+        <div class="distance-input">
+            <div class="inputs">
+                <section class="parameter-section">
+                    <label for="l1">L1</label>
+                    <input
+                            type="text"
+                            class="input-distance"
+                            id="l1"
+                    >
+                </section>
+                <section class="parameter-section">
+                    <label for="ro1">σ1</label>
+                    <input
+                            type="text"
+                            class="input-distance"
+                            id="ro1"
+                    >
+                </section>
+                <section class="parameter-section">
+                    <label for="l2">L2</label>
+                    <input
+                            type="text"
+                            class="input-distance"
+                            id="l2"
+                    >
+                </section>
+                <section class="parameter-section">
+                    <label for="ro2">σ2</label>
+                    <input
+                            type="text"
+                            class="input-distance"
+                            id="ro2"
+                    >
+                </section>
+            </div>
+            <button class="console" id="confirm-distance">Подтвердить</button>
+        </div>
+    </div>
     <div class="test-wrapper">
         <div class="parameter-list">
             <div class="parameters">
@@ -21,7 +61,7 @@
                 </section>
                 <section class="parameter-section">
                     <label for="standard-deviation">
-                        Среднее квадратичное отклонение
+                        Среднеквадратическое отклонение
                     </label>
                     <input
                             type="text"
@@ -39,8 +79,8 @@
 
                     >
                 </section>
-
             </div>
+            <button class="console">Подтвердить</button>
         </div>
         <div class="target-div-wrapper">
             <div class="buttons">
@@ -48,8 +88,7 @@
                 <button class="drop100">100 точек</button>
                 <button class="reset">Удалить точки</button>
                 <button class="grid">Сетка</button>
-                <button class="console">Подтвердить</button>
-                <a href="secondPage.html"><p>Go to second page</p></a>
+                <a href="secondPage.html"><p>Главная</p></a>
             </div>
             <div class="test-container">
                 <div class="image-content-section">
@@ -74,8 +113,8 @@
         </div>
     </div>
 
+    <h1>Статистика</h1>
     <div class="stat">
-        <h1>Статистика</h1>
         <div class="hit-stat">
             <div class="plot">
                 <canvas id="canvas"></canvas>

@@ -4,8 +4,6 @@ const buttonReset = document.querySelector('.reset');
 const buttonShow = document.querySelector('.console');
 const buttonGrid = document.querySelector('.grid');
 
-
-
 const test = document.querySelector('.test');
 const testWrapper = document.querySelector('.test-wrapper');
 const targetDivWrapper = testWrapper.querySelector('.target-div-wrapper');
@@ -20,14 +18,14 @@ const inputStandardDeviation = document.querySelector('#standard-deviation');
 const inputArmor = document.querySelector('#armor');
 
 
-
 inputStandardDeviation.value = 40;
 inputArmor.value = 200;
 
-
-let distance;
-let standardDeviation;
-let armorPenetration;
+const l1 = document.querySelector('#l1')
+const ro1 = document.querySelector('#ro1')
+const l2 = document.querySelector('#l2')
+const ro2 = document.querySelector('#ro2')
+const buttonConfirmDistance = document.querySelector('#confirm-distance')
 
 const windowWidth = 600;
 const windowHeight = 491;
@@ -36,7 +34,37 @@ const target = targetDivWrapper.querySelector('.target');
 const targetSigma1 = document.querySelector('#target-sigma1')
 const targetSigma2 = document.querySelector('#target-sigma2')
 
-console.log(inputDistance.innerHTML);
+// CANVAS
+
+const canvas_distance = document.querySelector('#canvas_distance');
+const context = canvas_distance.getContext('2d');
+
+context.strokeStyle = '#333D79FF'
+context.beginPath()
+context.moveTo(30, 250)
+context.lineTo(600, 40)
+context.stroke()
+
+context.beginPath()
+context.moveTo(30, 250)
+context.lineTo(610, 137)
+context.stroke()
+
+context.beginPath()
+context.arc(400, 147, 30, 0, 2*Math.PI)
+context.stroke()
+
+context.beginPath()
+context.arc(605, 89, 48, 0, 2*Math.PI)
+context.stroke()
+
+context.font = "20px serif";
+context.fillText('σ1', 380, 110);
+
+
+context.font = "20px serif";
+context.fillText('σ2', 570, 40);
+
 
 
 
@@ -81,11 +109,7 @@ const getIndex = (parent, child) => {
     return Array.prototype.indexOf.call(parent.children, child);
 }
 
-
-
 // PLOT DATA
-
-
 
 const addData = (chart, label, data) => {
     chart.data.labels.push(label);
@@ -141,6 +165,13 @@ const range = function(start, stop, step){
 };
 
 // MATH
+
+const extrapolation = (r, q) => {
+    let result = (q[0][1] + (r - q[0][0]) /
+        (q[1][0] - q[0][0]) *
+        (q[1][1] - q[0][1]));
+    return result
+}
 
 const normalcdf = (x) => {
     const mean = 0;
@@ -275,10 +306,10 @@ const make_dot_grid = () => {
         let data2d = [
             {
                 z: z,
-                x: y,
-                y: x,
+                x: x,
+                y: y,
                 type: 'heatmap',
-                // hoverongaps: false
+                hoverongaps: false
             }
         ];
 
