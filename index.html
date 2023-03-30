@@ -8,57 +8,9 @@
     <title>A193</title>
 </head>
 <body>
-    <div class="distance">
-        <canvas id="canvas_distance" width="700px" height="300px"></canvas>
-        <div class="distance-input">
-            <div class="inputs">
-                <section class="parameter-section">
-                    <label for="l1">L1</label>
-                    <input
-                            type="text"
-                            class="input-distance"
-                            id="l1"
-                    >
-                </section>
-                <section class="parameter-section">
-                    <label for="ro1">σ1</label>
-                    <input
-                            type="text"
-                            class="input-distance"
-                            id="ro1"
-                    >
-                </section>
-                <section class="parameter-section">
-                    <label for="l2">L2</label>
-                    <input
-                            type="text"
-                            class="input-distance"
-                            id="l2"
-                    >
-                </section>
-                <section class="parameter-section">
-                    <label for="ro2">σ2</label>
-                    <input
-                            type="text"
-                            class="input-distance"
-                            id="ro2"
-                    >
-                </section>
-            </div>
-            <button class="console" id="confirm-distance">Подтвердить</button>
-        </div>
-    </div>
     <div class="test-wrapper">
         <div class="parameter-list">
             <div class="parameters">
-                <section class="parameter-section">
-                    <label for="distance">Дальность</label>
-                    <input
-                            type="text"
-                            class="parameter"
-                            id="distance"
-                    >
-                </section>
                 <section class="parameter-section">
                     <label for="standard-deviation">
                         Среднеквадратическое отклонение
@@ -92,7 +44,8 @@
             </div>
             <div class="test-container">
                 <div class="image-content-section">
-                    <img src="tank.png" class="tank_image">
+                    <img src="" class="tank_image" id="file-wrapper" alt="">
+                    <span id="test-message">Вставьте изображение танка</span>
                     <div class="test-img-wrapper">
                         <div class="test">
 
@@ -110,6 +63,11 @@
             </div>
             <div class="gradient"></div>
             <div class="list"></div>
+        </div>
+        <div id="armor-info-wrapper">
+            <div class="armor-info">
+
+            </div>
         </div>
     </div>
 
@@ -131,6 +89,10 @@
             <div class="target-div" id="plotlyDiv2d">
 
             </div>
+            <div class="target-div" id="input_file">
+                <input type="file" id="file-input">
+            </div>
+
         </div>
     </div>
 
