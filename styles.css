@@ -14,8 +14,8 @@ h1 {
     margin: 0;
 }
 
-#armor-info-wrapper {
-
+#file-input {
+    display: none;
 }
 
 .armor-info {
@@ -61,6 +61,11 @@ h1 {
 }
 
 
+#plotly3d {
+    width: 400px;
+    height: 500px;
+}
+
 
 .buttons {
     display: flex;
@@ -90,7 +95,7 @@ h1 {
     flex-direction: row;
 }
 
-button {
+button, .upload_label {
     background-color: var(--main-bg-color);
     font-size: 14px;
     padding: 0;
@@ -104,7 +109,13 @@ button {
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    font-family: Arial;
 }
+
+.upload_label {
+    margin: 0;
+}
+
 
 .dot {
     width: 5px;
@@ -120,7 +131,7 @@ sub {
 
 
 
-button:hover {
+button:hover, .upload_label:hover {
     background: rgba(39,39,147,0.78);
 }
 
@@ -414,6 +425,7 @@ button:hover {
     position: absolute;
     top: 640px;
     left: 100px;
+    opacity: 0;
 }
 
 .target-cross {
@@ -448,7 +460,6 @@ button:hover {
 
 
 .parameters {
-    height: 250px;
     width: 300px;
     margin: auto;
     display: flex;
@@ -464,6 +475,7 @@ button:hover {
     display: flex;
     flex-direction: column;
     width: 100%;
+    margin-bottom: 10px
 }
 
 label {

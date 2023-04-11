@@ -11,6 +11,8 @@ const fileInput = document.querySelector('#file-input');
 const preview = document.querySelector('#file-wrapper');
 const message = document.querySelector('#test-message');
 
+const targetButton = document.querySelector('.target-button');
+
 const test = document.querySelector('.test');
 const testWrapper = document.querySelector('.test-wrapper');
 const targetDivWrapper = testWrapper.querySelector('.target-div-wrapper');
@@ -18,14 +20,18 @@ const testContainer = targetDivWrapper.querySelector('.test-container');
 const list = testWrapper.querySelector('.list');
 const plotlyDiv =  document.querySelector('#plotlyDiv');
 const plotlyDiv2d =  document.querySelector('#plotlyDiv2d');
+const plotly3d = document.querySelector('#plotly3d');
 
 const armorInfo = document.querySelector('.armor-info');
 
-
+const testWidth = 600;
+const testHeight = 491;
 
 
 const inputStandardDeviation = document.querySelector('#standard-deviation');
 const inputArmor = document.querySelector('#armor');
+const tankWidth = document.querySelector('#width');
+const tankHeight = document.querySelector('#height');
 
 
 inputStandardDeviation.value = 40;
@@ -39,6 +45,12 @@ const target = targetDivWrapper.querySelector('.target');
 const targetSigma1 = document.querySelector('#target-sigma1')
 const targetSigma2 = document.querySelector('#target-sigma2')
 
+let targetDisplay = false;
+
+targetButton.addEventListener('click', () => {
+    target.style.opacity = targetDisplay ? 0 : 1;
+    targetDisplay = !targetDisplay;
+})
 
 function getBase64(file) {
     const reader = new FileReader();
@@ -92,9 +104,9 @@ target.addEventListener('mousedown', (e) => {
 let divStack = [];
 const stack = [];
 
-//todo modal window when hover list item
+
 //todo delete contents
-// todo plotly color map
+
 
 const ctx = document.querySelector('.plot');
 const canvas = ctx.querySelector('#canvas');
@@ -274,8 +286,12 @@ const make_dot_grid = () => {
 
     computeProbability(front_dots_x, front_dots_y, Number(inputStandardDeviation.value)).then((result) => {
 
-        let x = tank_front_dots_x;
-        let y = tank_front_dots_y;
+        const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
+        const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
+
+        let x = range(0, dot_width, dot_width / 30);
+        let y = range(0, dot_height, dot_height / 25);
+
 
         let resultZ = result.slice();
 
@@ -285,16 +301,7 @@ const make_dot_grid = () => {
         let z = [];
 
 
-        let data3d =[
-            {
-                opacity:1,
-                colorscale: 'Viridis',
-                type: 'mesh3d',
-                x: dots_x,
-                y: front_dots_y,
-                z: resultZ,
-            }
-        ];
+
 
         let layout = {
             title: 'Вероятность попадания ПТУРа',
@@ -312,7 +319,7 @@ const make_dot_grid = () => {
         };
 
 
-        Plotly.newPlot(plotlyDiv, data3d, layout);
+
 
         while (result.length) z.push(result.splice(0, 25))
         z = z[0].map((_, colIndex) => z.map(row => row[colIndex]));
@@ -336,6 +343,8 @@ const make_dot_grid = () => {
 
         Plotly.newPlot(plotlyDiv2d, data2d, layout2d, {displayModeBar: false});
 
+        const data_z = {x: x, y:y, z: z, opacity:0.9, type: 'surface'};
+        Plotly.newPlot(plotlyDiv, [data_z], layout);
     })
 }
 
