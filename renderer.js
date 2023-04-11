@@ -20,12 +20,9 @@ const testContainer = targetDivWrapper.querySelector('.test-container');
 const list = testWrapper.querySelector('.list');
 const plotlyDiv =  document.querySelector('#plotlyDiv');
 const plotlyDiv2d =  document.querySelector('#plotlyDiv2d');
-const plotly3d = document.querySelector('#plotly3d');
 
 const armorInfo = document.querySelector('.armor-info');
 
-const testWidth = 600;
-const testHeight = 491;
 
 
 const inputStandardDeviation = document.querySelector('#standard-deviation');
@@ -34,9 +31,10 @@ const tankWidth = document.querySelector('#width');
 const tankHeight = document.querySelector('#height');
 
 
-inputStandardDeviation.value = 40;
+inputStandardDeviation.value = 200;
 inputArmor.value = 200;
-let armorInfoVar;
+tankWidth.value = 3000;
+tankHeight.value = 2500;
 
 const windowWidth = 600;
 const windowHeight = 491;
@@ -51,6 +49,13 @@ targetButton.addEventListener('click', () => {
     target.style.opacity = targetDisplay ? 0 : 1;
     targetDisplay = !targetDisplay;
 })
+
+const convert_mm_px = (mmValue, mmParameter, pxParameter) => {
+    const result = (mmValue / mmParameter) * pxParameter
+    return result
+}
+
+let standardDeviation;
 
 function getBase64(file) {
     const reader = new FileReader();
@@ -77,11 +82,14 @@ ipcRenderer.on('photo-processed', (event, photo) => {
 })
 
 buttonShow.addEventListener('click', () => {
-    targetSigma1.style.width = `${Number(inputStandardDeviation.value) * 2}px`
-    targetSigma1.style.height = `${Number(inputStandardDeviation.value) * 2}px`
+    standardDeviation = convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
+    console.log(standardDeviation)
 
-    targetSigma2.style.width = `${Number(inputStandardDeviation.value) * 3}px`
-    targetSigma2.style.height = `${Number(inputStandardDeviation.value) * 3}px`
+    targetSigma1.style.width = `${Number(standardDeviation) * 2}px`
+    targetSigma1.style.height = `${Number(standardDeviation) * 2}px`
+
+    targetSigma2.style.width = `${Number(standardDeviation) * 3}px`
+    targetSigma2.style.height = `${Number(standardDeviation) * 3}px`
 
     divStack.map((armor) => {
         armor['hit'] = Number(inputArmor.value) - Number(armor.thickness) > 0 ? 1 : 0;
@@ -152,7 +160,7 @@ const updateData = (chart, label) => {
 }
 
 const clearAllData = (chart) => {
-    chart.data.datasets[0].data = chart.data.datasets[0].data.map(el => 0)
+    chart.data.datasets[0].data = chart.data.datasets[0].data.map(() => 0)
     chart.update();
 }
 
@@ -192,11 +200,6 @@ const range = function(start, stop, step){
 
 // MATH
 
-const extrapolation = (r, q) => {
-    return (q[0][1] + (r - q[0][0]) /
-        (q[1][0] - q[0][0]) *
-        (q[1][1] - q[0][1]))
-}
 
 const normalcdf = (x) => {
     const mean = 0;
@@ -225,7 +228,7 @@ const gaussianRandom = (mean=0, stdev=1) => {
 }
 
 const computeProbability = (x_dots, y_dots, standardDeviation) => {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
         let probabilities = []
         for (let i = 0; i < x_dots.length; i++) {
             const dotProbabilities = [];
@@ -284,7 +287,10 @@ const make_dot_grid = () => {
         }
     }
 
-    computeProbability(front_dots_x, front_dots_y, Number(inputStandardDeviation.value)).then((result) => {
+    computeProbability(front_dots_x, front_dots_y, Number(standardDeviation)).then((result) => {
+        console.log(test.clientWidth)
+
+
 
         const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
         const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
@@ -293,15 +299,7 @@ const make_dot_grid = () => {
         let y = range(0, dot_height, dot_height / 25);
 
 
-        let resultZ = result.slice();
-
-        resultZ = resultZ.reverse();
-        let dots_x = front_dots_x.reverse();
-
         let z = [];
-
-
-
 
         let layout = {
             title: 'Вероятность попадания ПТУРа',
@@ -343,7 +341,7 @@ const make_dot_grid = () => {
 
         Plotly.newPlot(plotlyDiv2d, data2d, layout2d, {displayModeBar: false});
 
-        const data_z = {x: x, y:y, z: z, opacity:0.9, type: 'surface'};
+        const data_z = {x: x, y:y, z: z, opacity:1, type: 'surface'};
         Plotly.newPlot(plotlyDiv, [data_z], layout);
     })
 }
