@@ -313,7 +313,6 @@ const make_dot_grid = () => {
         let x_step = windowWidth === 600 ? 30 : 42.5
         let x = range(0, dot_width, dot_width / x_step);
         let y = range(0, dot_height, dot_height / 25);
-        console.log()
 
 
         let z = [];
