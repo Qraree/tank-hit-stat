@@ -51,8 +51,7 @@ targetButton.addEventListener('click', () => {
 })
 
 const convert_mm_px = (mmValue, mmParameter, pxParameter) => {
-    const result = (mmValue / mmParameter) * pxParameter
-    return result
+    return (mmValue / mmParameter) * pxParameter
 }
 
 let standardDeviation;
@@ -288,7 +287,6 @@ const make_dot_grid = () => {
     }
 
     computeProbability(front_dots_x, front_dots_y, Number(standardDeviation)).then((result) => {
-        console.log(test.clientWidth)
 
 
 
@@ -303,16 +301,27 @@ const make_dot_grid = () => {
 
         let layout = {
             title: 'Вероятность попадания ПТУРа',
-            scene: {camera: {eye: {x: 1.86, y: 0.88, z: -0.64}}},
-            autosize: false,
+            scene: {
+                zaxis: {title: 'P'},
+                camera: {
+                    eye: {
+                        x: 1.86, y: 0.88, z: -0.64}}},
+            // autosize: false,
             width: 500,
             height: 500,
-            margin: {
-                l: 65,
-                r: 50,
-                b: 65,
-                t: 90,
+            // margin: {
+            //     l: 65,
+            //     r: 50,
+            //     b: 65,
+            //     t: 90,
+            // },
+            zaxis: {
+                range: [0, 1],
+                fixedrange: true,
             },
+            xaxis: {
+                fixedrange: true,
+            }
 
         };
 
@@ -358,7 +367,7 @@ const dropGridDot = (x, y) => {
 }
 
 
-const dropDot = (x, y) => {
+const dropDot = () => {
 
     const targetLeft = target.offsetLeft + (target.clientWidth / 2);
     const targetTop = target.offsetTop + (target.clientHeight / 2);
