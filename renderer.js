@@ -6,6 +6,8 @@ const buttonDropHundred = document.querySelector('.drop100');
 const buttonReset = document.querySelector('.reset');
 const buttonShow = document.querySelector('.console');
 const buttonGrid = document.querySelector('.grid');
+const frontArmor = document.querySelector('.front');
+const sideArmor = document.querySelector('.side');
 
 const fileInput = document.querySelector('#file-input');
 const preview = document.querySelector('#file-wrapper');
@@ -36,7 +38,12 @@ inputArmor.value = 200;
 tankWidth.value = 3000;
 tankHeight.value = 2500;
 
-const windowWidth = 600;
+const FRONT_WINDOW_SIZE = 600;
+const SIDE_WINDOW_SIZE = 850;
+
+let windowSizeFrontMode = true;
+
+let windowWidth = FRONT_WINDOW_SIZE;
 const windowHeight = 491;
 
 const target = targetDivWrapper.querySelector('.target');
@@ -44,6 +51,20 @@ const targetSigma1 = document.querySelector('#target-sigma1')
 const targetSigma2 = document.querySelector('#target-sigma2')
 
 let targetDisplay = false;
+
+
+frontArmor.addEventListener('click', () => {
+    windowWidth = FRONT_WINDOW_SIZE;
+    testContainer.style.width = `${FRONT_WINDOW_SIZE}px`;
+    console.log(windowWidth)
+})
+
+sideArmor.addEventListener('click', () => {
+    windowWidth = SIDE_WINDOW_SIZE;
+    testContainer.style.width = `${SIDE_WINDOW_SIZE}px`;
+    console.log(windowWidth)
+})
+
 
 targetButton.addEventListener('click', () => {
     target.style.opacity = targetDisplay ? 0 : 1;
@@ -163,10 +184,6 @@ const clearAllData = (chart) => {
     chart.update();
 }
 
-// const deleteContent = (chart, index) => {
-//     chart.data.datasets[0].data = chart.data.datasets[0].data.splice(index, 1)
-//     chart.update()
-// }
 
 let chart = new Chart(canvas, {
     type: 'bar',
@@ -293,8 +310,10 @@ const make_dot_grid = () => {
         const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
         const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
 
-        let x = range(0, dot_width, dot_width / 30);
+        let x_step = windowWidth === 600 ? 30 : 42.5
+        let x = range(0, dot_width, dot_width / x_step);
         let y = range(0, dot_height, dot_height / 25);
+        console.log()
 
 
         let z = [];
