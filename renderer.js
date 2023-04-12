@@ -147,6 +147,7 @@ const getIndex = (parent, child) => {
 
 const showArmorInfo = (armor) => {
 
+
     armorInfo.innerHTML = `
     
         <div class="armor-info-table">
@@ -157,6 +158,8 @@ const showArmorInfo = (armor) => {
             <div>Пробитие - ${armor.hit === 1 ? 'Да' : 'Нет'}</div>
         </div>
     `
+
+    armorInfo.style.opacity = 1;
 
 }
 
@@ -280,6 +283,7 @@ const isDotInContent = (dotTop, dotLeft) => {
             && dotTop > div.top
             && dotTop < (div.top + div.height)
         ) {
+
             updateData(chart, div.name)
         }
     }
@@ -409,6 +413,7 @@ const dropDots = (number) => {
     for (let i = 0; i < number; i++) {
         dropDot()
     }
+
 }
 
 

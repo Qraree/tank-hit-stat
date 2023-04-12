@@ -20,11 +20,23 @@ h1 {
 
 .armor-info {
     width: 200px;
-    height: 300px;
-    margin-left: 10px;
+    height: 160px;
+    margin-left: 40px;
     border-radius: 5px;
     padding: 5px;
-    background-color: var(--main-bg-color);
+    border: 1px solid #ffffff;
+    opacity: 0;
+}
+
+#probability-table {
+    width: 200px;
+    height: 300px;
+    margin-left: 40px;
+    border-radius: 5px;
+    padding: 5px;
+    color: white;
+    /*border: 1px solid #ffffff;*/
+    /*opacity: 0;*/
 }
 
 .armor-info-table {
@@ -245,8 +257,7 @@ button:hover, .upload_label:hover {
     display: flex;
     flex-direction: column;
     position: relative;
-
-    resize: horizontal;
+    transition: 300ms all;
 }
 
 .image-content-section {
