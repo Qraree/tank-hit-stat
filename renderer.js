@@ -48,7 +48,6 @@ tankHeight.value = 2500;
 const FRONT_WINDOW_SIZE = 600;
 const SIDE_WINDOW_SIZE = 850;
 
-let windowSizeFrontMode = true;
 
 let windowWidth = FRONT_WINDOW_SIZE;
 const windowHeight = 491;
@@ -152,17 +151,22 @@ target.addEventListener('mousedown', (e) => {
     e.stopPropagation()
 })
 
+let resizeObserver;
 let divStack = [];
 const stack = [];
+const observers = [];
 
+deleteArmor.addEventListener('click', () => {
+    for (let observer of observers) {
+        observer.disconnect();
+    }
 
-// deleteArmor.addEventListener('click', () => {
-//     test.replaceChildren();
-//     divStack = [];
-//     armorInfo.innerHTML = '';
-//
-//
-// })
+    test.replaceChildren();
+    divStack = [];
+    armorInfo.innerHTML = '';
+    list.replaceChildren();
+
+})
 
 downloadArmor.addEventListener('click', () => {
     const obj = {
@@ -172,14 +176,19 @@ downloadArmor.addEventListener('click', () => {
     const json = JSON.stringify(obj);
     fs.writeFile('armor.json', json, 'utf-8', () => {
         console.log('Armor has been downloaded!')
+
+        downloadArmor.style.backgroundColor = 'rgba(33,247,59,0.71)'
+
+        setTimeout(() => {
+            downloadArmor.style.backgroundColor = '#333D79FF'
+        }, 1000)
+
     })
 
 })
 
 
 
-// todo delete armor
-// todo armor upload callback
 
 
 const ctx = document.querySelector('.plot');
@@ -606,6 +615,7 @@ test.addEventListener('click', (e) => {
     const onresize = (dom_elem, callback) => {
         const resizeObserver = new ResizeObserver(() => callback() );
         resizeObserver.observe(dom_elem);
+        observers.push(resizeObserver);
     };
 
     onresize(content, function () {
@@ -748,6 +758,8 @@ const addContent = (armor) => {
     const onresize = (dom_elem, callback) => {
         const resizeObserver = new ResizeObserver(() => callback() );
         resizeObserver.observe(dom_elem);
+        observers.push(resizeObserver);
+
     };
 
     onresize(content, function () {
