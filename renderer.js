@@ -134,6 +134,7 @@ const stack = [];
 
 
 //todo delete contents
+//todo save and load armor in json
 
 
 const ctx = document.querySelector('.plot');
@@ -324,26 +325,15 @@ const make_dot_grid = () => {
         let layout = {
             title: 'Вероятность попадания ПТУРа',
             scene: {
-                zaxis: {title: 'P'},
+                zaxis: {
+                    title: 'P',
+                    range: [0, 1],
+                },
                 camera: {
                     eye: {
                         x: 1.86, y: 0.88, z: -0.64}}},
-            // autosize: false,
             width: 500,
             height: 500,
-            // margin: {
-            //     l: 65,
-            //     r: 50,
-            //     b: 65,
-            //     t: 90,
-            // },
-            zaxis: {
-                range: [0, 1],
-                fixedrange: true,
-            },
-            xaxis: {
-                fixedrange: true,
-            }
 
         };
 
