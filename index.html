@@ -13,7 +13,7 @@
             <div class="parameters">
                 <section class="parameter-section">
                     <label for="standard-deviation">
-                        Среднеквадратическое отклонение
+                        Среднеквадратическое отклонение, мм
                     </label>
                     <input
                             type="text"
@@ -23,7 +23,7 @@
                     >
                 </section>
                 <section class="parameter-section">
-                    <label for="armor">Бронепробиваемость</label>
+                    <label for="armor">Бронепробиваемость, мм</label>
                     <input
                             type="text"
                             class="parameter"
@@ -32,7 +32,10 @@
                     >
                 </section>
                 <section class="parameter-section">
-                    <label for="armor">Ширина, мм</label>
+                    <div class="dimension">
+                        <label for="armor">Ширина, мм</label>
+                        <div class="dimension-tip" id="width-dimension">!</div>
+                    </div>
                     <input
                             type="text"
                             class="parameter"
@@ -41,7 +44,10 @@
                     >
                 </section>
                 <section class="parameter-section">
-                    <label for="armor">Высота, мм</label>
+                    <div class="dimension">
+                        <label for="armor">Высота, мм</label>
+                        <div class="dimension-tip" id="height-dimension">!</div>
+                    </div>
                     <input
                             type="text"
                             class="parameter"
@@ -56,9 +62,15 @@
                 <div class="buttons">
                     <div>
                     <label for="file-input" class="upload_label">
-                        Загрузить
+                        Загрузить фото
                         <input type="file" id="file-input">
                     </label>
+                    <button class="download-armor">Сохранить броню</button>
+                    <label for="upload-armor" class="upload_label">
+                        Загрузить броню
+                        <input type="file" id="upload-armor">
+                    </label>
+                    <button class="delete-armor">Удалить броню</button>
                     <button class="drop1">1 точка</button>
                     <button class="drop100">100 точек</button>
                     <button class="reset">Удалить точки</button>

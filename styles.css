@@ -18,6 +18,32 @@ h1 {
     display: none;
 }
 
+#upload-armor {
+    display: none;
+}
+
+.dimension {
+    display: flex;
+    flex-direction: row;
+}
+
+.dimension-tip {
+    background-color: rgba(183, 182, 182, 0.47);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 10px;
+    transition: 200ms all;
+    cursor: pointer;
+}
+
+.dimension-tip:hover {
+    background-color: #b7b6b6;
+}
+
 .armor-info {
     width: 200px;
     height: 160px;

@@ -1,4 +1,5 @@
-const {ipcRenderer} = require('electron')
+const {ipcRenderer} = require('electron');
+const fs = require('fs');
 
 
 const button = document.querySelector('.drop1');
@@ -8,6 +9,12 @@ const buttonShow = document.querySelector('.console');
 const buttonGrid = document.querySelector('.grid');
 const frontArmor = document.querySelector('.front');
 const sideArmor = document.querySelector('.side');
+const downloadArmor = document.querySelector('.download-armor');
+const uploadArmor = document.querySelector('#upload-armor');
+const deleteArmor = document.querySelector('.delete-armor');
+
+const widthTip = document.querySelector('#width-dimension');
+const heightTip = document.querySelector('#height-dimension');
 
 const fileInput = document.querySelector('#file-input');
 const preview = document.querySelector('#file-wrapper');
@@ -51,6 +58,22 @@ const targetSigma1 = document.querySelector('#target-sigma1')
 const targetSigma2 = document.querySelector('#target-sigma2')
 
 let targetDisplay = false;
+
+widthTip.addEventListener('mouseenter', () => {
+    testContainer.style.borderBottomColor = 'red';
+})
+
+widthTip.addEventListener('mouseleave', () => {
+    testContainer.style.borderBottomColor = '#333D79FF';
+})
+
+heightTip.addEventListener('mouseenter', () => {
+    testContainer.style.borderLeftColor = 'red';
+})
+
+heightTip.addEventListener('mouseleave', () => {
+    testContainer.style.borderLeftColor = '#333D79FF';
+})
 
 
 frontArmor.addEventListener('click', () => {
@@ -133,8 +156,30 @@ let divStack = [];
 const stack = [];
 
 
-//todo delete contents
-//todo save and load armor in json
+// deleteArmor.addEventListener('click', () => {
+//     test.replaceChildren();
+//     divStack = [];
+//     armorInfo.innerHTML = '';
+//
+//
+// })
+
+downloadArmor.addEventListener('click', () => {
+    const obj = {
+        table: divStack,
+    };
+
+    const json = JSON.stringify(obj);
+    fs.writeFile('armor.json', json, 'utf-8', () => {
+        console.log('Armor has been downloaded!')
+    })
+
+})
+
+
+
+// todo delete armor
+// todo armor upload callback
 
 
 const ctx = document.querySelector('.plot');
@@ -488,10 +533,6 @@ test.addEventListener('click', (e) => {
         width: 200,
         top: e.offsetY,
         left: e.offsetX,
-        topRightRadius: 0,
-        topLeftRadius: 0,
-        bottomRightRadius: 0,
-        bottomLeftRadius: 0,
     })
 
     showArmorInfo(divStack[divStack.length - 1])
@@ -575,22 +616,6 @@ test.addEventListener('click', (e) => {
         divStack[index].right = divStack[index].left + content.offsetWidth;
     });
 
-    // content.addEventListener('dblclick', (e) => {
-    //     let index = getIndex(test, content);
-    //     console.log(divStack[index].name)
-    //     divStack.splice(index, 1);
-    //     let array = [...list.children]
-    //     let i = 0;
-    //     for (let child of array) {
-    //         if (i === index) {
-    //             list.removeChild(child)
-    //         }
-    //         i++;
-    //     }
-    //     deleteContent(chart, index)
-    //     test.removeChild(content);
-    // })
-
 
     content.addEventListener('click', (e) => {
         e.stopPropagation()
@@ -603,6 +628,161 @@ test.addEventListener('click', (e) => {
     test.appendChild(content)
     console.log(divStack)
 
+})
+
+
+const addContent = (armor) => {
+    let content = document.createElement('div');
+
+    divStack.push({
+        index: armor.index,
+        name: armor.name,
+        thickness: armor.thickness,
+        hit: armor.hit,
+        height: armor.height,
+        width: armor.width,
+        top: armor.top,
+        left: armor.left,
+    })
+
+    addData(chart, `delta_${divStack.length}`, 0)
+
+    content.className = 'content';
+    content.style.top = `${armor.top}px`;
+    content.style.left = `${armor.left}px`;
+    content.style.width = `${armor.width}px`;
+    content.style.height = `${armor.height}px`;
+    content.style.overflow = 'hidden';
+    content.style.resize = 'both';
+    content.innerHTML = '' +
+        '<div class="dragHeader">' +
+        '<div class="dragHeaderCircle"></div>' +
+        '<div class="dragHeaderCircle"></div>' +
+        '<div class="dragHeaderCircle"></div>' +
+        '</div>' +
+        '<div class="contentValue">' +
+        `<span class="delta">&#948;<span class="index">${divStack.length}</span> = </span>` +
+        '<div class="value">100</div>' +
+        '<input class="input"/>' +
+        '<span class="delta">mm</span>' +
+        '</div>'
+
+
+
+    showArmorInfo(divStack[divStack.length-1])
+
+    let contentValue = content.querySelector('.contentValue')
+    let input = contentValue.querySelector('.input')
+    let value = contentValue.querySelector('.value')
+
+    value.innerHTML = `${armor.thickness}`;
+
+    if (Number(value.innerHTML) > 500) {
+        content.style.backgroundColor = `rgba(255, ${255-((Number(value.innerHTML)-500)/500*255)}, 0, 0.8)`
+    } else {
+        content.style.backgroundColor = `rgba(${Number(value.innerHTML)/500*255}, 255, 0, 0.8)`
+    }
+
+    let listItem = document.createElement('div')
+    listItem.className = 'listItem';
+    listItem.innerHTML = `delta_${divStack.length} - ${100} мм`
+
+    let divColor;
+
+    listItem.addEventListener('mouseenter', () => {
+        let index = getIndex(list, listItem)
+        divColor = test.childNodes[index+1].style.backgroundColor;
+        listItem.style.backgroundColor = 'rgba(39,39,147,0.78)'
+        test.childNodes[index+1].style.backgroundColor = 'rgba(55, 55, 196, 0.78)'
+
+    })
+
+    listItem.addEventListener('mouseleave', () => {
+        let index = getIndex(list, listItem)
+        listItem.style.backgroundColor = '#333D79FF'
+        test.childNodes[index+1].style.backgroundColor = divColor;
+    })
+
+    listItem.addEventListener('click', () => {
+        let index = getIndex(list, listItem)
+        showArmorInfo(divStack[index])
+    })
+
+    list.appendChild(listItem)
+
+
+    contentValue.addEventListener('click', () => {
+        input.value = value.innerHTML;
+        value.classList.add('valueHide');
+        input.classList.add('inputShow');
+
+    })
+
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            input.classList.remove('inputShow');
+            value.classList.remove('valueHide');
+            value.innerHTML = input.value;
+
+            let index = Array.prototype.indexOf.call(test.children, content);
+            listItem.innerHTML = `delta_${index + 1} - ${input.value} мм`
+            divStack[index].thickness = Number(input.value);
+            divStack[index].hit = (Number(inputArmor.value) - Number(input.value)) > 0 ? 1 : 0;
+
+            showArmorInfo(divStack[index])
+
+
+            if (Number(value.innerHTML) > 500) {
+                content.style.backgroundColor = `rgba(255, ${255-((Number(value.innerHTML)-500)/500*255)}, 0, 0.8)`
+            } else {
+                content.style.backgroundColor = `rgba(${Number(value.innerHTML)/500*255}, 255, 0, 0.8)`
+            }
+        }
+    })
+
+
+    dragElement(content);
+
+    // RESIZING_CONTENT_WINDOW //
+
+    const onresize = (dom_elem, callback) => {
+        const resizeObserver = new ResizeObserver(() => callback() );
+        resizeObserver.observe(dom_elem);
+    };
+
+    onresize(content, function () {
+        let index = Array.prototype.indexOf.call(test.children, content);
+        divStack[index].height = content.offsetHeight;
+        divStack[index].width = content.offsetWidth;
+        divStack[index].bottom = content.offsetHeight + divStack[index].top;
+        divStack[index].right = divStack[index].left + content.offsetWidth;
+    });
+
+
+    content.addEventListener('click', (e) => {
+        e.stopPropagation()
+    })
+
+    content.addEventListener('mousedown', (e) => {
+        e.stopPropagation()
+    })
+
+    test.appendChild(content)
+    console.log(divStack)
+}
+
+const handleArmorLoad = (e) => {
+    const obj = JSON.parse(e.target.result);
+    const table = obj.table;
+    for (let armor of table) {
+        addContent(armor);
+        // console.log(armor);
+    }
+}
+uploadArmor.addEventListener('change', (e) => {
+    const reader = new FileReader();
+    reader.onload = handleArmorLoad;
+    reader.readAsText(e.target.files[0]);
 })
 
 
