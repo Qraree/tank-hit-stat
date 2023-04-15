@@ -1,6 +1,8 @@
 const {ipcRenderer} = require('electron');
 const fs = require('fs');
 
+const MAIN_COLOR = '#333D79FF';
+const SECONDARY_COLOR = 'rgb(245, 222, 179)';
 
 const button = document.querySelector('.drop1');
 const buttonDropHundred = document.querySelector('.drop100');
@@ -12,15 +14,24 @@ const sideArmor = document.querySelector('.side');
 const downloadArmor = document.querySelector('.download-armor');
 const uploadArmor = document.querySelector('#upload-armor');
 const deleteArmor = document.querySelector('.delete-armor');
+const monteCarlo = document.querySelector('.monte-carlo');
 
 const widthTip = document.querySelector('#width-dimension');
 const heightTip = document.querySelector('#height-dimension');
+
+const monteCarlo3d = document.querySelector('#monte-carlo-3d');
+const monteCarlo2d = document.querySelector('#monte-carlo-2d');
 
 const fileInput = document.querySelector('#file-input');
 const preview = document.querySelector('#file-wrapper');
 const message = document.querySelector('#test-message');
 
 const targetButton = document.querySelector('.target-button');
+
+const tabs = document.querySelector('.tabs');
+const analyticsTab = document.querySelector('#analytics-mode');
+const monteCarloTab = document.querySelector('#monte-carlo-mode');
+const otherTab = document.querySelector('#other-mode');
 
 const test = document.querySelector('.test');
 const testWrapper = document.querySelector('.test-wrapper');
@@ -57,6 +68,63 @@ const targetSigma1 = document.querySelector('#target-sigma1')
 const targetSigma2 = document.querySelector('#target-sigma2')
 
 let targetDisplay = false;
+
+
+const monteCarloPlots = document.querySelector('#monte-carlo-plots');
+const analyticsPlots = document.querySelector('#analytics-plots');
+const otherPlots = document.querySelector('#other-plots');
+
+
+const tabsArray = [
+    {
+        tab: analyticsTab,
+        plot: analyticsPlots,
+    },
+    {
+        tab: monteCarloTab,
+        plot: monteCarloPlots,
+    },
+    {
+        tab: otherTab,
+        plot: otherPlots,
+    }
+];
+
+const changeTab = (tab_value) => {
+    for (let tab of tabsArray) {
+        if (tab.tab === tab_value) {
+            tab.tab.style.backgroundColor = 'white';
+            tab.tab.style.color = MAIN_COLOR;
+            tab.plot.style.display = 'flex';
+        } else {
+            tab.tab.style.backgroundColor = MAIN_COLOR;
+            tab.tab.style.color = 'white';
+            tab.plot.style.display = 'none';
+        }
+    }
+}
+
+
+// TABS
+
+analyticsTab.addEventListener('click', () => {
+    changeTab(analyticsTab)
+    target.style.display = 'none';
+})
+
+monteCarloTab.addEventListener('click', () => {
+    changeTab(monteCarloTab)
+    target.style.display = 'none';
+})
+
+otherTab.addEventListener('click', () => {
+    changeTab(otherTab)
+    target.style.display = 'flex';
+})
+
+
+
+
 
 widthTip.addEventListener('mouseenter', () => {
     testContainer.style.borderBottomColor = 'red';
@@ -160,8 +228,9 @@ deleteArmor.addEventListener('click', () => {
     for (let observer of observers) {
         observer.disconnect();
     }
-
-    test.replaceChildren();
+    while (test.childNodes.length !== 1) {
+        test.removeChild(test.lastChild);
+    }
     divStack = [];
     armorInfo.innerHTML = '';
     list.replaceChildren();
@@ -188,6 +257,8 @@ downloadArmor.addEventListener('click', () => {
 })
 
 
+// todo armor table
+// todo method modes
 
 
 
@@ -217,8 +288,6 @@ const showArmorInfo = (armor) => {
     armorInfo.style.opacity = 1;
 
 }
-
-
 
 
 // PLOT DATA
@@ -321,6 +390,51 @@ const computeProbability = (x_dots, y_dots, standardDeviation) => {
     // todo this
 }
 
+// const computeMonteCarlo = (x_dots, y_dots, standardDeviation, divStack) => {
+//     return new Promise( function (resolve, reject) {
+//         const probabilitiesArray = [];
+//
+//
+//         for (let i = 0; i < x_dots.length; i++) {
+//             const probabilitiesLocalArray = [];
+//             let hit = 0;
+//             let j = -1;
+//
+//             while (true) {
+//                 j += 1;
+//
+//                 const x_dot = gaussianRandom(x_dots[i], standardDeviation);
+//                 const y_dot = gaussianRandom(y_dots[i], standardDeviation);
+//
+//                 for (let armor of divStack) {
+//                     if (x_dot > armor.left
+//                         && x_dot < (armor.left + armor.width)
+//                         && y_dot > armor.top
+//                         && y_dot < (armor.top + armor.height)
+//                     ) {
+//
+//                         if (armor.hit === 1) {
+//                             hit += 1;
+//                             break
+//                         }
+//                     }
+//                 }
+//
+//                 probabilitiesLocalArray.push(hit / (j+1));
+//                 if (probabilitiesLocalArray.length > 500) {
+//                     if (Math.abs(probabilitiesLocalArray[probabilitiesLocalArray.length - 1] - probabilitiesLocalArray[probabilitiesLocalArray.length - 2]) > 0.001) {
+//                         break
+//                     }
+//                 }
+//             }
+//
+//             probabilitiesArray.push(hit / probabilitiesLocalArray.length);
+//         }
+//         resolve(probabilitiesArray)
+//     })
+// }
+
+
 // DOTS
 
 const resetDots = () => {
@@ -344,10 +458,7 @@ const isDotInContent = (dotTop, dotLeft) => {
     }
 }
 
-
-const make_dot_grid = () => {
-    // todo optimize
-
+const makeDotGrid = () => {
     const tank_front_dots_x = range(0, windowWidth, 20)
     const tank_front_dots_y = range(0, windowHeight, 20)
 
@@ -362,64 +473,96 @@ const make_dot_grid = () => {
         }
     }
 
-    computeProbability(front_dots_x, front_dots_y, Number(standardDeviation)).then((result) => {
+    return [front_dots_x, front_dots_y]
+}
+
+const plotResults = (resultArray, threeDimDiv, twoDimDiv) => {
+
+    const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
+    const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
+
+    let x_step = windowWidth === 600 ? 30 : 42.5
+    let x = range(0, dot_width, dot_width / x_step);
+    let y = range(0, dot_height, dot_height / 25);
+
+    let z = [];
+
+    let layout = {
+        title: 'Вероятность попадания ПТУРа',
+        scene: {
+            zaxis: {
+                title: 'P',
+                range: [0, 1],
+            },
+            camera: {
+                eye: {
+                    x: 1.86, y: 0.88, z: -0.64}}},
+        width: 500,
+        height: 500,
+
+    };
 
 
 
-        const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
-        const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
 
-        let x_step = windowWidth === 600 ? 30 : 42.5
-        let x = range(0, dot_width, dot_width / x_step);
-        let y = range(0, dot_height, dot_height / 25);
+    while (resultArray.length) z.push(resultArray.splice(0, 25))
+    z = z[0].map((_, colIndex) => z.map(row => row[colIndex]));
+    z = z.reverse();
 
 
-        let z = [];
+    let layout2d = {
+        title: 'Вероятность попадания ПТУРа в плоскости'
+    }
 
-        let layout = {
-            title: 'Вероятность попадания ПТУРа',
-            scene: {
-                zaxis: {
-                    title: 'P',
-                    range: [0, 1],
-                },
-                camera: {
-                    eye: {
-                        x: 1.86, y: 0.88, z: -0.64}}},
-            width: 500,
-            height: 500,
-
-        };
-
-
-
-
-        while (result.length) z.push(result.splice(0, 25))
-        z = z[0].map((_, colIndex) => z.map(row => row[colIndex]));
-        z = z.reverse();
-
-
-        let layout2d = {
-            title: 'Вероятность попадания ПТУРа в плоскости'
+    let data2d = [
+        {
+            z: z,
+            x: x,
+            y: y,
+            type: 'heatmap',
+            hoverongaps: false
         }
-
-        let data2d = [
-            {
-                z: z,
-                x: x,
-                y: y,
-                type: 'heatmap',
-                hoverongaps: false
-            }
-        ];
+    ];
 
 
-        Plotly.newPlot(plotlyDiv2d, data2d, layout2d, {displayModeBar: false});
+    Plotly.newPlot(twoDimDiv, data2d, layout2d, {displayModeBar: false});
 
-        const data_z = {x: x, y:y, z: z, opacity:1, type: 'surface'};
-        Plotly.newPlot(plotlyDiv, [data_z], layout);
+    const data_z = {x: x, y:y, z: z, opacity:1, type: 'surface'};
+    Plotly.newPlot(threeDimDiv, [data_z], layout);
+}
+
+
+const analyticComputation = () => {
+    // todo optimize
+
+    const [front_dots_x, front_dots_y] = makeDotGrid();
+
+    computeProbability(front_dots_x, front_dots_y, Number(standardDeviation)).then((result) => {
+        plotResults(result, plotlyDiv, plotlyDiv2d);
+
     })
 }
+
+let myWorker;
+
+const monteCarloComputation = () => {
+
+    myWorker = new Worker("worker.js");
+     const [front_x_dots, front_y_dots] = makeDotGrid();
+
+     // computeMonteCarlo(front_x_dots, front_y_dots, standardDeviation).then((result) => {
+     //    plotResults(result, monteCarlo3d, monteCarlo2d);
+     // })
+
+    myWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack]);
+
+    myWorker.onmessage = (e) => {
+        plotResults(e.data, monteCarlo3d, monteCarlo2d);
+        myWorker.terminate();
+    }
+
+}
+
 
 
 const dropGridDot = (x, y) => {
@@ -464,7 +607,10 @@ const dropDots = (number) => {
 button.addEventListener('click', dropDot)
 buttonDropHundred.addEventListener('click', () => dropDots(100))
 buttonReset.addEventListener('click', resetDots)
-buttonGrid.addEventListener('click', make_dot_grid)
+buttonGrid.addEventListener('click', analyticComputation)
+// todo disable
+// monteCarlo.disabled = true;
+monteCarlo.addEventListener('click', monteCarloComputation)
 
 
 
