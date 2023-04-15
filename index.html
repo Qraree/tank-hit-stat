@@ -61,21 +61,21 @@
         <div class="target-div-wrapper">
                 <div class="buttons">
                     <div>
-                    <label for="file-input" class="upload_label">
-                        Загрузить фото
-                        <input type="file" id="file-input">
-                    </label>
-                    <button class="download-armor">Сохранить броню</button>
-                    <label for="upload-armor" class="upload_label">
-                        Загрузить броню
-                        <input type="file" id="upload-armor">
-                    </label>
-                    <button class="delete-armor">Удалить броню</button>
-                    <button class="drop1">1 точка</button>
-                    <button class="drop100">100 точек</button>
-                    <button class="reset">Удалить точки</button>
-                    <button class="grid">Расчёт</button>
-                    <button class="target-button">Прицел</button>
+                        <label for="file-input" class="upload_label">
+                            Загрузить фото
+                            <input type="file" id="file-input">
+                        </label>
+                        <button class="download-armor">Сохранить броню</button>
+                        <label for="upload-armor" class="upload_label">
+                            Загрузить броню
+                            <input type="file" id="upload-armor">
+                        </label>
+                        <button class="delete-armor">Удалить броню</button>
+                        <button class="reset">Удалить точки</button>
+                        <button class="grid">Расчёт</button>
+                        <button class="monte-carlo">Монте-Карло</button>
+                        <button class="obstacle">Сгенерировать</button>
+                        <button class="delete-obstacle">Удалить местность</button>
                     </div>
                     <div>
                         <button class="front">Лобовая броня</button>
@@ -87,6 +87,9 @@
                 <div class="image-content-section">
                     <img src="" class="tank_image" id="file-wrapper" alt="">
                     <span id="test-message">Вставьте изображение танка</span>
+                    <div class="obstacle-wrapper">
+
+                    </div>
                     <div class="test-img-wrapper">
                         <div class="test">
 
@@ -106,15 +109,99 @@
             <div class="list"></div>
         </div>
     </div>
-
     <h1>Статистика</h1>
+    <div class="tabs">
+        <button class="tab" id="analytics-mode">Аналитический метод</button>
+        <button class="tab" id="monte-carlo-mode">Метод Монте-Карло</button>
+        <button class="tab" id="other-mode">Другое</button>
+    </div>
     <div class="stat">
-        <div class="hit-stat">
+        <div class="plots" id="analytics-plots">
+            <div class="plot-wrapper">
+                <div class="target-div" id="plotlyDiv">
+
+                </div>
+
+                <div class="target-div" id="plotlyDiv2d">
+
+                </div>
+            </div>
+            <div class="tip">
+                * В аналитическом методе препятствия не учитываются
+            </div>
+        </div>
+        <div class="plots" id="monte-carlo-plots">
+            <div class="additional-parameters">
+                <div class="parameters">
+                    <section class="parameter-section">
+                        <label for="tree-number">
+                            Количество деревьев
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter"
+                                id="tree-number"
+                                min="1"
+                                max="10"
+
+                        >
+                    </section>
+                    <section class="parameter-section">
+                        <label for="tree-mean">
+                            Средний диаметр дерева, мм
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter"
+                                id="tree-mean"
+                                min="1"
+
+
+                        >
+                    </section>
+                    <section class="parameter-section">
+                        <label for="tree-std">
+                            Среднеквадратическое отклонени диаметра дерева, мм
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter"
+                                id="tree-std"
+                                min="1"
+
+
+                        >
+                    </section>
+<!--                    <section class="rock-number">-->
+<!--                        <label for="armor">Количество камней</label>-->
+<!--                        <input-->
+<!--                                type="text"-->
+<!--                                class="parameter"-->
+<!--                                id="rock-number"-->
+
+<!--                        >-->
+<!--                    </section>-->
+                </div>
+            </div>
+            <div class="target-div" id="monte-carlo-3d">
+
+            </div>
+
+            <div class="target-div" id="monte-carlo-2d">
+
+            </div>
+
+        </div>
+        <div class="hit-stat" id="other-plots">
             <div class="plot">
                 <canvas id="canvas"></canvas>
             </div>
             <div class="target-div">
-
+            </div>
+            <div class="target-buttons">
+                <button class="drop1 target-control">1 точка</button>
+                <button class="drop100 target-control">100 точек</button>
+                <button class="target-button target-control">Прицел</button>
             </div>
             <div id="armor-info-wrapper">
                 <div class="armor-info">
@@ -125,21 +212,7 @@
 
             </div>
         </div>
-        <div class="plots">
-            <div class="target-div" id="plotlyDiv">
-
-            </div>
-
-            <div class="target-div" id="plotlyDiv2d">
-
-            </div>
-
-        </div>
     </div>
-
-
-
-
     <script src="./renderer.js"></script>
 </body>
 </html>

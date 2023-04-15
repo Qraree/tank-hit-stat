@@ -1,6 +1,8 @@
 const {ipcRenderer} = require('electron');
 const fs = require('fs');
 
+const MAIN_COLOR = '#333D79FF';
+const SECONDARY_COLOR = '#FAEBEFFF';
 
 const button = document.querySelector('.drop1');
 const buttonDropHundred = document.querySelector('.drop100');
@@ -12,9 +14,16 @@ const sideArmor = document.querySelector('.side');
 const downloadArmor = document.querySelector('.download-armor');
 const uploadArmor = document.querySelector('#upload-armor');
 const deleteArmor = document.querySelector('.delete-armor');
+const monteCarlo = document.querySelector('.monte-carlo');
+const obstacleButton = document.querySelector('.obstacle');
+const deleteObstacle = document.querySelector('.delete-obstacle');
+
 
 const widthTip = document.querySelector('#width-dimension');
 const heightTip = document.querySelector('#height-dimension');
+
+const monteCarlo3d = document.querySelector('#monte-carlo-3d');
+const monteCarlo2d = document.querySelector('#monte-carlo-2d');
 
 const fileInput = document.querySelector('#file-input');
 const preview = document.querySelector('#file-wrapper');
@@ -22,6 +31,11 @@ const message = document.querySelector('#test-message');
 
 const targetButton = document.querySelector('.target-button');
 
+const analyticsTab = document.querySelector('#analytics-mode');
+const monteCarloTab = document.querySelector('#monte-carlo-mode');
+const otherTab = document.querySelector('#other-mode');
+
+const obstacleWrapper = document.querySelector('.obstacle-wrapper');
 const test = document.querySelector('.test');
 const testWrapper = document.querySelector('.test-wrapper');
 const targetDivWrapper = testWrapper.querySelector('.target-div-wrapper');
@@ -39,7 +53,14 @@ const inputArmor = document.querySelector('#armor');
 const tankWidth = document.querySelector('#width');
 const tankHeight = document.querySelector('#height');
 
+const treeNumber = document.querySelector('#tree-number');
+const treeMean = document.querySelector('#tree-mean');
+const treeStd = document.querySelector('#tree-std');
 
+treeMean.value = 250;
+treeStd.value = 40;
+
+treeNumber.value = 1;
 inputStandardDeviation.value = 200;
 inputArmor.value = 200;
 tankWidth.value = 3000;
@@ -57,6 +78,63 @@ const targetSigma1 = document.querySelector('#target-sigma1')
 const targetSigma2 = document.querySelector('#target-sigma2')
 
 let targetDisplay = false;
+
+
+const monteCarloPlots = document.querySelector('#monte-carlo-plots');
+const analyticsPlots = document.querySelector('#analytics-plots');
+const otherPlots = document.querySelector('#other-plots');
+
+
+const tabsArray = [
+    {
+        tab: analyticsTab,
+        plot: analyticsPlots,
+    },
+    {
+        tab: monteCarloTab,
+        plot: monteCarloPlots,
+    },
+    {
+        tab: otherTab,
+        plot: otherPlots,
+    }
+];
+
+const changeTab = (tab_value) => {
+    for (let tab of tabsArray) {
+        if (tab.tab === tab_value) {
+            tab.tab.style.backgroundColor = 'white';
+            tab.tab.style.color = MAIN_COLOR;
+            tab.plot.style.display = 'flex';
+        } else {
+            tab.tab.style.backgroundColor = MAIN_COLOR;
+            tab.tab.style.color = 'white';
+            tab.plot.style.display = 'none';
+        }
+    }
+}
+
+
+// TABS
+
+analyticsTab.addEventListener('click', () => {
+    changeTab(analyticsTab)
+    target.style.display = 'none';
+})
+
+monteCarloTab.addEventListener('click', () => {
+    changeTab(monteCarloTab)
+    target.style.display = 'none';
+})
+
+otherTab.addEventListener('click', () => {
+    changeTab(otherTab)
+    target.style.display = 'flex';
+})
+
+
+
+
 
 widthTip.addEventListener('mouseenter', () => {
     testContainer.style.borderBottomColor = 'red';
@@ -151,7 +229,7 @@ target.addEventListener('mousedown', (e) => {
     e.stopPropagation()
 })
 
-let resizeObserver;
+let obstacles = [];
 let divStack = [];
 const stack = [];
 const observers = [];
@@ -160,8 +238,9 @@ deleteArmor.addEventListener('click', () => {
     for (let observer of observers) {
         observer.disconnect();
     }
-
-    test.replaceChildren();
+    while (test.childNodes.length !== 1) {
+        test.removeChild(test.lastChild);
+    }
     divStack = [];
     armorInfo.innerHTML = '';
     list.replaceChildren();
@@ -188,6 +267,7 @@ downloadArmor.addEventListener('click', () => {
 })
 
 
+// todo armor table
 
 
 
@@ -217,8 +297,6 @@ const showArmorInfo = (armor) => {
     armorInfo.style.opacity = 1;
 
 }
-
-
 
 
 // PLOT DATA
@@ -321,6 +399,8 @@ const computeProbability = (x_dots, y_dots, standardDeviation) => {
     // todo this
 }
 
+
+
 // DOTS
 
 const resetDots = () => {
@@ -344,10 +424,7 @@ const isDotInContent = (dotTop, dotLeft) => {
     }
 }
 
-
-const make_dot_grid = () => {
-    // todo optimize
-
+const makeDotGrid = () => {
     const tank_front_dots_x = range(0, windowWidth, 20)
     const tank_front_dots_y = range(0, windowHeight, 20)
 
@@ -362,64 +439,92 @@ const make_dot_grid = () => {
         }
     }
 
-    computeProbability(front_dots_x, front_dots_y, Number(standardDeviation)).then((result) => {
+    return [front_dots_x, front_dots_y]
+}
+
+const plotResults = (resultArray, threeDimDiv, twoDimDiv) => {
+
+    const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
+    const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
+
+    let x_step = windowWidth === 600 ? 30 : 42.5
+    let x = range(0, dot_width, dot_width / x_step);
+    let y = range(0, dot_height, dot_height / 25);
+
+    let z = [];
+
+    let layout = {
+        title: 'Вероятность попадания ПТУРа',
+        scene: {
+            zaxis: {
+                title: 'P',
+                range: [0, 1],
+            },
+            camera: {
+                eye: {
+                    x: 1.86, y: 0.88, z: -0.64}}},
+        width: 500,
+        height: 500,
+
+    };
 
 
 
-        const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
-        const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
 
-        let x_step = windowWidth === 600 ? 30 : 42.5
-        let x = range(0, dot_width, dot_width / x_step);
-        let y = range(0, dot_height, dot_height / 25);
+    while (resultArray.length) z.push(resultArray.splice(0, 25))
+    z = z[0].map((_, colIndex) => z.map(row => row[colIndex]));
+    z = z.reverse();
 
 
-        let z = [];
+    let layout2d = {
+        title: 'Вероятность попадания ПТУРа в плоскости'
+    }
 
-        let layout = {
-            title: 'Вероятность попадания ПТУРа',
-            scene: {
-                zaxis: {
-                    title: 'P',
-                    range: [0, 1],
-                },
-                camera: {
-                    eye: {
-                        x: 1.86, y: 0.88, z: -0.64}}},
-            width: 500,
-            height: 500,
-
-        };
-
-
-
-
-        while (result.length) z.push(result.splice(0, 25))
-        z = z[0].map((_, colIndex) => z.map(row => row[colIndex]));
-        z = z.reverse();
-
-
-        let layout2d = {
-            title: 'Вероятность попадания ПТУРа в плоскости'
+    let data2d = [
+        {
+            z: z,
+            x: x,
+            y: y,
+            type: 'heatmap',
+            hoverongaps: false
         }
-
-        let data2d = [
-            {
-                z: z,
-                x: x,
-                y: y,
-                type: 'heatmap',
-                hoverongaps: false
-            }
-        ];
+    ];
 
 
-        Plotly.newPlot(plotlyDiv2d, data2d, layout2d, {displayModeBar: false});
+    Plotly.newPlot(twoDimDiv, data2d, layout2d, {displayModeBar: false});
 
-        const data_z = {x: x, y:y, z: z, opacity:1, type: 'surface'};
-        Plotly.newPlot(plotlyDiv, [data_z], layout);
+    const data_z = {x: x, y:y, z: z, opacity:1, type: 'surface'};
+    Plotly.newPlot(threeDimDiv, [data_z], layout);
+}
+
+
+const analyticComputation = () => {
+    // todo optimize
+
+    const [front_dots_x, front_dots_y] = makeDotGrid();
+
+    computeProbability(front_dots_x, front_dots_y, Number(standardDeviation)).then((result) => {
+        plotResults(result, plotlyDiv, plotlyDiv2d);
+
     })
 }
+
+let myWorker;
+
+const monteCarloComputation = () => {
+
+    myWorker = new Worker("worker.js");
+     const [front_x_dots, front_y_dots] = makeDotGrid();
+
+    myWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
+
+    myWorker.onmessage = (e) => {
+        plotResults(e.data, monteCarlo3d, monteCarlo2d);
+        myWorker.terminate();
+    }
+
+}
+
 
 
 const dropGridDot = (x, y) => {
@@ -464,7 +569,8 @@ const dropDots = (number) => {
 button.addEventListener('click', dropDot)
 buttonDropHundred.addEventListener('click', () => dropDots(100))
 buttonReset.addEventListener('click', resetDots)
-buttonGrid.addEventListener('click', make_dot_grid)
+buttonGrid.addEventListener('click', analyticComputation)
+monteCarlo.addEventListener('click', monteCarloComputation)
 
 
 
@@ -641,6 +747,7 @@ test.addEventListener('click', (e) => {
 })
 
 
+
 const addContent = (armor) => {
     let content = document.createElement('div');
 
@@ -797,7 +904,51 @@ uploadArmor.addEventListener('change', (e) => {
     reader.readAsText(e.target.files[0]);
 })
 
+const randomInInterval = (max, min=0) => {
+    return Math.floor((Math.random() * (max - min)) + min);
+}
+
+const generateObstacle = () => {
+    let obstacle = document.createElement('div');
+
+    const mean = convert_mm_px(Number(treeMean.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
+    const std = convert_mm_px(Number(treeStd.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
+    const leftRandom = randomInInterval(10, windowWidth - 100)
+    const widthRandom = gaussianRandom(mean, std);
+
+    obstacle.className = 'obstacle-content';
+    obstacle.style.left = `${leftRandom}px`;
+    obstacle.style.height = `${windowHeight}px`;
+    obstacle.style.width = `${widthRandom}px`;
 
 
+    obstacles.push({
+        index: obstacles.length,
+        height: windowHeight,
+        width: 75,
+        top: 0,
+        left: leftRandom,
+    })
 
+    obstacleWrapper.appendChild(obstacle);
+}
+
+const deleteObstacles = () => {
+    obstacleWrapper.replaceChildren();
+    obstacles = [];
+}
+
+obstacleButton.addEventListener('click', (e) => {
+    deleteObstacles();
+
+    if (Number(treeNumber.value) >= 1 && Number(treeNumber.value) < 11) {
+        for (let i = 0; i < Number(treeNumber.value); i++) {
+            generateObstacle();
+        }
+    }
+})
+
+deleteObstacle.addEventListener('click', () => {
+    deleteObstacles();
+})
 
