@@ -1,10 +1,11 @@
-// x_dots, y_dots, standardDeviation, divStack
+// x_dots, y_dots, standardDeviation, divStack, obstacles
 
 onmessage = (e) => {
     const x_dots = e.data[0];
     const y_dots = e.data[1];
     const standardDeviation = e.data[2];
     const divStack = e.data[3];
+    const obstacles = e.data[4];
 
 
     const gaussianRandom = (mean=0, stdev=1) => {
@@ -24,22 +25,39 @@ onmessage = (e) => {
 
         while (true) {
             j += 1;
+            let miss = false;
 
             const x_dot = gaussianRandom(x_dots[i], standardDeviation);
             const y_dot = gaussianRandom(y_dots[i], standardDeviation);
 
-            for (let armor of divStack) {
-                if (x_dot > armor.left
-                    && x_dot < (armor.left + armor.width)
-                    && y_dot > armor.top
-                    && y_dot < (armor.top + armor.height)
-                ) {
-                    if (armor.hit === 1) {
-                        hit += 1;
+            if (obstacles !== [] || obstacles !== undefined) {
+                for (let obstacle of obstacles) {
+                    if (x_dot > obstacle.left
+                        && x_dot < (obstacle.left + obstacle.width)
+                        && y_dot > obstacle.top
+                        && y_dot < (obstacle.top + obstacle.height)
+                    ) {
+                        miss = true;
                         break
                     }
                 }
             }
+
+            if (miss !== true) {
+                for (let armor of divStack) {
+                    if (x_dot > armor.left
+                        && x_dot < (armor.left + armor.width)
+                        && y_dot > armor.top
+                        && y_dot < (armor.top + armor.height)
+                    ) {
+                        if (armor.hit === 1) {
+                            hit += 1;
+                            break
+                        }
+                    }
+                }
+            }
+
 
             probabilitiesLocalArray.push(hit / (j + 1));
             if (probabilitiesLocalArray.length > 500) {

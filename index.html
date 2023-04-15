@@ -74,6 +74,8 @@
                         <button class="reset">Удалить точки</button>
                         <button class="grid">Расчёт</button>
                         <button class="monte-carlo">Монте-Карло</button>
+                        <button class="obstacle">Сгенерировать</button>
+                        <button class="delete-obstacle">Удалить местность</button>
                     </div>
                     <div>
                         <button class="front">Лобовая броня</button>
@@ -85,6 +87,9 @@
                 <div class="image-content-section">
                     <img src="" class="tank_image" id="file-wrapper" alt="">
                     <span id="test-message">Вставьте изображение танка</span>
+                    <div class="obstacle-wrapper">
+
+                    </div>
                     <div class="test-img-wrapper">
                         <div class="test">
 
@@ -112,16 +117,72 @@
     </div>
     <div class="stat">
         <div class="plots" id="analytics-plots">
-            <div class="target-div" id="plotlyDiv">
+            <div class="plot-wrapper">
+                <div class="target-div" id="plotlyDiv">
 
+                </div>
+
+                <div class="target-div" id="plotlyDiv2d">
+
+                </div>
             </div>
-
-            <div class="target-div" id="plotlyDiv2d">
-
+            <div class="tip">
+                * В аналитическом методе препятствия не учитываются
             </div>
-
         </div>
         <div class="plots" id="monte-carlo-plots">
+            <div class="additional-parameters">
+                <div class="parameters">
+                    <section class="parameter-section">
+                        <label for="tree-number">
+                            Количество деревьев
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter"
+                                id="tree-number"
+                                min="1"
+                                max="10"
+
+                        >
+                    </section>
+                    <section class="parameter-section">
+                        <label for="tree-mean">
+                            Средний диаметр дерева, мм
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter"
+                                id="tree-mean"
+                                min="1"
+
+
+                        >
+                    </section>
+                    <section class="parameter-section">
+                        <label for="tree-std">
+                            Среднеквадратическое отклонени диаметра дерева, мм
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter"
+                                id="tree-std"
+                                min="1"
+
+
+                        >
+                    </section>
+<!--                    <section class="rock-number">-->
+<!--                        <label for="armor">Количество камней</label>-->
+<!--                        <input-->
+<!--                                type="text"-->
+<!--                                class="parameter"-->
+<!--                                id="rock-number"-->
+
+<!--                        >-->
+<!--                    </section>-->
+                </div>
+            </div>
             <div class="target-div" id="monte-carlo-3d">
 
             </div>

@@ -51,7 +51,7 @@ h1 {
 
 #analytics-plots {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 }
 
 #monte-carlo-plots {
@@ -585,6 +585,7 @@ label {
 .stat {
     background-color: var(--main-bg-color);
     padding: 10px;
+    width: 100%;
 }
 
 .target-buttons {
@@ -602,4 +603,41 @@ label {
 .target-control:hover {
     background-color: white;
     color: var(--main-bg-color)
+}
+
+.additional-parameters {
+    height: 500px;
+    width: 300px;
+    margin-top: 10px;
+}
+
+.obstacle-content {
+    background-color: rgba(147, 28, 12, 0.66);
+    position: absolute;
+    width: 75px;
+    z-index: 10000;
+}
+
+.obstacle-wrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.tip {
+    color: white;
+    margin-left: 10px;
+    height: 50px;
+    width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.plot-wrapper {
+    display: flex;
+    flex-direction: row;
 }

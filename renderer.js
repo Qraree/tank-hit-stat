@@ -2,7 +2,7 @@ const {ipcRenderer} = require('electron');
 const fs = require('fs');
 
 const MAIN_COLOR = '#333D79FF';
-const SECONDARY_COLOR = 'rgb(245, 222, 179)';
+const SECONDARY_COLOR = '#FAEBEFFF';
 
 const button = document.querySelector('.drop1');
 const buttonDropHundred = document.querySelector('.drop100');
@@ -15,6 +15,9 @@ const downloadArmor = document.querySelector('.download-armor');
 const uploadArmor = document.querySelector('#upload-armor');
 const deleteArmor = document.querySelector('.delete-armor');
 const monteCarlo = document.querySelector('.monte-carlo');
+const obstacleButton = document.querySelector('.obstacle');
+const deleteObstacle = document.querySelector('.delete-obstacle');
+
 
 const widthTip = document.querySelector('#width-dimension');
 const heightTip = document.querySelector('#height-dimension');
@@ -28,11 +31,11 @@ const message = document.querySelector('#test-message');
 
 const targetButton = document.querySelector('.target-button');
 
-const tabs = document.querySelector('.tabs');
 const analyticsTab = document.querySelector('#analytics-mode');
 const monteCarloTab = document.querySelector('#monte-carlo-mode');
 const otherTab = document.querySelector('#other-mode');
 
+const obstacleWrapper = document.querySelector('.obstacle-wrapper');
 const test = document.querySelector('.test');
 const testWrapper = document.querySelector('.test-wrapper');
 const targetDivWrapper = testWrapper.querySelector('.target-div-wrapper');
@@ -50,7 +53,14 @@ const inputArmor = document.querySelector('#armor');
 const tankWidth = document.querySelector('#width');
 const tankHeight = document.querySelector('#height');
 
+const treeNumber = document.querySelector('#tree-number');
+const treeMean = document.querySelector('#tree-mean');
+const treeStd = document.querySelector('#tree-std');
 
+treeMean.value = 250;
+treeStd.value = 40;
+
+treeNumber.value = 1;
 inputStandardDeviation.value = 200;
 inputArmor.value = 200;
 tankWidth.value = 3000;
@@ -219,7 +229,7 @@ target.addEventListener('mousedown', (e) => {
     e.stopPropagation()
 })
 
-let resizeObserver;
+let obstacles = [];
 let divStack = [];
 const stack = [];
 const observers = [];
@@ -258,7 +268,6 @@ downloadArmor.addEventListener('click', () => {
 
 
 // todo armor table
-// todo method modes
 
 
 
@@ -390,49 +399,6 @@ const computeProbability = (x_dots, y_dots, standardDeviation) => {
     // todo this
 }
 
-// const computeMonteCarlo = (x_dots, y_dots, standardDeviation, divStack) => {
-//     return new Promise( function (resolve, reject) {
-//         const probabilitiesArray = [];
-//
-//
-//         for (let i = 0; i < x_dots.length; i++) {
-//             const probabilitiesLocalArray = [];
-//             let hit = 0;
-//             let j = -1;
-//
-//             while (true) {
-//                 j += 1;
-//
-//                 const x_dot = gaussianRandom(x_dots[i], standardDeviation);
-//                 const y_dot = gaussianRandom(y_dots[i], standardDeviation);
-//
-//                 for (let armor of divStack) {
-//                     if (x_dot > armor.left
-//                         && x_dot < (armor.left + armor.width)
-//                         && y_dot > armor.top
-//                         && y_dot < (armor.top + armor.height)
-//                     ) {
-//
-//                         if (armor.hit === 1) {
-//                             hit += 1;
-//                             break
-//                         }
-//                     }
-//                 }
-//
-//                 probabilitiesLocalArray.push(hit / (j+1));
-//                 if (probabilitiesLocalArray.length > 500) {
-//                     if (Math.abs(probabilitiesLocalArray[probabilitiesLocalArray.length - 1] - probabilitiesLocalArray[probabilitiesLocalArray.length - 2]) > 0.001) {
-//                         break
-//                     }
-//                 }
-//             }
-//
-//             probabilitiesArray.push(hit / probabilitiesLocalArray.length);
-//         }
-//         resolve(probabilitiesArray)
-//     })
-// }
 
 
 // DOTS
@@ -550,11 +516,7 @@ const monteCarloComputation = () => {
     myWorker = new Worker("worker.js");
      const [front_x_dots, front_y_dots] = makeDotGrid();
 
-     // computeMonteCarlo(front_x_dots, front_y_dots, standardDeviation).then((result) => {
-     //    plotResults(result, monteCarlo3d, monteCarlo2d);
-     // })
-
-    myWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack]);
+    myWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
 
     myWorker.onmessage = (e) => {
         plotResults(e.data, monteCarlo3d, monteCarlo2d);
@@ -608,8 +570,6 @@ button.addEventListener('click', dropDot)
 buttonDropHundred.addEventListener('click', () => dropDots(100))
 buttonReset.addEventListener('click', resetDots)
 buttonGrid.addEventListener('click', analyticComputation)
-// todo disable
-// monteCarlo.disabled = true;
 monteCarlo.addEventListener('click', monteCarloComputation)
 
 
@@ -787,6 +747,7 @@ test.addEventListener('click', (e) => {
 })
 
 
+
 const addContent = (armor) => {
     let content = document.createElement('div');
 
@@ -943,7 +904,51 @@ uploadArmor.addEventListener('change', (e) => {
     reader.readAsText(e.target.files[0]);
 })
 
+const randomInInterval = (max, min=0) => {
+    return Math.floor((Math.random() * (max - min)) + min);
+}
+
+const generateObstacle = () => {
+    let obstacle = document.createElement('div');
+
+    const mean = convert_mm_px(Number(treeMean.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
+    const std = convert_mm_px(Number(treeStd.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
+    const leftRandom = randomInInterval(10, windowWidth - 100)
+    const widthRandom = gaussianRandom(mean, std);
+
+    obstacle.className = 'obstacle-content';
+    obstacle.style.left = `${leftRandom}px`;
+    obstacle.style.height = `${windowHeight}px`;
+    obstacle.style.width = `${widthRandom}px`;
 
 
+    obstacles.push({
+        index: obstacles.length,
+        height: windowHeight,
+        width: 75,
+        top: 0,
+        left: leftRandom,
+    })
 
+    obstacleWrapper.appendChild(obstacle);
+}
+
+const deleteObstacles = () => {
+    obstacleWrapper.replaceChildren();
+    obstacles = [];
+}
+
+obstacleButton.addEventListener('click', (e) => {
+    deleteObstacles();
+
+    if (Number(treeNumber.value) >= 1 && Number(treeNumber.value) < 11) {
+        for (let i = 0; i < Number(treeNumber.value); i++) {
+            generateObstacle();
+        }
+    }
+})
+
+deleteObstacle.addEventListener('click', () => {
+    deleteObstacles();
+})
 
