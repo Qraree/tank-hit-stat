@@ -162,13 +162,11 @@ heightTip.addEventListener('mouseleave', () => {
 frontArmor.addEventListener('click', () => {
     windowWidth = FRONT_WINDOW_SIZE;
     testContainer.style.width = `${FRONT_WINDOW_SIZE}px`;
-    // console.log(windowWidth)
 })
 
 sideArmor.addEventListener('click', () => {
     windowWidth = SIDE_WINDOW_SIZE;
     testContainer.style.width = `${SIDE_WINDOW_SIZE}px`;
-    // console.log(windowWidth)
 })
 
 
@@ -191,7 +189,6 @@ function getBase64(file) {
     };
     reader.readAsDataURL(file);
     reader.onerror = function (error) {
-        // console.log('Error: ', error);
     };
 }
 
@@ -204,12 +201,10 @@ fileInput.addEventListener('change', (e) => {
 })
 
 ipcRenderer.on('photo-processed', (event, photo) => {
-    // console.log('Обработанное изображение', photo )
 })
 
 buttonShow.addEventListener('click', () => {
     standardDeviation = convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
-    // console.log(standardDeviation)
 
     targetSigma1.style.width = `${Number(standardDeviation) * 2}px`
     targetSigma1.style.height = `${Number(standardDeviation) * 2}px`
@@ -250,6 +245,7 @@ deleteArmor.addEventListener('click', () => {
     divStack = [];
     armorInfo.innerHTML = '';
     list.replaceChildren();
+    uploadArmor.value = '';
 
 })
 
@@ -260,7 +256,6 @@ downloadArmor.addEventListener('click', () => {
 
     const json = JSON.stringify(obj);
     fs.writeFile('armor.json', json, 'utf-8', () => {
-        // console.log('Armor has been downloaded!')
 
         downloadArmor.style.backgroundColor = 'rgba(33,247,59,0.71)'
 
@@ -413,7 +408,6 @@ const resetDots = () => {
     const contentArray = testContainer.querySelectorAll('.image-content-section');
     testContainer.replaceChildren(...contentArray)
     clearAllData(chart);
-    // console.log(divStack)
 
 }
 
@@ -749,7 +743,6 @@ test.addEventListener('click', (e) => {
     })
 
     test.appendChild(content)
-    // console.log(divStack)
 
 })
 
@@ -894,7 +887,6 @@ const addContent = (armor) => {
     })
 
     test.appendChild(content)
-    // console.log(divStack)
 }
 
 const handleArmorLoad = (e) => {
@@ -990,13 +982,11 @@ simulation.addEventListener('click', () => {
 
         mySecondWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
         forP += 1;
-        // console.log(forP);
 
 
         mySecondWorker.onmessage = (e) => {
             summaryProbability = addTwoArrays(summaryProbability, e.data)
             workerP += 1;
-            // console.log(workerP);
 
             if (workerP === Number(landscapeNumber.value)) {
                 mySecondWorker.terminate();

@@ -261,7 +261,7 @@ button:hover, .upload_label:hover {
     width: 130px;
     height: auto;
     overflow-y: scroll;
-    max-height: 500px;
+    max-height: 490px;
 }
 
 .list::-webkit-scrollbar {
@@ -284,7 +284,7 @@ button:hover, .upload_label:hover {
 
 
 .gradient {
-    height: 500px;
+    height: 490px;
     width: 10px;
     background: linear-gradient(red,yellow, #02ff02);
     border: 5px solid var(--main-bg-color);
@@ -341,7 +341,7 @@ button:hover, .upload_label:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-
+    height: 491px;
     font-size: 20px;
 
 }
