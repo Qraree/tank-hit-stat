@@ -1,3 +1,5 @@
+'use strict';
+
 const {ipcRenderer} = require('electron');
 const fs = require('fs');
 
@@ -17,6 +19,9 @@ const deleteArmor = document.querySelector('.delete-armor');
 const monteCarlo = document.querySelector('.monte-carlo');
 const obstacleButton = document.querySelector('.obstacle');
 const deleteObstacle = document.querySelector('.delete-obstacle');
+const simulation = document.querySelector('#simulation');
+
+const loader = document.querySelector('#loader');
 
 
 const widthTip = document.querySelector('#width-dimension');
@@ -56,6 +61,7 @@ const tankHeight = document.querySelector('#height');
 const treeNumber = document.querySelector('#tree-number');
 const treeMean = document.querySelector('#tree-mean');
 const treeStd = document.querySelector('#tree-std');
+const landscapeNumber = document.querySelector('#landscape-number');
 
 treeMean.value = 250;
 treeStd.value = 40;
@@ -156,13 +162,13 @@ heightTip.addEventListener('mouseleave', () => {
 frontArmor.addEventListener('click', () => {
     windowWidth = FRONT_WINDOW_SIZE;
     testContainer.style.width = `${FRONT_WINDOW_SIZE}px`;
-    console.log(windowWidth)
+    // console.log(windowWidth)
 })
 
 sideArmor.addEventListener('click', () => {
     windowWidth = SIDE_WINDOW_SIZE;
     testContainer.style.width = `${SIDE_WINDOW_SIZE}px`;
-    console.log(windowWidth)
+    // console.log(windowWidth)
 })
 
 
@@ -185,7 +191,7 @@ function getBase64(file) {
     };
     reader.readAsDataURL(file);
     reader.onerror = function (error) {
-        console.log('Error: ', error);
+        // console.log('Error: ', error);
     };
 }
 
@@ -198,12 +204,12 @@ fileInput.addEventListener('change', (e) => {
 })
 
 ipcRenderer.on('photo-processed', (event, photo) => {
-    console.log('Обработанное изображение', photo )
+    // console.log('Обработанное изображение', photo )
 })
 
 buttonShow.addEventListener('click', () => {
     standardDeviation = convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
-    console.log(standardDeviation)
+    // console.log(standardDeviation)
 
     targetSigma1.style.width = `${Number(standardDeviation) * 2}px`
     targetSigma1.style.height = `${Number(standardDeviation) * 2}px`
@@ -254,7 +260,7 @@ downloadArmor.addEventListener('click', () => {
 
     const json = JSON.stringify(obj);
     fs.writeFile('armor.json', json, 'utf-8', () => {
-        console.log('Armor has been downloaded!')
+        // console.log('Armor has been downloaded!')
 
         downloadArmor.style.backgroundColor = 'rgba(33,247,59,0.71)'
 
@@ -407,7 +413,7 @@ const resetDots = () => {
     const contentArray = testContainer.querySelectorAll('.image-content-section');
     testContainer.replaceChildren(...contentArray)
     clearAllData(chart);
-    console.log(divStack)
+    // console.log(divStack)
 
 }
 
@@ -511,7 +517,7 @@ const analyticComputation = () => {
 
 let myWorker;
 
-const monteCarloComputation = () => {
+const monteCarloComputation = (simulation = false) => {
 
     myWorker = new Worker("worker.js");
      const [front_x_dots, front_y_dots] = makeDotGrid();
@@ -522,7 +528,6 @@ const monteCarloComputation = () => {
         plotResults(e.data, monteCarlo3d, monteCarlo2d);
         myWorker.terminate();
     }
-
 }
 
 
@@ -570,7 +575,9 @@ button.addEventListener('click', dropDot)
 buttonDropHundred.addEventListener('click', () => dropDots(100))
 buttonReset.addEventListener('click', resetDots)
 buttonGrid.addEventListener('click', analyticComputation)
-monteCarlo.addEventListener('click', monteCarloComputation)
+monteCarlo.addEventListener('click', () => {
+    monteCarloComputation(false);
+})
 
 
 
@@ -742,7 +749,7 @@ test.addEventListener('click', (e) => {
     })
 
     test.appendChild(content)
-    console.log(divStack)
+    // console.log(divStack)
 
 })
 
@@ -887,7 +894,7 @@ const addContent = (armor) => {
     })
 
     test.appendChild(content)
-    console.log(divStack)
+    // console.log(divStack)
 }
 
 const handleArmorLoad = (e) => {
@@ -895,7 +902,6 @@ const handleArmorLoad = (e) => {
     const table = obj.table;
     for (let armor of table) {
         addContent(armor);
-        // console.log(armor);
     }
 }
 uploadArmor.addEventListener('change', (e) => {
@@ -950,5 +956,57 @@ obstacleButton.addEventListener('click', (e) => {
 
 deleteObstacle.addEventListener('click', () => {
     deleteObstacles();
+})
+
+const addTwoArrays = (a, b) => {
+    if (a.length === 0 || b.length === 0) {
+        return a.length === 0 ? b : a
+    }
+
+    return a.map((e, i) => e + b[i])
+}
+
+let mySecondWorker;
+simulation.addEventListener('click', () => {
+    loader.style.display = 'block';
+    let summaryProbability = [];
+    let workerP = 0;
+    let forP = 0;
+
+    mySecondWorker = new Worker("worker.js");
+    const [front_x_dots, front_y_dots] = makeDotGrid();
+
+    for (let i = 0; i < Number(landscapeNumber.value); i++) {
+
+
+        deleteObstacles();
+
+        if (Number(treeNumber.value) >= 1 && Number(treeNumber.value) < 11) {
+            for (let k = 0; k < Number(treeNumber.value); k++) {
+                generateObstacle();
+            }
+        }
+
+
+        mySecondWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
+        forP += 1;
+        // console.log(forP);
+
+
+        mySecondWorker.onmessage = (e) => {
+            summaryProbability = addTwoArrays(summaryProbability, e.data)
+            workerP += 1;
+            // console.log(workerP);
+
+            if (workerP === Number(landscapeNumber.value)) {
+                mySecondWorker.terminate();
+                summaryProbability = summaryProbability.map(e => e / workerP);
+                plotResults(summaryProbability, monteCarlo3d, monteCarlo2d)
+                loader.style.display = 'none';
+            }
+        }
+
+    }
+
 })
 

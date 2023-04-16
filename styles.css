@@ -63,6 +63,29 @@ h1 {
     background-color: #b7b6b6;
 }
 
+hr {
+    width: 100%;
+}
+
+h3 {
+    margin: 10px 0 10px 0;
+}
+
+#simulation {
+    background-color: white;
+    color: var(--main-bg-color);
+    border-radius: 3px;
+    transition: 200ms all;
+}
+#simulation:hover {
+    background-color: #b7b6b6;
+}
+
+#loader {
+    display: none;
+}
+
+
 .armor-info {
     width: 200px;
     height: 160px;
