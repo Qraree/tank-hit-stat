@@ -11,6 +11,7 @@
     <div class="test-wrapper">
         <div class="parameter-list">
             <div class="parameters">
+                <div class="info-tip">?</div>
                 <section class="parameter-section">
                     <label for="standard-deviation">
                         Среднеквадратическое отклонение, мм
@@ -61,25 +62,26 @@
         <div class="target-div-wrapper">
                 <div class="buttons">
                     <div>
-                        <label for="file-input" class="upload_label">
+                        <label for="file-input" class="upload_label side-button">
                             Загрузить фото
                             <input type="file" id="file-input">
                         </label>
-                        <button class="download-armor">Сохранить броню</button>
-                        <label for="upload-armor" class="upload_label">
+                        <button class="download-armor side-button">Сохранить броню</button>
+                        <label for="upload-armor" class="upload_label side-button">
                             Загрузить броню
                             <input type="file" id="upload-armor">
                         </label>
-                        <button class="delete-armor">Удалить броню</button>
-                        <button class="reset">Удалить точки</button>
-                        <button class="grid">Расчёт</button>
-                        <button class="monte-carlo">Монте-Карло</button>
-                        <button class="obstacle">Сгенерировать</button>
-                        <button class="delete-obstacle">Удалить местность</button>
+                        <button class="delete-armor side-button">Удалить всю броню</button>
+                        <button class="delete-last-armor side-button big-side-button">Удалить последнюю броню</button>
+                        <button class="reset side-button">Удалить точки</button>
+                        <button class="grid side-button big-side-button">Аналитический расчёт</button>
+                        <button class="monte-carlo side-button big-side-button">Расчёт по Монте-Карло</button>
+                        <button class="obstacle side-button">Новая местность</button>
+                        <button class="delete-obstacle side-button">Удалить местность</button>
                     </div>
                     <div>
-                        <button class="front">Лобовая броня</button>
-                        <button class="side">Бортовая броня</button>
+                        <button class="front side-button">Лобовая броня</button>
+                        <button class="side side-button">Бортовая броня</button>
                     </div>
                 </div>
 
@@ -228,6 +230,32 @@
             <div id="probability-table">
 
             </div>
+        </div>
+    </div>
+    <div class="overlay hidden">
+        <div class="modal">
+            <p>
+                Программа предназначена для ознакомления с лабораторными работами по эффективности.<br><hr/>
+                1 работа - исследование изменения вероятности поражения танка в зависимости от дистанции и угла поражения.
+                Для проведения расчёта выберете "Аналитический расчёт".<br><hr/>
+                2 работа - исследования изменения вероятности поражения танка в зависимости от театра военных действий (местности),
+                дистанции и угла поражения.<br>
+                Для одиночного расчёта в разделе "Монте-Карло" выберете количество и размер препятствий и нажмите кнопку "Расчёт Монте-Карло". <br>
+                Для проведения симуляции с многочисленными генерациями случайной местности выберете также количество препятствий и количество генераций (Оптимальное количество - в районе 500) и нажмите "Симуляция".
+                По итогу симуляции находится средняя поверхность вероятности поражения.<br>
+                В ходе симуляции будет показана только последняя местность во избежание большой нагрузки на программу.<br><hr>
+            </p>
+            <p>
+                Пара моментов:<br>
+                - Броня сохраняется в файле armor.json в папке программы.<br>
+                - В разделе "Другое" можно посмотреть как работает метод Монте-Карло.<br>
+                - Возможна ошибка с вероятностью больше 1. В таком случае перезугрузите приложение (Ctrl + R),
+                поставьте ту же броню и попробуйте ещё раз.
+            </p>
+            <br>
+            <p>Если вдруг найдете ошибки, будут идеи, комментарии и т.д. - напишите в лс пж</p>
+            <br>
+            <button class="close-modal">Пон</button>
         </div>
     </div>
     <script src="./renderer.js"></script>

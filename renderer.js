@@ -6,6 +6,7 @@ const fs = require('fs');
 const MAIN_COLOR = '#333D79FF';
 const SECONDARY_COLOR = '#FAEBEFFF';
 
+const infoTip = document.querySelector('.info-tip');
 const button = document.querySelector('.drop1');
 const buttonDropHundred = document.querySelector('.drop100');
 const buttonReset = document.querySelector('.reset');
@@ -16,10 +17,12 @@ const sideArmor = document.querySelector('.side');
 const downloadArmor = document.querySelector('.download-armor');
 const uploadArmor = document.querySelector('#upload-armor');
 const deleteArmor = document.querySelector('.delete-armor');
+const deleteLastArmor = document.querySelector('.delete-last-armor');
 const monteCarlo = document.querySelector('.monte-carlo');
 const obstacleButton = document.querySelector('.obstacle');
 const deleteObstacle = document.querySelector('.delete-obstacle');
 const simulation = document.querySelector('#simulation');
+
 
 const loader = document.querySelector('#loader');
 
@@ -91,6 +94,21 @@ const analyticsPlots = document.querySelector('#analytics-plots');
 const otherPlots = document.querySelector('#other-plots');
 
 
+const overlay = document.querySelector('.overlay');
+const closeModal = document.querySelector('.close-modal');
+
+closeModal.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    document.body.style.overflow = 'scroll';
+})
+
+infoTip.addEventListener('click', () => {
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+})
+
+// TABS
+
 const tabsArray = [
     {
         tab: analyticsTab,
@@ -121,7 +139,7 @@ const changeTab = (tab_value) => {
 }
 
 
-// TABS
+
 
 analyticsTab.addEventListener('click', () => {
     changeTab(analyticsTab)
@@ -233,7 +251,7 @@ target.addEventListener('mousedown', (e) => {
 let obstacles = [];
 let divStack = [];
 const stack = [];
-const observers = [];
+let observers = [];
 
 deleteArmor.addEventListener('click', () => {
     for (let observer of observers) {
@@ -243,9 +261,11 @@ deleteArmor.addEventListener('click', () => {
         test.removeChild(test.lastChild);
     }
     divStack = [];
+    observers = [];
     armorInfo.innerHTML = '';
     list.replaceChildren();
     uploadArmor.value = '';
+    deleteAllArmorChart(chart);
 
 })
 
@@ -256,21 +276,13 @@ downloadArmor.addEventListener('click', () => {
 
     const json = JSON.stringify(obj);
     fs.writeFile('armor.json', json, 'utf-8', () => {
-
-        downloadArmor.style.backgroundColor = 'rgba(33,247,59,0.71)'
-
-        setTimeout(() => {
-            downloadArmor.style.backgroundColor = '#333D79FF'
-        }, 1000)
-
+        alert('Броня была сохранена в файл armor.json!');
     })
 
 })
 
 
 // todo armor table
-
-
 
 const ctx = document.querySelector('.plot');
 const canvas = ctx.querySelector('#canvas');
@@ -307,6 +319,18 @@ const addData = (chart, label, data) => {
     chart.data.datasets.forEach((dataset) => {
         dataset.data.push(data);
     });
+    chart.update();
+}
+
+const deleteAllArmorChart = (chart) => {
+    chart.data.labels = [];
+    chart.data.datasets = [];
+    chart.update();
+}
+
+const deleteLastArmorChart = (chart) => {
+    chart.data.labels.pop();
+    chart.data.datasets.pop();
     chart.update();
 }
 
@@ -744,6 +768,7 @@ test.addEventListener('click', (e) => {
 
     test.appendChild(content)
 
+
 })
 
 
@@ -923,12 +948,13 @@ const generateObstacle = () => {
     obstacles.push({
         index: obstacles.length,
         height: windowHeight,
-        width: 75,
+        width: widthRandom,
         top: 0,
         left: leftRandom,
     })
 
     obstacleWrapper.appendChild(obstacle);
+    console.log(obstacles)
 }
 
 const deleteObstacles = () => {
@@ -970,7 +996,6 @@ simulation.addEventListener('click', () => {
 
     for (let i = 0; i < Number(landscapeNumber.value); i++) {
 
-
         deleteObstacles();
 
         if (Number(treeNumber.value) >= 1 && Number(treeNumber.value) < 11) {
@@ -1000,3 +1025,13 @@ simulation.addEventListener('click', () => {
 
 })
 
+
+deleteLastArmor.addEventListener('click', () => {
+    observers[observers.length - 1].disconnect();
+    observers.pop();
+    test.removeChild(test.lastChild);
+    divStack.pop();
+    list.removeChild(list.lastChild);
+    uploadArmor.value = '';
+    deleteLastArmorChart(chart);
+})

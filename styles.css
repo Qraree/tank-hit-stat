@@ -6,6 +6,11 @@ body {
     background-color: #FAEBEFFF;
     padding: 10px;
     font-family: "Segoe UI", serif;
+    position: relative;
+}
+
+.body-hide {
+    overflow: hidden;
 }
 
 h1 {
@@ -155,6 +160,7 @@ h3 {
     height: 500px;
 }
 
+
 .console {
     background-color: white;
     color: var(--main-bg-color);
@@ -187,12 +193,13 @@ button, .upload_label {
 
     border: 0;
     color: white;
-    height: 30px;
-    min-width: 130px;
+    min-height: 30px;
+    width: 135px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    overflow: hidden;
     font-family: Arial;
 }
 
@@ -553,6 +560,7 @@ button:hover, .upload_label:hover {
     color: white;
     font-weight: bold;
     font-size: 18px;
+    position: relative;
 }
 
 .parameter-section {
@@ -638,7 +646,7 @@ label {
     background-color: rgba(147, 28, 12, 0.66);
     position: absolute;
     width: 75px;
-    z-index: 10000;
+    z-index: 9999;
 }
 
 .obstacle-wrapper {
@@ -663,4 +671,82 @@ label {
 .plot-wrapper {
     display: flex;
     flex-direction: row;
+}
+
+.info-tip {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    width: 15px;
+    height: 15px;
+    background-color: transparent;
+    border: 2px solid white;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    padding: 7px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: 200ms all;
+}
+
+.info-tip:hover {
+    background-color: white;
+    color: var(--main-bg-color);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    z-index: 10000;
+}
+
+.modal {
+    width: 600px;
+    min-height: 250px;
+    background-color: white;
+    border-radius: 5px;
+    padding: 15px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+p {
+    text-align: start;
+    margin: 0;
+}
+
+.close-modal {
+    border-radius: 3px;
+}
+
+.hidden {
+    display: none;
+}
+
+.side-button {
+    border-bottom: 1px solid rgba(89, 86, 86, 0.75);
+    /*padding: 5px 0;*/
+}
+
+.big-side-button {
+    padding: 5px 0;
 }
