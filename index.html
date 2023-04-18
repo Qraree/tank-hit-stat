@@ -12,52 +12,58 @@
         <div class="parameter-list">
             <div class="parameters">
                 <div class="info-tip">?</div>
-                <section class="parameter-section">
+                <section class="parameter-section additional-parameter">
                     <label for="standard-deviation">
-                        Среднеквадратическое отклонение, мм
+                        Среднеквадратическое<br> отклонение, мм
                     </label>
                     <input
                             type="text"
-                            class="parameter"
+                            class="parameter additional-input"
                             id="standard-deviation"
 
                     >
                 </section>
-                <section class="parameter-section">
+                <section class="parameter-section additional-parameter">
                     <label for="armor">Бронепробиваемость, мм</label>
                     <input
                             type="text"
-                            class="parameter"
+                            class="parameter additional-input"
                             id="armor"
 
                     >
                 </section>
-                <section class="parameter-section">
+                <section class="parameter-section additional-parameter">
                     <div class="dimension">
                         <label for="armor">Ширина, мм</label>
                         <div class="dimension-tip" id="width-dimension">!</div>
                     </div>
                     <input
                             type="text"
-                            class="parameter"
+                            class="parameter additional-input"
                             id="width"
 
                     >
                 </section>
-                <section class="parameter-section">
+                <section class="parameter-section additional-parameter">
                     <div class="dimension">
                         <label for="armor">Высота, мм</label>
                         <div class="dimension-tip" id="height-dimension">!</div>
                     </div>
                     <input
                             type="text"
-                            class="parameter"
+                            class="parameter additional-input"
                             id="height"
 
                     >
                 </section>
+                <button class="console">Подтвердить</button>
+                <div class="warn-tip" id="size-alert">
+                    Проверьте корректность введённых габаритов!
+                </div>
+                <div class="warn-tip" id="armor-alert">
+                    Броня была сохранена в файл armor.json!
+                </div>
             </div>
-            <button class="console">Подтвердить</button>
         </div>
         <div class="target-div-wrapper">
                 <div class="buttons">
@@ -134,72 +140,109 @@
         </div>
         <div class="plots" id="monte-carlo-plots">
             <div class="additional-parameters">
-                <div class="parameters">
-                    <section class="parameter-section">
+                <div class="parameters add-param">
+                    <section class="parameter-section additional-parameter">
                         <label for="tree-number">
-                            Количество деревьев
+                            Количество деревьев (1-10)
                         </label>
                         <input
                                 type="number"
-                                class="parameter"
+                                class="parameter additional-input"
                                 id="tree-number"
                                 min="1"
                                 max="10"
 
                         >
                     </section>
-                    <section class="parameter-section">
+                    <section class="parameter-section additional-parameter">
                         <label for="tree-mean">
                             Средний диаметр дерева, мм
                         </label>
                         <input
                                 type="number"
-                                class="parameter"
+                                class="parameter additional-input"
                                 id="tree-mean"
                                 min="1"
 
 
                         >
                     </section>
-                    <section class="parameter-section">
+                    <section class="parameter-section additional-parameter">
                         <label for="tree-std">
                             Среднеквадратическое отклонени диаметра дерева, мм
                         </label>
                         <input
                                 type="number"
-                                class="parameter"
+                                class="parameter additional-input"
                                 id="tree-std"
                                 min="1"
-
-
                         >
                     </section>
                     <hr/>
-                    <h3>Симуляция Монте-Карло</h3>
-                    <section class="parameter-section">
+                    <section class="parameter-section additional-parameter">
+                        <label for="rock-number">Количество камней (1-10)</label>
+                        <input
+                                type="text"
+                                class="parameter additional-input"
+                                id="rock-number"
+                        >
+                    </section>
+                    <div class="rock-parameters-grid">
+                        <section class="parameter-section additional-parameter">
+                            <label for="rock-mean-width">Средняя ширина</label>
+                            <input
+                                    type="text"
+                                    class="parameter additional-input mini-input"
+                                    id="rock-mean-width"
+
+                            >
+                        </section>
+                        <section class="parameter-section additional-parameter">
+                            <label for="rock-mean-height">Средняя высота</label>
+                            <input
+                                    type="text"
+                                    class="parameter additional-input mini-input"
+                                    id="rock-mean-height"
+
+                            >
+                        </section>
+                        <section class="parameter-section additional-parameter">
+                            <label for="rock-std-width">с.к.о. ширины</label>
+                            <input
+                                    type="text"
+                                    class="parameter additional-input mini-input"
+                                    id="rock-std-width"
+
+                            >
+                        </section>
+                        <section class="parameter-section additional-parameter">
+                            <label for="rock-std-height">с.к.о. высоты</label>
+                            <input
+                                    type="text"
+                                    class="parameter additional-input mini-input"
+                                    id="rock-std-height"
+
+                            >
+                        </section>
+                    </div>
+                    <hr/>
+                    <section class="parameter-section additional-parameter">
                         <label for="landscape-number">
                             Количество генераций ландшафта
                         </label>
                         <input
                                 type="number"
-                                class="parameter"
+                                class="parameter additional-input"
                                 id="landscape-number"
                                 min="1"
 
 
                         >
                     </section>
-                    <button id="simulation">Симуляция</button>
-                    <span id="loader">Загрузка...</span>
-<!--                    <section class="rock-number">-->
-<!--                        <label for="armor">Количество камней</label>-->
-<!--                        <input-->
-<!--                                type="text"-->
-<!--                                class="parameter"-->
-<!--                                id="rock-number"-->
-
-<!--                        >-->
-<!--                    </section>-->
+                    <div class="start-simulation">
+                        <button id="simulation">Симуляция</button>
+                        <span id="loader">Загрузка...</span>
+                    </div>
                 </div>
             </div>
             <div class="target-div" id="monte-carlo-3d">
@@ -242,11 +285,11 @@
                 дистанции и угла поражения.<br>
                 Для одиночного расчёта в разделе "Монте-Карло" выберете количество и размер препятствий и нажмите кнопку "Расчёт Монте-Карло". <br>
                 Для проведения симуляции с многочисленными генерациями случайной местности выберете также количество препятствий и количество генераций (Оптимальное количество - в районе 500) и нажмите "Симуляция".
-                По итогу симуляции находится средняя поверхность вероятности поражения.<br>
-                В ходе симуляции будет показана только последняя местность во избежание большой нагрузки на программу.<br><hr>
+                По итогу симуляции находится средняя поверхность вероятности поражения.<br><hr>
             </p>
             <p>
                 Пара моментов:<br>
+                - Если после загрузки фото танка окно увеличилось по высоте, то проверьте корректность введённых габаритов.<br>
                 - Броня сохраняется в файле armor.json в папке программы.<br>
                 - В разделе "Другое" можно посмотреть как работает метод Монте-Карло.<br>
                 - Возможна ошибка с вероятностью больше 1. В таком случае перезугрузите приложение (Ctrl + R),

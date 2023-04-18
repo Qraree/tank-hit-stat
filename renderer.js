@@ -5,6 +5,8 @@ const fs = require('fs');
 
 const MAIN_COLOR = '#333D79FF';
 const SECONDARY_COLOR = '#FAEBEFFF';
+const TREE_COLOR = `rgba(147, 28, 12, 0.66)`;
+const ROCK_COLOR = `rgba(37, 108, 199, 0.55)`
 
 const infoTip = document.querySelector('.info-tip');
 const button = document.querySelector('.drop1');
@@ -26,7 +28,8 @@ const simulation = document.querySelector('#simulation');
 
 const loader = document.querySelector('#loader');
 
-
+const armorAlert = document.querySelector('#armor-alert');
+const sizeAlert = document.querySelector('#size-alert');
 const widthTip = document.querySelector('#width-dimension');
 const heightTip = document.querySelector('#height-dimension');
 
@@ -64,6 +67,13 @@ const tankHeight = document.querySelector('#height');
 const treeNumber = document.querySelector('#tree-number');
 const treeMean = document.querySelector('#tree-mean');
 const treeStd = document.querySelector('#tree-std');
+
+const rockNumber = document.querySelector('#rock-number');
+const rockMeanHeight = document.querySelector('#rock-mean-height');
+const rockMeanWidth = document.querySelector('#rock-mean-width');
+const rockStdWidth = document.querySelector('#rock-std-width');
+const rockStdHeight = document.querySelector('#rock-std-height');
+
 const landscapeNumber = document.querySelector('#landscape-number');
 
 treeMean.value = 250;
@@ -71,6 +81,12 @@ treeStd.value = 40;
 
 treeNumber.value = 1;
 inputStandardDeviation.value = 200;
+rockNumber.value = 1;
+rockMeanHeight.value = 200;
+rockMeanWidth.value = 250;
+rockStdHeight.value = 30;
+rockStdWidth.value = 20;
+
 inputArmor.value = 200;
 tankWidth.value = 3000;
 tankHeight.value = 2500;
@@ -106,6 +122,11 @@ infoTip.addEventListener('click', () => {
     overlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 })
+
+const OBSTACLE_NAMES = {
+    TREE: 'tree',
+    ROCK: 'rock',
+}
 
 // TABS
 
@@ -183,8 +204,9 @@ frontArmor.addEventListener('click', () => {
 })
 
 sideArmor.addEventListener('click', () => {
-    windowWidth = SIDE_WINDOW_SIZE;
-    testContainer.style.width = `${SIDE_WINDOW_SIZE}px`;
+    const sizeRatio = Number(tankHeight.value) / Number(tankWidth.value);
+    windowWidth = windowHeight / sizeRatio;
+    testContainer.style.width = `${windowHeight / sizeRatio}px`;
 })
 
 
@@ -233,6 +255,22 @@ buttonShow.addEventListener('click', () => {
     divStack.map((armor) => {
         armor['hit'] = Number(inputArmor.value) - Number(armor.thickness) > 0 ? 1 : 0;
     })
+
+    const sizeRatio = Number(tankHeight.value) / Number(tankWidth.value);
+    windowWidth = windowHeight / sizeRatio;
+    testContainer.style.width = `${windowHeight / sizeRatio}px`;
+
+    setTimeout(() => {
+        if (test.clientHeight > windowHeight) {
+            sizeAlert.style.display = 'block';
+        } else {
+            if (sizeAlert.style.display === 'block') {
+                sizeAlert.style.display = 'none';
+            }
+        }
+
+    }, 300)
+
 })
 
 
@@ -276,7 +314,11 @@ downloadArmor.addEventListener('click', () => {
 
     const json = JSON.stringify(obj);
     fs.writeFile('armor.json', json, 'utf-8', () => {
-        alert('Броня была сохранена в файл armor.json!');
+        armorAlert.style.display = 'block';
+
+        setTimeout(() => {
+            armorAlert.style.display = 'none';
+        }, 2000)
     })
 
 })
@@ -471,7 +513,7 @@ const plotResults = (resultArray, threeDimDiv, twoDimDiv) => {
     const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
     const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
 
-    let x_step = windowWidth === 600 ? 30 : 42.5
+    let x_step = windowWidth / 20
     let x = range(0, dot_width, dot_width / x_step);
     let y = range(0, dot_height, dot_height / 25);
 
@@ -931,30 +973,47 @@ const randomInInterval = (max, min=0) => {
     return Math.floor((Math.random() * (max - min)) + min);
 }
 
-const generateObstacle = () => {
+const generateObstacle = (name=OBSTACLE_NAMES.TREE, draw=true) => {
     let obstacle = document.createElement('div');
+    let leftRandom;
+    let widthRandom;
+    let heightRandom;
 
-    const mean = convert_mm_px(Number(treeMean.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
-    const std = convert_mm_px(Number(treeStd.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
-    const leftRandom = randomInInterval(10, windowWidth - 100)
-    const widthRandom = gaussianRandom(mean, std);
+    if (name === OBSTACLE_NAMES.TREE) {
+        const mean = convert_mm_px(Number(treeMean.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
+        const std = convert_mm_px(Number(treeStd.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
+        leftRandom = randomInInterval(10, windowWidth - 100)
+        widthRandom = gaussianRandom(mean, std);
+    } else {
+        const meanWidth = convert_mm_px(Number(rockMeanWidth.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
+        const stdWidth = convert_mm_px(Number(rockStdWidth.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
+        const meanHeight = convert_mm_px(Number(rockMeanHeight.value), tankHeight.value ? tankHeight.value : test.clientHeight, test.clientHeight);
+        const stdHeight = convert_mm_px(Number(rockStdHeight.value), tankHeight.value ? tankHeight.value : test.clientHeight, test.clientHeight)
+        leftRandom = randomInInterval(10, windowWidth - (meanWidth))
+        widthRandom = gaussianRandom(meanWidth, stdWidth);
+        heightRandom = gaussianRandom(meanHeight, stdHeight);
+    }
+
 
     obstacle.className = 'obstacle-content';
     obstacle.style.left = `${leftRandom}px`;
-    obstacle.style.height = `${windowHeight}px`;
     obstacle.style.width = `${widthRandom}px`;
+    obstacle.style.height = name === OBSTACLE_NAMES.TREE ? `${windowHeight}px` : `${heightRandom}px`;
+    obstacle.style.backgroundColor = name === OBSTACLE_NAMES.TREE ? TREE_COLOR : ROCK_COLOR;
+    obstacle.style.top = name === OBSTACLE_NAMES.TREE ? '0' : `${(windowHeight - heightRandom)}px`;
 
 
     obstacles.push({
         index: obstacles.length,
-        height: windowHeight,
+        height: name === OBSTACLE_NAMES.TREE ? windowHeight : heightRandom,
         width: widthRandom,
-        top: 0,
+        top: name === OBSTACLE_NAMES.TREE ? 0 : (windowHeight - heightRandom),
         left: leftRandom,
     })
 
-    obstacleWrapper.appendChild(obstacle);
-    console.log(obstacles)
+    if (draw === true) {
+        obstacleWrapper.appendChild(obstacle);
+    }
 }
 
 const deleteObstacles = () => {
@@ -967,9 +1026,16 @@ obstacleButton.addEventListener('click', (e) => {
 
     if (Number(treeNumber.value) >= 1 && Number(treeNumber.value) < 11) {
         for (let i = 0; i < Number(treeNumber.value); i++) {
-            generateObstacle();
+            generateObstacle(OBSTACLE_NAMES.TREE);
         }
     }
+
+    if (Number(rockNumber.value) >= 1 && Number(rockNumber.value) < 11) {
+        for (let i = 0; i < Number(rockNumber.value); i++) {
+            generateObstacle(OBSTACLE_NAMES.ROCK);
+        }
+    }
+
 })
 
 deleteObstacle.addEventListener('click', () => {
@@ -1000,7 +1066,13 @@ simulation.addEventListener('click', () => {
 
         if (Number(treeNumber.value) >= 1 && Number(treeNumber.value) < 11) {
             for (let k = 0; k < Number(treeNumber.value); k++) {
-                generateObstacle();
+                generateObstacle(OBSTACLE_NAMES.TREE, false);
+            }
+        }
+
+        if (Number(rockNumber.value) >= 1 && Number(rockNumber.value) < 11) {
+            for (let i = 0; i < Number(rockNumber.value); i++) {
+                generateObstacle(OBSTACLE_NAMES.ROCK, false);
             }
         }
 
