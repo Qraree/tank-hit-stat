@@ -799,10 +799,18 @@ p {
     background-color: white;
 }
 
-#size-alert, #armor-alert {
+#size-alert, #armor-alert, #armor-excel-alert {
     display: none;
 }
 
-#armor-alert {
+#armor-alert, #armor-excel-alert{
     color: var(--main-bg-color);
+}
+
+.armor-table-row {
+
+}
+
+.colormap-label {
+    color: white;
 }

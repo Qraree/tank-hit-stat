@@ -2,11 +2,13 @@
 
 const {ipcRenderer} = require('electron');
 const fs = require('fs');
+const xl = require('excel4node');
 
 const MAIN_COLOR = '#333D79FF';
 const SECONDARY_COLOR = '#FAEBEFFF';
 const TREE_COLOR = `rgba(147, 28, 12, 0.66)`;
 const ROCK_COLOR = `rgba(37, 108, 199, 0.55)`
+let PLOT_COLORMAP = 'Viridis';
 
 const infoTip = document.querySelector('.info-tip');
 const button = document.querySelector('.drop1');
@@ -14,8 +16,6 @@ const buttonDropHundred = document.querySelector('.drop100');
 const buttonReset = document.querySelector('.reset');
 const buttonShow = document.querySelector('.console');
 const buttonGrid = document.querySelector('.grid');
-const frontArmor = document.querySelector('.front');
-const sideArmor = document.querySelector('.side');
 const downloadArmor = document.querySelector('.download-armor');
 const uploadArmor = document.querySelector('#upload-armor');
 const deleteArmor = document.querySelector('.delete-armor');
@@ -23,6 +23,7 @@ const deleteLastArmor = document.querySelector('.delete-last-armor');
 const monteCarlo = document.querySelector('.monte-carlo');
 const obstacleButton = document.querySelector('.obstacle');
 const deleteObstacle = document.querySelector('.delete-obstacle');
+const downloadArmorExcel = document.querySelector('.download-armor-excel');
 const simulation = document.querySelector('#simulation');
 
 
@@ -30,11 +31,15 @@ const loader = document.querySelector('#loader');
 
 const armorAlert = document.querySelector('#armor-alert');
 const sizeAlert = document.querySelector('#size-alert');
+const armorExcelAlert = document.querySelector('#armor-excel-alert');
+
 const widthTip = document.querySelector('#width-dimension');
 const heightTip = document.querySelector('#height-dimension');
 
 const monteCarlo3d = document.querySelector('#monte-carlo-3d');
 const monteCarlo2d = document.querySelector('#monte-carlo-2d');
+
+const selectColorMap = document.querySelector('#colormap-select');
 
 const fileInput = document.querySelector('#file-input');
 const preview = document.querySelector('#file-wrapper');
@@ -45,6 +50,7 @@ const targetButton = document.querySelector('.target-button');
 const analyticsTab = document.querySelector('#analytics-mode');
 const monteCarloTab = document.querySelector('#monte-carlo-mode');
 const otherTab = document.querySelector('#other-mode');
+const settingsTab = document.querySelector('#settings-mode');
 
 const obstacleWrapper = document.querySelector('.obstacle-wrapper');
 const test = document.querySelector('.test');
@@ -54,6 +60,7 @@ const testContainer = targetDivWrapper.querySelector('.test-container');
 const list = testWrapper.querySelector('.list');
 const plotlyDiv =  document.querySelector('#plotlyDiv');
 const plotlyDiv2d =  document.querySelector('#plotlyDiv2d');
+// const armorTable = document.querySelector('#armor-table');
 
 const armorInfo = document.querySelector('.armor-info');
 
@@ -108,7 +115,12 @@ let targetDisplay = false;
 const monteCarloPlots = document.querySelector('#monte-carlo-plots');
 const analyticsPlots = document.querySelector('#analytics-plots');
 const otherPlots = document.querySelector('#other-plots');
+const settings = document.querySelector('#settings');
 
+
+selectColorMap.addEventListener('click', (e) => {
+    PLOT_COLORMAP = e.target.value;
+})
 
 const overlay = document.querySelector('.overlay');
 const closeModal = document.querySelector('.close-modal');
@@ -142,6 +154,10 @@ const tabsArray = [
     {
         tab: otherTab,
         plot: otherPlots,
+    },
+    {
+        tab: settingsTab,
+        plot: settings,
     }
 ];
 
@@ -177,6 +193,11 @@ otherTab.addEventListener('click', () => {
     target.style.display = 'flex';
 })
 
+settingsTab.addEventListener('click', () => {
+    changeTab(settingsTab);
+    target.style.display = 'none';
+})
+
 
 
 
@@ -197,17 +218,6 @@ heightTip.addEventListener('mouseleave', () => {
     testContainer.style.borderLeftColor = '#333D79FF';
 })
 
-
-frontArmor.addEventListener('click', () => {
-    windowWidth = FRONT_WINDOW_SIZE;
-    testContainer.style.width = `${FRONT_WINDOW_SIZE}px`;
-})
-
-sideArmor.addEventListener('click', () => {
-    const sizeRatio = Number(tankHeight.value) / Number(tankWidth.value);
-    windowWidth = windowHeight / sizeRatio;
-    testContainer.style.width = `${windowHeight / sizeRatio}px`;
-})
 
 
 targetButton.addEventListener('click', () => {
@@ -290,6 +300,33 @@ let obstacles = [];
 let divStack = [];
 const stack = [];
 let observers = [];
+
+downloadArmorExcel.addEventListener('click', () => {
+    const divStackList = ["x_left_mm", "x_right_mm", "y_top_mm", "y_bottom_mm", "thickness"];
+
+    const wb = new xl.Workbook();
+    const ws = wb.addWorksheet('Sheet 1');
+
+    ws.cell(1,1).string('X-Лев');
+    ws.cell(1,2).string('X-Прав');
+    ws.cell(1,3).string('Y-Вверх');
+    ws.cell(1,4).string('Y-Низ');
+    ws.cell(1,5).string('Толщина');
+
+    for (let i = 0; i < divStack.length; i++) {
+        for (let j = 0; j < 5; j++) {
+            ws.cell(i+2, j+1).number(divStack[i][divStackList[j]])
+        }
+    }
+
+    wb.write('armor_excel.xlsx', () => {
+        armorExcelAlert.style.display = 'block';
+
+        setTimeout(() => {
+            armorExcelAlert.style.display = 'none';
+        }, 2000)
+    });
+})
 
 deleteArmor.addEventListener('click', () => {
     for (let observer of observers) {
@@ -552,14 +589,15 @@ const plotResults = (resultArray, threeDimDiv, twoDimDiv) => {
             x: x,
             y: y,
             type: 'heatmap',
-            hoverongaps: false
+            hoverongaps: false,
+            colorscale: PLOT_COLORMAP,
         }
     ];
 
 
     Plotly.newPlot(twoDimDiv, data2d, layout2d, {displayModeBar: false});
 
-    const data_z = {x: x, y:y, z: z, opacity:1, type: 'surface'};
+    const data_z = {x: x, y:y, z: z, opacity:1, type: 'surface', colorscale: PLOT_COLORMAP};
     Plotly.newPlot(threeDimDiv, [data_z], layout);
 }
 
@@ -577,7 +615,7 @@ const analyticComputation = () => {
 
 let myWorker;
 
-const monteCarloComputation = (simulation = false) => {
+const monteCarloComputation = () => {
 
     myWorker = new Worker("worker.js");
      const [front_x_dots, front_y_dots] = makeDotGrid();
@@ -670,6 +708,15 @@ function dragElement(elmnt) {
             let index = Array.prototype.indexOf.call(parent.children, elmnt);
             divStack[index].top = elmnt.offsetTop - pos2;
             divStack[index].left = elmnt.offsetLeft - pos1;
+            divStack[index].right = (elmnt.offsetLeft - pos1) + divStack[index].width;
+            divStack[index].bottom = (elmnt.offsetTop - pos2) + divStack[index].height;
+
+            divStack[index].x_left_mm = convert_px_to_mm(elmnt.offsetLeft - pos1, true);
+            divStack[index].x_right_mm = convert_px_to_mm(elmnt.offsetLeft - pos1, true) +
+                convert_px_distance_to_mm(divStack[index].width, true);
+            divStack[index].y_top_mm = convert_px_to_mm(elmnt.offsetTop - pos2, false);
+            divStack[index].y_bottom_mm = convert_px_to_mm(elmnt.offsetTop - pos2, false) -
+                convert_px_distance_to_mm(divStack[index].height, false)
         }
     }
 
@@ -679,7 +726,28 @@ function dragElement(elmnt) {
     }
 }
 
+const convert_px_to_mm = (px, left=true) => {
+    let mmSize;
 
+    if (left) {
+        mmSize = (px / windowWidth) * Number(tankWidth.value);
+    } else {
+        mmSize = Number(tankHeight.value) - ((px / windowHeight) * Number(tankHeight.value));
+    }
+
+    return mmSize
+}
+
+const convert_px_distance_to_mm = (px, left=true) => {
+    let mmDistance;
+
+    if (left) {
+        mmDistance = (px * Number(tankWidth.value)) / windowWidth;
+    } else {
+        mmDistance = (px * Number(tankHeight.value)) / windowHeight;
+    }
+    return mmDistance;
+}
 
 test.addEventListener('click', (e) => {
     let content = document.createElement('div');
@@ -715,7 +783,12 @@ test.addEventListener('click', (e) => {
         width: 200,
         top: e.offsetY,
         left: e.offsetX,
+        x_left_mm: convert_px_to_mm(e.offsetX, true),
+        x_right_mm: convert_px_to_mm(e.offsetX, true) + convert_px_distance_to_mm(200, true),
+        y_top_mm: convert_px_to_mm(e.offsetY, false),
+        y_bottom_mm: convert_px_to_mm(e.offsetY, false) - convert_px_distance_to_mm(100, false),
     })
+
 
     showArmorInfo(divStack[divStack.length - 1])
 
@@ -749,6 +822,10 @@ test.addEventListener('click', (e) => {
     })
 
     list.appendChild(listItem)
+
+    // const armorTableRow = document.createElement('div');
+    // armorTableRow.classList.add('')
+
 
 
     contentValue.addEventListener('click', () => {
@@ -797,6 +874,8 @@ test.addEventListener('click', (e) => {
         divStack[index].width = content.offsetWidth;
         divStack[index].bottom = content.offsetHeight + divStack[index].top;
         divStack[index].right = divStack[index].left + content.offsetWidth;
+        divStack[index].x_right_mm = divStack[index].x_left_mm + convert_px_distance_to_mm(content.offsetWidth, true);
+        divStack[index].y_bottom_mm = divStack[index].y_top_mm - convert_px_distance_to_mm(content.offsetHeight, false);
     });
 
 
@@ -809,7 +888,7 @@ test.addEventListener('click', (e) => {
     })
 
     test.appendChild(content)
-
+    console.log(divStack);
 
 })
 
@@ -827,6 +906,10 @@ const addContent = (armor) => {
         width: armor.width,
         top: armor.top,
         left: armor.left,
+        x_left_mm: convert_px_to_mm(armor.left, true),
+        x_right_mm: convert_px_to_mm(armor.left, true) + convert_px_distance_to_mm(armor.width, true),
+        y_top_mm: convert_px_to_mm(armor.top, false),
+        y_bottom_mm: convert_px_to_mm(armor.top, false) - convert_px_distance_to_mm(armor.height, false)
     })
 
     addData(chart, `delta_${divStack.length}`, 0)
@@ -942,6 +1025,9 @@ const addContent = (armor) => {
         divStack[index].width = content.offsetWidth;
         divStack[index].bottom = content.offsetHeight + divStack[index].top;
         divStack[index].right = divStack[index].left + content.offsetWidth;
+
+        divStack[index].x_right_mm = divStack[index].x_left_mm + convert_px_distance_to_mm(content.offsetWidth, true);
+        divStack[index].y_bottom_mm = divStack[index].y_top_mm - convert_px_distance_to_mm(content.offsetHeight, false);
     });
 
 

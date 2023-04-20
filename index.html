@@ -63,6 +63,9 @@
                 <div class="warn-tip" id="armor-alert">
                     Броня была сохранена в файл armor.json!
                 </div>
+                <div class="warn-tip" id="armor-excel-alert">
+                    Броня была сохранена в файл armor_excel.xlsx!
+                </div>
             </div>
         </div>
         <div class="target-div-wrapper">
@@ -86,8 +89,7 @@
                         <button class="delete-obstacle side-button">Удалить местность</button>
                     </div>
                     <div>
-                        <button class="front side-button">Лобовая броня</button>
-                        <button class="side side-button">Бортовая броня</button>
+                        <button class="download-armor-excel side-button big-side-button">Скачать броню в excel</button>
                     </div>
                 </div>
 
@@ -122,6 +124,7 @@
         <button class="tab" id="analytics-mode">Аналитический метод</button>
         <button class="tab" id="monte-carlo-mode">Метод Монте-Карло</button>
         <button class="tab" id="other-mode">Другое</button>
+        <button class="tab" id="settings-mode">Настройки</button>
     </div>
     <div class="stat">
         <div class="plots" id="analytics-plots">
@@ -133,6 +136,14 @@
                 <div class="target-div" id="plotlyDiv2d">
 
                 </div>
+<!--                <div id="armor-table">-->
+<!--                    <div class="armor-table-row">-->
+<!--                        <div class="armor-table-cell">1270</div>-->
+<!--                        <div class="armor-table-cell">1170</div>-->
+<!--                        <div class="armor-table-cell"></div>-->
+<!--                        <div class="armor-table-cell"></div>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
             <div class="tip">
                 * В аналитическом методе препятствия не учитываются
@@ -235,8 +246,6 @@
                                 class="parameter additional-input"
                                 id="landscape-number"
                                 min="1"
-
-
                         >
                     </section>
                     <div class="start-simulation">
@@ -272,6 +281,28 @@
             </div>
             <div id="probability-table">
 
+            </div>
+        </div>
+        <div id="settings">
+            <div class="colormap-section">
+                <span class="colormap-label">Выберете расцветку графиков</span>
+                <select name="select" id="colormap-select">
+                    <!--Supplement an id here instead of using 'name'-->
+                    <option value="Viridis" selected>Viridis</option>
+                    <option value="YlOrRd">YlOrRd</option>
+                    <option value="YlGnBu">YlGnBu</option>
+                    <option value="RdBu">RdBu</option>
+                    <option value="Portland">Portland</option>
+                    <option value="Picnic">Picnic</option>
+                    <option value="Jet">Jet</option>
+                    <option value="Hot">Hot</option>
+                    <option value="Greys">Greys</option>
+                    <option value="Greens">Greens</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Earth">Earth</option>
+                    <option value="Bluered">Bluered</option>
+                    <option value="Blackbody">Blackbody</option>
+                </select>
             </div>
         </div>
     </div>
