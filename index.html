@@ -232,7 +232,6 @@
                                     type="text"
                                     class="parameter additional-input mini-input"
                                     id="rock-std-height"
-
                             >
                         </section>
                     </div>
@@ -283,26 +282,58 @@
 
             </div>
         </div>
-        <div id="settings">
-            <div class="colormap-section">
-                <span class="colormap-label">Выберете расцветку графиков</span>
-                <select name="select" id="colormap-select">
-                    <!--Supplement an id here instead of using 'name'-->
-                    <option value="Viridis" selected>Viridis</option>
-                    <option value="YlOrRd">YlOrRd</option>
-                    <option value="YlGnBu">YlGnBu</option>
-                    <option value="RdBu">RdBu</option>
-                    <option value="Portland">Portland</option>
-                    <option value="Picnic">Picnic</option>
-                    <option value="Jet">Jet</option>
-                    <option value="Hot">Hot</option>
-                    <option value="Greys">Greys</option>
-                    <option value="Greens">Greens</option>
-                    <option value="Electric">Electric</option>
-                    <option value="Earth">Earth</option>
-                    <option value="Bluered">Bluered</option>
-                    <option value="Blackbody">Blackbody</option>
-                </select>
+        <div class="plots" id="settings">
+            <div class="settings-wrapper">
+                <div>
+                    <div class="colormap-section">
+                        <span class="colormap-label">Выберете расцветку графиков</span>
+                        <select name="select" id="colormap-select">
+                            <!--Supplement an id here instead of using 'name'-->
+                            <option value="Viridis">Viridis</option>
+                            <option value="YlOrRd">YlOrRd</option>
+                            <option value="YlGnBu">YlGnBu</option>
+                            <option value="RdBu" selected>RdBu</option>
+                            <option value="Portland">Portland</option>
+                            <option value="Picnic">Picnic</option>
+                            <option value="Jet">Jet</option>
+                            <option value="Hot">Hot</option>
+                            <option value="Greys">Greys</option>
+                            <option value="Greens">Greens</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Earth">Earth</option>
+                            <option value="Bluered">Bluered</option>
+                            <option value="Blackbody">Blackbody</option>
+                        </select>
+                    </div>
+                    <div class="colormap-plot">
+
+                    </div>
+                </div>
+                <div class="title-name-section">
+                    <section class="parameter-section additional-parameter">
+                        <label for="PlotName3d">Заголовок трехмерного графика</label>
+                        <textarea
+                                class="text-area"
+                                id="PlotName3d"
+                                cols="80"
+                                rows="5"
+                        >
+
+                        </textarea>
+                    </section>
+                    <section class="parameter-section additional-parameter">
+                        <label for="PlotName2d">Заголовок двумерного графика</label>
+                        <textarea
+                                class="text-area"
+                                id="PlotName2d"
+                                cols="80"
+                                rows="5"
+                        >
+
+                        </textarea>
+                    </section>
+                    <p>*Для переноса строки в названии графика вставьте в место переноса <<span>br</span>> </p>
+                </div>
             </div>
         </div>
     </div>
@@ -311,11 +342,11 @@
             <p>
                 Программа предназначена для ознакомления с лабораторными работами по эффективности.<br><hr/>
                 1 работа - исследование изменения вероятности поражения танка в зависимости от дистанции и угла поражения.
-                Для проведения расчёта выберете "Аналитический расчёт".<br><hr/>
+                Для проведения расчёта выберите "Аналитический расчёт".<br><hr/>
                 2 работа - исследования изменения вероятности поражения танка в зависимости от театра военных действий (местности),
                 дистанции и угла поражения.<br>
-                Для одиночного расчёта в разделе "Монте-Карло" выберете количество и размер препятствий и нажмите кнопку "Расчёт Монте-Карло". <br>
-                Для проведения симуляции с многочисленными генерациями случайной местности выберете также количество препятствий и количество генераций (Оптимальное количество - в районе 500) и нажмите "Симуляция".
+                Для одиночного расчёта в разделе "Монте-Карло" выберите количество и размер препятствий и нажмите кнопку "Расчёт Монте-Карло". <br>
+                Для проведения симуляции с многочисленными генерациями случайной местности выберите также количество препятствий и количество генераций (Оптимальное количество - в районе 500) и нажмите "Симуляция".
                 По итогу симуляции находится средняя поверхность вероятности поражения.<br><hr>
             </p>
             <p>

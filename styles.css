@@ -64,6 +64,12 @@ h1 {
     flex-direction: row;
 }
 
+#settings {
+    display: none;
+    flex-direction: column;
+}
+
+
 .dimension-tip:hover {
     background-color: #b7b6b6;
 }
@@ -588,6 +594,7 @@ button:hover, .upload_label:hover {
 
 label {
     margin-bottom: 10px;
+    color: white;
 }
 
 .parameter {
@@ -813,4 +820,30 @@ p {
 
 .colormap-label {
     color: white;
+}
+
+.settings-wrapper {
+    display: flex;
+    flex-direction: row;
+    color: white;
+}
+
+
+
+.title-name-section {
+    margin-top: 10px;
+    font-family: "Segoe UI", serif;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    margin-left: 15px;
+}
+
+.colormap-plot {
+    width: 400px;
+    height: 400px;
+}
+
+.colormap-section {
+    margin-bottom: 10px;
 }
