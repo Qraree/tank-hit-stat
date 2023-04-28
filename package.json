@@ -23,6 +23,7 @@
   "dependencies": {
     "chart.js": "^4.2.1",
     "excel4node": "^1.8.1",
+    "grapick": "^0.1.13",
     "plotly.js-dist-min": "^2.21.0"
   }
 }

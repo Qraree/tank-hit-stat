@@ -847,3 +847,7 @@ p {
 .colormap-section {
     margin-bottom: 10px;
 }
+
+#gradient-picker {
+    margin-bottom: 30px;
+}

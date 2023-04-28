@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="grapick.min.css">
     <link rel="stylesheet" href="styles.css" >
+    <script src="grapick.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.18.2.min.js"></script>
     <title>A193</title>
@@ -286,9 +288,18 @@
             <div class="settings-wrapper">
                 <div>
                     <div class="colormap-section">
+                        <div>
+                            <span>Строить при расчёте сетку точек</span>
+                            <input type="checkbox" name="dots-checkbox" id="dots-checkbox">
+                        </div>
+                        <div>
+                            <span>Фиксированная цветовая шкала вероятности</span>
+                            <input type="checkbox" name="color-checkbox" id="color-checkbox" checked>
+                        </div>
                         <span class="colormap-label">Выберете расцветку графиков</span>
                         <select name="select" id="colormap-select">
                             <!--Supplement an id here instead of using 'name'-->
+                            <option value="gradient">Свой градиент</option>
                             <option value="Viridis">Viridis</option>
                             <option value="YlOrRd">YlOrRd</option>
                             <option value="YlGnBu">YlGnBu</option>
@@ -310,6 +321,9 @@
                     </div>
                 </div>
                 <div class="title-name-section">
+                    <div id="gradient-picker">
+
+                    </div>
                     <section class="parameter-section additional-parameter">
                         <label for="PlotName3d">Заголовок трехмерного графика</label>
                         <textarea
