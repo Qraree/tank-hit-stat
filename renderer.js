@@ -40,6 +40,9 @@ let autoResizeColorBar = false;
 const dotsCheckBox = document.querySelector('#dots-checkbox');
 let drawDots = false;
 
+const scaleCheckBox = document.querySelector('#scale-checkbox');
+let fixedProbabilityScale = true;
+
 
 const loader = document.querySelector('#loader');
 
@@ -310,13 +313,6 @@ ipcRenderer.on('photo-processed', (event, photo) => {
 })
 
 buttonShow.addEventListener('click', () => {
-    standardDeviation = convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
-
-    targetSigma1.style.width = `${Number(standardDeviation) * 2}px`
-    targetSigma1.style.height = `${Number(standardDeviation) * 2}px`
-
-    targetSigma2.style.width = `${Number(standardDeviation) * 3}px`
-    targetSigma2.style.height = `${Number(standardDeviation) * 3}px`
 
     divStack.map((armor) => {
         armor['hit'] = Number(inputArmor.value) - Number(armor.thickness) > 0 ? 1 : 0;
@@ -334,6 +330,8 @@ buttonShow.addEventListener('click', () => {
                 sizeAlert.style.display = 'none';
             }
         }
+
+        standardDeviation = convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
 
     }, 300)
 
@@ -618,7 +616,7 @@ const plotResults = (resultArray, threeDimDiv, twoDimDiv) => {
         scene: {
             zaxis: {
                 title: 'P',
-                range: [0, 1],
+                range: fixedProbabilityScale ? [0, 1] : 'none',
             },
             camera: {
                 eye: {
@@ -637,7 +635,7 @@ const plotResults = (resultArray, threeDimDiv, twoDimDiv) => {
 
 
     let layout2d = {
-        title: PLOT_TITLE_2D
+        title: PLOT_TITLE_2D,
     }
 
     let data2d = [
@@ -1328,6 +1326,9 @@ gp.on('change', complete => {
     throttleColorStack();
 })
 
+scaleCheckBox.addEventListener('change', (e) => {
+    fixedProbabilityScale = e.target.checked;
+})
 
 colorCheckBox.addEventListener('change', (e) => {
     autoResizeColorBar = !e.target.checked;
@@ -1368,10 +1369,6 @@ const handleGradientUpload = (e) => {
     for (let i = 1; i < gradient.length - 1; i++) {
         gp.addHandler(gradient[i][0]*100, gradient[i][1])
     }
-
-
-
-
 
 }
 
