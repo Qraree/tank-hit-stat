@@ -59,6 +59,9 @@
                     >
                 </section>
                 <button class="console">Подтвердить</button>
+                <div class="warn-tip" id="gradient-alert">
+                    Градиент был сохранен в файл gradient.json!
+                </div>
                 <div class="warn-tip" id="size-alert">
                     Проверьте корректность введённых габаритов!
                 </div>
@@ -138,14 +141,6 @@
                 <div class="target-div" id="plotlyDiv2d">
 
                 </div>
-<!--                <div id="armor-table">-->
-<!--                    <div class="armor-table-row">-->
-<!--                        <div class="armor-table-cell">1270</div>-->
-<!--                        <div class="armor-table-cell">1170</div>-->
-<!--                        <div class="armor-table-cell"></div>-->
-<!--                        <div class="armor-table-cell"></div>-->
-<!--                    </div>-->
-<!--                </div>-->
             </div>
             <div class="tip">
                 * В аналитическом методе препятствия не учитываются
@@ -321,6 +316,15 @@
                     </div>
                 </div>
                 <div class="title-name-section">
+                    <div id="gradient-buttons">
+                        <button class="gradient-button" id="save-gradient">
+                            Сохранить градиент
+                        </button>
+                        <label for="upload-gradient" class="upload_label gradient-button" id="upload-gradient-label">
+                            Загрузить градиент
+                            <input type="file" id="upload-gradient">
+                        </label>
+                    </div>
                     <div id="gradient-picker">
 
                     </div>

@@ -43,6 +43,7 @@ let drawDots = false;
 
 const loader = document.querySelector('#loader');
 
+const gradientAlert = document.querySelector('#gradient-alert');
 const armorAlert = document.querySelector('#armor-alert');
 const sizeAlert = document.querySelector('#size-alert');
 const armorExcelAlert = document.querySelector('#armor-excel-alert');
@@ -78,7 +79,9 @@ const plotlyDiv2d =  document.querySelector('#plotlyDiv2d');
 
 const armorInfo = document.querySelector('.armor-info');
 
-
+const gradientPicker = document.querySelector('#gradient-picker');
+const saveGradient = document.querySelector('#save-gradient');
+const uploadGradient = document.querySelector('#upload-gradient');
 
 const inputStandardDeviation = document.querySelector('#standard-deviation');
 const inputArmor = document.querySelector('#armor');
@@ -1277,12 +1280,11 @@ function throttle(callee, timeout) {
 }
 
 const parseColorString = (str) => {
-    console.log(str.split(','))
 }
 
 let percentageColorStack = [0, 100];
 
-const gradientPicker = document.querySelector('#gradient-picker');
+
 const gp = new Grapick({el: gradientPicker});
 
 gp.addHandler(0, 'red');
@@ -1299,20 +1301,15 @@ const normalizeColor = (value) => {
 }
 
 const showColorStack = () => {
-    console.log(gp.getColorValue())
     const newPercentageArray = gp.getColorValue().match(/(\d*)%/g);
     percentageColorStack = newPercentageArray.map((e) => normalizeColor(Number(e.replace('%', ''))));
     const newStr = gp.getColorValue().replace(/\d+%/g, '');
-    console.log(newStr);
     colorStack = newStr.match(/([a-z]+) | (rgba*\(\d*,\s\d*.\s\d*,\s*\d*\)) | (#\w*)/g)
-    console.log(colorStack)
 
     summuryColorStack = [];
-    // summuryColorStack.push([0.0, colorStack[0]])
     for (let i = 0; i < colorStack.length; i++) {
         summuryColorStack.push([percentageColorStack[i], colorStack[i]]);
     }
-    // summuryColorStack.push([1, colorStack[colorStack.length - 1]]);
 
     const colorMapData = [{
         z: z_colormap,
@@ -1323,16 +1320,12 @@ const showColorStack = () => {
     Plotly.newPlot(colorMapPlot, colorMapData, colorMaplayout);
 
     console.log(summuryColorStack)
-    // console.log(colorStack);
 }
 
 const throttleColorStack = throttle(showColorStack, 1000)
 
 gp.on('change', complete => {
     throttleColorStack();
-    // gp.getHandler(0).setPosition(0).setColor('red');
-    // console.log(gp.getHandler(1));
-    // gp.getHandler(3).setPosition(100).setColor('blue');
 })
 
 
@@ -1344,4 +1337,46 @@ dotsCheckBox.addEventListener('change', (e) => {
     drawDots = e.target.checked;
 })
 
-//todo color bug
+saveGradient.addEventListener('click', () => {
+    const gradientJson = {
+        gradient: summuryColorStack
+    }
+
+    const json = JSON.stringify(gradientJson);
+
+    fs.writeFile('gradient.json', json, 'utf-8', () => {
+        gradientAlert.style.display = 'block';
+
+        setTimeout(() => {
+            gradientAlert.style.display = 'none';
+        }, 2000)
+    })
+})
+
+const handleGradientUpload = (e) => {
+    const obj = JSON.parse(e.target.result);
+    const gradient = obj.gradient;
+    gp.clear();
+    console.log(gradient);
+
+    gp.addHandler(0, 'blue');
+    gp.addHandler(100, 'red');
+
+    gp.getHandler(0).getEl().style.opacity = '0';
+    gp.getHandler(1).getEl().style.opacity = '0';
+
+    for (let i = 1; i < gradient.length - 1; i++) {
+        gp.addHandler(gradient[i][0]*100, gradient[i][1])
+    }
+
+
+
+
+
+}
+
+uploadGradient.addEventListener('change', (e) => {
+    const reader = new FileReader();
+    reader.onload = handleGradientUpload;
+    reader.readAsText(e.target.files[0]);
+})

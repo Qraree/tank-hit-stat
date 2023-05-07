@@ -23,7 +23,7 @@ h1 {
     display: none;
 }
 
-#upload-armor {
+#upload-armor, #upload-gradient {
     display: none;
 }
 
@@ -201,6 +201,10 @@ h3 {
     border-radius: 5px;
     display: flex;
     flex-direction: row;
+}
+
+#upload-gradient-label {
+    font-weight: normal;
 }
 
 button, .upload_label {
@@ -806,11 +810,13 @@ p {
     background-color: white;
 }
 
-#size-alert, #armor-alert, #armor-excel-alert {
+
+
+#size-alert, #armor-alert, #armor-excel-alert, #gradient-alert {
     display: none;
 }
 
-#armor-alert, #armor-excel-alert{
+#armor-alert, #armor-excel-alert, #gradient-alert{
     color: var(--main-bg-color);
 }
 
@@ -850,4 +856,24 @@ p {
 
 #gradient-picker {
     margin-bottom: 30px;
+}
+
+#gradient-buttons {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 25px;
+}
+
+.gradient-button {
+    background-color: white;
+    color: var(--main-bg-color);
+    border-radius: 3px;
+    margin-right: 20px;
+    padding: 0 3px;
+    width: auto;
+    transition: 200ms all;
+}
+
+.gradient-button:hover {
+    background-color: #b7b6b6;
 }
