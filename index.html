@@ -7,6 +7,8 @@
     <script src="grapick.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.18.2.min.js"></script>
+    <link href="tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="tabulator.min.js"></script>
     <title>A193</title>
 </head>
 <body>
@@ -128,6 +130,7 @@
     <div class="tabs">
         <button class="tab" id="analytics-mode">Аналитический метод</button>
         <button class="tab" id="monte-carlo-mode">Метод Монте-Карло</button>
+        <button class="tab" id="battle-mode">Бой</button>
         <button class="tab" id="other-mode">Другое</button>
         <button class="tab" id="settings-mode">Настройки</button>
     </div>
@@ -190,7 +193,7 @@
                     <section class="parameter-section additional-parameter">
                         <label for="rock-number">Количество камней (1-10)</label>
                         <input
-                                type="text"
+                                type="number"
                                 class="parameter additional-input"
                                 id="rock-number"
                         >
@@ -199,7 +202,7 @@
                         <section class="parameter-section additional-parameter">
                             <label for="rock-mean-width">Средняя ширина</label>
                             <input
-                                    type="text"
+                                    type="number"
                                     class="parameter additional-input mini-input"
                                     id="rock-mean-width"
 
@@ -208,7 +211,7 @@
                         <section class="parameter-section additional-parameter">
                             <label for="rock-mean-height">Средняя высота</label>
                             <input
-                                    type="text"
+                                    type="number"
                                     class="parameter additional-input mini-input"
                                     id="rock-mean-height"
 
@@ -217,7 +220,7 @@
                         <section class="parameter-section additional-parameter">
                             <label for="rock-std-width">с.к.о. ширины</label>
                             <input
-                                    type="text"
+                                    type="number"
                                     class="parameter additional-input mini-input"
                                     id="rock-std-width"
 
@@ -226,7 +229,7 @@
                         <section class="parameter-section additional-parameter">
                             <label for="rock-std-height">с.к.о. высоты</label>
                             <input
-                                    type="text"
+                                    type="number"
                                     class="parameter additional-input mini-input"
                                     id="rock-std-height"
                             >
@@ -246,7 +249,7 @@
                     </section>
                     <div class="start-simulation">
                         <button id="simulation">Симуляция</button>
-                        <span id="loader">Загрузка...</span>
+                        <span class="loader">Загрузка...</span>
                     </div>
                 </div>
             </div>
@@ -258,6 +261,143 @@
 
             </div>
 
+        </div>
+        <div class="plots" id="battle-plots">
+            <div class="additional-parameters">
+                <div class="parameters add-param">
+                    <section class="parameter-section additional-parameter">
+                        <label for="tree-number">
+                            Время перезарядки ПТРК, с
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter additional-input"
+                                id="atgm-reload-time"
+                                min="1"
+                                max="10"
+
+                        >
+                    </section>
+                    <section class="parameter-section additional-parameter">
+                        <label for="tree-mean">
+                            Время наведения ПТРК, с
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter additional-input"
+                                id="atgm-aiming-time"
+                                min="1"
+
+
+                        >
+                    </section>
+                    <section class="parameter-section additional-parameter">
+                        <label for="tree-std">
+                            Количество ракет ПТРК
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter additional-input"
+                                id="missile-number"
+                                min="1"
+                        >
+                    </section>
+                    <section class="parameter-section additional-parameter">
+                        <label for="tree-std">
+                            Скорость полёта ПТУРа
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter additional-input"
+                                id="missile-speed"
+                                min="1"
+                        >
+                    </section>
+                    <hr>
+                    <section class="parameter-section additional-parameter">
+                        <label for="tree-mean">
+                            Время перезарядки танка, с
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter additional-input"
+                                id="tank-reload-time"
+                                min="1"
+
+
+                        >
+                    </section>
+                    <section class="parameter-section additional-parameter">
+                        <label for="tree-mean">
+                            Время наведения танка, с
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter additional-input"
+                                id="tank-aiming-time"
+                                min="1"
+
+
+                        >
+                    </section>
+                    <section class="parameter-section additional-parameter">
+                        <label for="tree-std">
+                            Скорость полёта снаряда танка
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter additional-input"
+                                id="trajectile-speed"
+                                min="1"
+                        >
+                    </section>
+                    <section class="parameter-section additional-parameter">
+                        <label for="tree-std">
+                            Скорость реакции танка, с
+                        </label>
+                        <input
+                                type="number"
+                                class="parameter additional-input"
+                                id="tank-reaction-time"
+                                min="1"
+                        >
+                    </section>
+                    <hr>
+                    <div class="start-simulation">
+                        <button id="battle-button">Бой</button>
+                        <span class="loader">Загрузка...</span>
+                    </div>
+
+                </div>
+            </div>
+            <div id="battle-plot">
+
+            </div>
+            <div class="table-section">
+                <div class="table-wrapper">
+                    <div class="table-buttons">
+                        <button class="white-button" id="add-row">Добавить ряд</button>
+                        <button class="white-button" id="add-column">Добавить столбец</button>
+                        <button class="white-button" id="get-data">Получить данные</button>
+                    </div>
+                    <p>Матрица вероятностей попаданий в ПТРК</p>
+                    <div class="battle-table-section" id="tank-table">
+
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <p>Матрица вероятностей попаданий в танк</p>
+                    <div class="battle-table-section" id="atgm-table">
+
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <p>Итоговая матрица вероятностей</p>
+                    <div class="battle-table-section" id="result-table">
+
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="hit-stat" id="other-plots">
             <div class="plot">

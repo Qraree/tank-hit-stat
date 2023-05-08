@@ -64,6 +64,10 @@ h1 {
     flex-direction: row;
 }
 
+#battle-plots {
+    display: none;
+}
+
 #settings {
     display: none;
     flex-direction: column;
@@ -82,7 +86,7 @@ h3 {
     margin: 10px 0 10px 0;
 }
 
-#simulation {
+#simulation, #battle-button {
     background-color: white;
     color: var(--main-bg-color);
     border-radius: 3px;
@@ -90,11 +94,11 @@ h3 {
     font-weight: bold;
     margin-right: 15px;
 }
-#simulation:hover {
+#simulation:hover, #battle-button:hover {
     background-color: #b7b6b6;
 }
 
-#loader {
+.loader {
     display: none;
     text-align: center;
     height: 30px;
@@ -876,4 +880,89 @@ p {
 
 .gradient-button:hover {
     background-color: #b7b6b6;
+}
+
+#battle-plot {
+    min-width: 600px;
+    height: 600px;
+    background-color: white;
+    border-radius: 5px;
+    margin: 10px 20px 0 25px;
+}
+
+.battle-table-section {
+    max-width: 600px;
+    max-height: 150px;
+    margin: 0 20px 10px 20px;
+}
+
+#battle-plots {
+    justify-content: flex-start;
+}
+
+.table-section {
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    color: white;
+}
+
+.table-wrapper {
+    max-width: 500px;
+    height: auto;
+}
+
+.table-wrapper > p {
+    margin-bottom: 5px;
+}
+
+.table-buttons {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.white-button {
+    background-color: white;
+    color: var(--main-bg-color);
+    border-radius: 3px;
+    margin-right: 10px;
+    transition: 200ms all;
+}
+
+.white-button:hover {
+    background-color: #b7b6b6;
+}
+
+.tabulator-header {
+    display: none;
+}
+
+
+.tabulator-row:first-child > .tabulator-cell {
+    border: 1px solid white;
+    background-color: #8298cb;
+}
+
+.tabulator-row > .tabulator-cell:first-child {
+    border: 1px solid white;
+    background-color: #8298cb;
+}
+
+/*.tabulator-row:first-child > .tabulator-editing {*/
+/*    background-color: white;*/
+/*}*/
+
+.tabulator-row > .tabulator-editing {
+    background-color: white;
+}
+
+.tabulator-editing {
+    background-color: white;
+}
+
+
+.tabulator-cell {
+    background-color: white;
+    border: 1px solid black;
 }

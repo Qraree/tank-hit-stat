@@ -68,6 +68,7 @@ const targetButton = document.querySelector('.target-button');
 
 const analyticsTab = document.querySelector('#analytics-mode');
 const monteCarloTab = document.querySelector('#monte-carlo-mode');
+const battleTab = document.querySelector('#battle-mode');
 const otherTab = document.querySelector('#other-mode');
 const settingsTab = document.querySelector('#settings-mode');
 
@@ -142,8 +143,94 @@ let targetDisplay = false;
 
 const monteCarloPlots = document.querySelector('#monte-carlo-plots');
 const analyticsPlots = document.querySelector('#analytics-plots');
+const battlePlots = document.querySelector('#battle-plots');
 const otherPlots = document.querySelector('#other-plots');
 const settings = document.querySelector('#settings');
+
+const battleTankTable = document.querySelector('#tank-table');
+const battleAtgmTable = document.querySelector('#atgm-table');
+const battleResultTable = document.querySelector('#result-table');
+
+
+const addTableRow = document.querySelector('#add-row');
+const addTableColumn = document.querySelector('#add-column');
+const getData = document.querySelector('#get-data');
+
+
+const makeid = (length) => {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
+}
+
+
+let tabledata = [
+    {distance:'', first:"1", second:'2', third:'3', forth: '', fifth: '', six: '', seven: '', eight: ''},
+    {distance:'500', first:"0.59", second:'0.52', third:"0.45", forth: '', fifth: '', six: '', seven: '', eight: ''},
+    {distance:'1000', first:"0.38", second:'0.29', third:"0.39", forth: '', fifth: '', six: '', seven: '', eight: ''},
+];
+
+const defaultColumns = [
+    {title: '-', field: 'distance', editor: 'input'},
+    {title: '-', field: 'first', editor: 'input'},
+    {title: '-', field: 'second', editor: 'input'},
+    {title: '-', field: 'third', editor: 'input'},
+    {title: '-', field: 'forth', editor: 'input'},
+    {title: '-', field: 'fifth', editor: 'input'},
+    {title: '-', field: 'six', editor: 'input'},
+    {title: '-', field: 'seven', editor: 'input'},
+    {title: '-', field: 'eight', editor: 'input'},
+]
+
+//define table
+let tankTable = new Tabulator(battleTankTable, {
+    data:tabledata,
+    columns: defaultColumns,
+});
+
+let atgmTable = new Tabulator(battleAtgmTable, {
+    data:tabledata,
+    columns: defaultColumns,
+});
+
+let resultTable = new Tabulator(battleResultTable, {
+    data:tabledata,
+    columns: defaultColumns,
+});
+
+getData.addEventListener('click', () => {
+    console.log(tankTable.getData())
+})
+
+
+
+addTableRow.addEventListener('click', () => {
+    tankTable.addRow({});
+    atgmTable.addRow({});
+    resultTable.addRow({});
+
+})
+
+addTableColumn.addEventListener('click', () => {
+    let newStringField = makeid(6);
+
+    tankTable.addColumn({title:"-", field:newStringField, editor: "input"}, false);
+    atgmTable.addColumn({title:"-", field:newStringField, editor: "input"}, false);
+    resultTable.addColumn({title:"-", field:newStringField, editor: "input"}, false);
+
+})
+
+
+
+
+
+
 
 plotTitle3d.addEventListener('change', (e) => {
     PLOT_TITLE_3D = e.target.value;
@@ -211,6 +298,10 @@ const tabsArray = [
         plot: monteCarloPlots,
     },
     {
+        tab: battleTab,
+        plot: battlePlots,
+    },
+    {
         tab: otherTab,
         plot: otherPlots,
     },
@@ -244,6 +335,11 @@ analyticsTab.addEventListener('click', () => {
 
 monteCarloTab.addEventListener('click', () => {
     changeTab(monteCarloTab)
+    target.style.display = 'none';
+})
+
+battleTab.addEventListener('click', () => {
+    changeTab(battleTab)
     target.style.display = 'none';
 })
 
