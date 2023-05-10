@@ -7,7 +7,8 @@ const xl = require('excel4node');
 let colorStack = ['red', 'blue'];
 let summuryColorStack = [[0.0, 'red'], [1.0, 'blue']];
 const z_colormap = [[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51], [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52], [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53], [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54], [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55], [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56], [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57], [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58], [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59], [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60], [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61], [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62], [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63], [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64], [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65], [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66], [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67], [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68], [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69], [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70], [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71], [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72], [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73], [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74], [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75], [27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76], [28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77], [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78], [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79], [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80], [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81], [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82], [34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83], [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84], [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85], [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86], [38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87], [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88], [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89], [41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90], [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91], [43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92], [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93], [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94], [46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95], [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96], [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97], [49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98], [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99], [51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100]];
-
+const landscapesTank = ['firstTank', 'secondTank', 'thirdTank', 'forthTank', 'fifthTank', 'sixTank', 'sevenTank', 'eightTank'];
+const landscapesAtgm = ['firstAtgm', 'secondAtgm', 'thirdAtgm', 'forthAtgm', 'fifthAtgm', 'sixAtgm', 'sevenAtgm', 'eightAtgm'];
 
 const MAIN_COLOR = '#333D79FF';
 const SECONDARY_COLOR = '#FAEBEFFF';
@@ -44,7 +45,7 @@ const scaleCheckBox = document.querySelector('#scale-checkbox');
 let fixedProbabilityScale = true;
 
 
-const loader = document.querySelector('#loader');
+const loader = document.querySelector('.loader');
 
 const gradientAlert = document.querySelector('#gradient-alert');
 const armorAlert = document.querySelector('#armor-alert');
@@ -107,6 +108,28 @@ const rockStdHeight = document.querySelector('#rock-std-height');
 
 const landscapeNumber = document.querySelector('#landscape-number');
 
+const battlePlot = document.querySelector('#battle-plot');
+
+const atgmReloadInput = document.querySelector('#atgm-reload-time');
+const atgmAimingInput = document.querySelector('#atgm-aiming-time');
+const atgmMissileNumberInput = document.querySelector('#missile-number');
+const atgmMissileSpeedInput = document.querySelector('#missile-speed');
+
+
+atgmReloadInput.value = 15;
+atgmAimingInput.value = 5;
+atgmMissileNumberInput.value = 4;
+atgmMissileSpeedInput.value = 200;
+
+const tankReloadInput = document.querySelector('#tank-reload-time');
+const tankAimingInput = document.querySelector('#tank-aiming-time');
+const tankProjectileSpeedInput = document.querySelector('#projectile-speed');
+const tankReactionInput = document.querySelector('#tank-reaction-time');
+
+tankReloadInput.value = 8;
+tankAimingInput.value = 5;
+tankProjectileSpeedInput.value = 800;
+tankReactionInput.value = 2;
 
 
 plotTitle3d.value = PLOT_TITLE_3D
@@ -155,7 +178,11 @@ const battleResultTable = document.querySelector('#result-table');
 const addTableRow = document.querySelector('#add-row');
 const addTableColumn = document.querySelector('#add-column');
 const getData = document.querySelector('#get-data');
+const beginBattleButton = document.querySelector('#battle-button');
 
+const battleWinColor = document.querySelector('#battleWin');
+const battleTieColor = document.querySelector('#battleTie');
+const battleLoseColor = document.querySelector('#battleLose');
 
 const makeid = (length) => {
     let result = '';
@@ -169,60 +196,373 @@ const makeid = (length) => {
     return result;
 }
 
+let tankData = {
+    "1": {
+        "500": 0.59,
+        "1000": 0.12,
+        "1500": 0.035,
+        "2000": 0.02,
+    },
+    "2": {
+        "500": 0.54,
+        "1000": 0.1,
+        "1500": 0.02,
+        "2000": 0.008,
+    },
+    "3": {
+        "500": 0.45,
+        "1000": 0.07,
+        "1500": 0.01,
+        "2000": 0.008,
+    }
+}
 
-let tabledata = [
-    {distance:'', first:"1", second:'2', third:'3', forth: '', fifth: '', six: '', seven: '', eight: ''},
-    {distance:'500', first:"0.59", second:'0.52', third:"0.45", forth: '', fifth: '', six: '', seven: '', eight: ''},
-    {distance:'1000', first:"0.38", second:'0.29', third:"0.39", forth: '', fifth: '', six: '', seven: '', eight: ''},
+let atgmData = {
+    "1": {
+        "500": 0.63,
+        "1000": 0.33,
+        "1500": 0.182,
+        "2000": 0.1,
+    },
+    "2": {
+        "500": 0.57,
+        "1000": 0.28,
+        "1500": 0.14,
+        "2000": 0.08,
+    },
+    "3": {
+        "500": 0.52,
+        "1000": 0.23,
+        "1500": 0.11,
+        "2000": 0.09,
+    },
+}
+
+
+const calculateBattle = (atgmProbability=0.2, tankProbability=0.2, distance=500, landscape=1) => {
+
+    let time = -0.1;
+    let atgmMissileNumber = atgmMissileNumberInput.value
+
+    let confidenceProbabilityAtgm = 0;
+    let confidenceProbabilityTank = 0;
+
+    let probabilityValueAtgm = atgmProbability;
+    let probabilityValueTank = tankProbability;
+
+    let atgmMissileSpeed = atgmMissileSpeedInput.value;
+    let tankProjectileSpeed = tankProjectileSpeedInput.value;
+
+    let atgmReloadTime = atgmReloadInput.value + atgmAimingInput.value;
+    let tankReloadTime = tankReloadInput.value + tankAimingInput.value;
+
+    let atgmReload = atgmReloadTime + 1;
+    let tankReload = tankReloadTime + 1;
+
+    let atgmFire = false;
+    let tankFire = false;
+
+    let atgmMissileFlightTime = distance / atgmMissileSpeed;
+    let tankProjectileFlightTime = distance / tankProjectileSpeed;
+
+    let atgmMissileFlight = 0;
+    let tankProjectileFlight = 0;
+
+    let firstMissileHit = false;
+    let tankReactionTime = tankReactionInput.value;
+    let tankReactionTimer = false;
+
+    let step = 0.1;
+
+    while (true) {
+        time += step;
+        time = Math.round(time * 100) / 100;
+
+
+        if (tankReactionTimer) {
+            tankReactionTime -= step;
+        }
+
+        if (atgmReload >= atgmReloadTime && atgmFire === false && atgmMissileNumber !== 0) {
+            atgmMissileNumber -= 1;
+            atgmFire = true;
+            atgmReload = 0;
+            atgmMissileFlight = 0;
+        } else {
+            if (atgmFire === false) {
+                atgmReload += step;
+            }
+        }
+
+        if (firstMissileHit === true && tankReactionTime <= 0) {
+            if (tankReload >= tankReloadTime && tankFire === false) {
+                tankFire = true;
+                tankReactionTimer = false;
+                tankReload = 0;
+                tankProjectileFlight = 0;
+            } else {
+                if (tankFire === false) {
+                    tankReload += step;
+                }
+            }
+        }
+
+        if (atgmFire) {
+            if (atgmMissileFlight >= atgmMissileFlightTime) {
+
+                if (firstMissileHit === false) {
+                    firstMissileHit = true;
+                    tankReactionTimer = true;
+                }
+
+                if (atgmMissileNumber === 0) {
+                    return 0
+                }
+
+                atgmFire = false;
+                confidenceProbabilityAtgm += probabilityValueAtgm;
+
+            } else {
+                atgmMissileFlight += step;
+                atgmReload += step;
+            }
+        }
+
+        if (tankFire) {
+            if (tankProjectileFlight >= tankProjectileFlightTime) {
+                tankFire = false;
+                confidenceProbabilityTank += probabilityValueTank;
+            } else {
+                tankProjectileFlight += step;
+                tankReload += step;
+            }
+        }
+
+        if (confidenceProbabilityAtgm >= 0.95 && confidenceProbabilityTank >= 0.95) {
+            return 0
+        }
+
+        if (confidenceProbabilityAtgm >= 0.95) {
+            if (tankProjectileFlight >= tankProjectileFlightTime) {
+                return 1
+            }
+            return 1
+        }
+
+        if (confidenceProbabilityTank >= 0.95) {
+            if (atgmMissileFlight >= atgmMissileFlightTime) {
+                return -1
+            }
+            return -1
+        }
+
+    }
+}
+
+const makeOutcomeTable = (atgmTable, tankTable) => {
+    let outcomeTable = {};
+
+    let X = [];
+    let Y = [];
+    let Z = [];
+
+    for (let tankProperty in tankTable) {
+        outcomeTable[tankProperty] = {};
+        for (let valueProperty in tankTable[tankProperty]) {
+            let outcome = calculateBattle(atgmTable[tankProperty][valueProperty], tankTable[tankProperty][valueProperty], Number(valueProperty), Number(tankProperty));
+            X.push(Number(tankProperty));
+            Y.push(Number(valueProperty));
+            outcomeTable[tankProperty][valueProperty] = outcome;
+
+        }
+    }
+
+    for (let outcomeProperty in outcomeTable['1']) {
+        for (let outcomeFirstProperty in outcomeTable) {
+            Z.push(outcomeTable[outcomeFirstProperty][outcomeProperty])
+        }
+    }
+
+    return [outcomeTable, X, Y, Z]
+}
+
+const make_battle_plot = (outcomeTable, X, Y, Z) => {
+
+    let z = [];
+
+    // while (Z.length) z.push(Z.splice(0, Object.keys(tankData['1']).length))
+    while (Z.length) z.push(Z.splice(0, Object.keys(tankData).length))
+
+    console.log(Array.from(new Set(X)))
+    console.log(Array.from(new Set(Y)))
+    console.log(z)
+
+    // console.log(z)
+
+    let data = {
+            type: 'surface',
+            x: Array.from(new Set(X)),
+            y: Array.from(new Set(Y)),
+            z: z,
+            cmax: 1,
+            cmin: -1,
+            opacity:1,
+            colorscale: [[0, `${battleLoseColor.value}`],
+                [0.45, `${battleLoseColor.value}`],
+                [0.45, `${battleTieColor.value}`],
+                [0.55, `${battleTieColor.value}`],
+                [0.55, `${battleWinColor.value}`],
+                [1, `${battleWinColor.value}`]],
+            contours: {
+                "x": {
+                    "show": true,
+                },
+                "y": {
+                    "show": true,
+                }
+            },
+        };
+
+    console.log(Array.from(new Set(Y)).length)
+
+    let layout = {
+        scene: {
+            aspectratio: {
+                "x": 1,
+                "y": 1,
+                "z": 0.5
+            },
+            xaxis: {
+                title: "Число помех на 1000м2",
+                nticks: Array.from(new Set(X)).length
+            },
+            yaxis: {
+                title: "Дистанция",
+                nticks: Array.from(new Set(Y)).length
+            },
+            zaxis: {
+                title: "Исход",
+                range: [-1, 1],
+                dtick: 1
+            }
+        },
+        title: {
+            text: "Исход сражения"
+        }
+    }
+
+    Plotly.newPlot(battlePlot, [data], layout);
+}
+
+beginBattleButton.addEventListener('click', () => {
+    const atgmDataTable = getDataFromTable(atgmTable, 'Atgm');
+    const tankDataTable = getDataFromTable(tankTable, 'Tank');
+    const [outcomeTable, X, Y, Z] = makeOutcomeTable(atgmDataTable, tankDataTable);
+    make_battle_plot(outcomeTable, X, Y, Z);
+})
+
+
+let tableTankData = [
+    {distanceTank:'', firstTank:"1", secondTank:'2', thirdTank:'3', forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'500', firstTank:"0.59", secondTank:'0.54', thirdTank:"0.45", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'1000', firstTank:"0.12", secondTank:'0.1', thirdTank:"0.07", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'1500', firstTank:"0.035", secondTank:'0.03', thirdTank:"0.02", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'2000', firstTank:"0.02", secondTank:'0.012', thirdTank:"0.008", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
 ];
 
-const defaultColumns = [
-    {title: '-', field: 'distance', editor: 'input'},
-    {title: '-', field: 'first', editor: 'input'},
-    {title: '-', field: 'second', editor: 'input'},
-    {title: '-', field: 'third', editor: 'input'},
-    {title: '-', field: 'forth', editor: 'input'},
-    {title: '-', field: 'fifth', editor: 'input'},
-    {title: '-', field: 'six', editor: 'input'},
-    {title: '-', field: 'seven', editor: 'input'},
-    {title: '-', field: 'eight', editor: 'input'},
+let tableAtgmData = [
+    {distanceAtgm:'', firstAtgm:"1", secondAtgm:'2', thirdAtgm:'3', forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
+    {distanceAtgm:'500', firstAtgm:"", secondAtgm:'', thirdAtgm:"", forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
+    {distanceAtgm:'1000', firstAtgm:"", secondAtgm:'', thirdAtgm:"", forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
+    {distanceAtgm:'1500', firstAtgm:"", secondAtgm:'', thirdAtgm:"", forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
+    {distanceAtgm:'2000', firstAtgm:"", secondAtgm:'', thirdAtgm:"", forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
+];
+
+const defaultTankColumns = [
+    {title: '-', field: 'distanceTank', editor: 'input'},
+    {title: '-', field: 'firstTank', editor: 'input'},
+    {title: '-', field: 'secondTank', editor: 'input'},
+    {title: '-', field: 'thirdTank', editor: 'input'},
+    {title: '-', field: 'forthTank', editor: 'input'},
+    {title: '-', field: 'fifthTank', editor: 'input'},
+    {title: '-', field: 'sixTank', editor: 'input'},
+    {title: '-', field: 'sevenTank', editor: 'input'},
+    {title: '-', field: 'eightTank', editor: 'input'},
+]
+
+const defaultAtgmColumns = [
+    {title: '-', field: 'distanceAtgm', editor: 'input'},
+    {title: '-', field: 'firstAtgm', editor: 'input'},
+    {title: '-', field: 'secondAtgm', editor: 'input'},
+    {title: '-', field: 'thirdAtgm', editor: 'input'},
+    {title: '-', field: 'forthAtgm', editor: 'input'},
+    {title: '-', field: 'fifthAtgm', editor: 'input'},
+    {title: '-', field: 'sixAtgm', editor: 'input'},
+    {title: '-', field: 'sevenAtgm', editor: 'input'},
+    {title: '-', field: 'eightAtgm', editor: 'input'},
 ]
 
 //define table
 let tankTable = new Tabulator(battleTankTable, {
-    data:tabledata,
-    columns: defaultColumns,
+    data:tableTankData,
+    columns: defaultTankColumns,
 });
 
 let atgmTable = new Tabulator(battleAtgmTable, {
-    data:tabledata,
-    columns: defaultColumns,
+    data:tableAtgmData,
+    columns: defaultAtgmColumns,
 });
 
-let resultTable = new Tabulator(battleResultTable, {
-    data:tabledata,
-    columns: defaultColumns,
-});
+// let resultTable = new Tabulator(battleResultTable, {
+//     data:tabledata,
+//     columns: defaultColumns,
+// });
 
 getData.addEventListener('click', () => {
-    console.log(tankTable.getData())
+    let result = getDataFromTable(atgmTable, 'Atgm')
+    console.log(result)
 })
+
+const getDataFromTable = (table, mode) => {
+    let data = table.getData();
+    let result = {}
+    let landscapes = mode === 'Tank' ? landscapesTank : landscapesAtgm
+    for (let landscape of landscapes) {
+        if (data['0'][`${landscape}`] !== "") {
+            result[`${data['0'][`${landscape}`]}`] = {}
+        }
+    }
+
+    for (let property in data) {
+        if (property !== "0") {
+            let i = -1;
+            for (let resultProperty in result) {
+                i++;
+                result[resultProperty][data[property][`distance${mode}`]] = Number(data[property][landscapes[i]]);
+            }
+        }
+    }
+
+    return result
+}
 
 
 
 addTableRow.addEventListener('click', () => {
     tankTable.addRow({});
     atgmTable.addRow({});
-    resultTable.addRow({});
+    // resultTable.addRow({});
 
 })
 
 addTableColumn.addEventListener('click', () => {
-    let newStringField = makeid(6);
+    let newTankStringField = makeid(6);
+    let newAtgmStringField = makeid(6);
 
-    tankTable.addColumn({title:"-", field:newStringField, editor: "input"}, false);
-    atgmTable.addColumn({title:"-", field:newStringField, editor: "input"}, false);
-    resultTable.addColumn({title:"-", field:newStringField, editor: "input"}, false);
+
+    tankTable.addColumn({title:"-", field:newTankStringField, editor: "input"}, false);
+    atgmTable.addColumn({title:"-", field:newAtgmStringField, editor: "input"}, false);
+    // resultTable.addColumn({title:"-", field:newStringField, editor: "input"}, false);
 
 })
 

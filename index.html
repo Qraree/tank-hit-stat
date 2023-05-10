@@ -38,7 +38,7 @@
                 </section>
                 <section class="parameter-section additional-parameter">
                     <div class="dimension">
-                        <label for="armor">Ширина, мм</label>
+                        <label for="width">Ширина, мм</label>
                         <div class="dimension-tip" id="width-dimension">!</div>
                     </div>
                     <input
@@ -50,7 +50,7 @@
                 </section>
                 <section class="parameter-section additional-parameter">
                     <div class="dimension">
-                        <label for="armor">Высота, мм</label>
+                        <label for="height">Высота, мм</label>
                         <div class="dimension-tip" id="height-dimension">!</div>
                     </div>
                     <input
@@ -266,100 +266,99 @@
             <div class="additional-parameters">
                 <div class="parameters add-param">
                     <section class="parameter-section additional-parameter">
-                        <label for="tree-number">
+                        <label for="atgm-reload-time">
                             Время перезарядки ПТРК, с
                         </label>
                         <input
                                 type="number"
                                 class="parameter additional-input"
                                 id="atgm-reload-time"
-                                min="1"
-                                max="10"
+
 
                         >
                     </section>
                     <section class="parameter-section additional-parameter">
-                        <label for="tree-mean">
+                        <label for="atgm-aiming-time">
                             Время наведения ПТРК, с
                         </label>
                         <input
                                 type="number"
                                 class="parameter additional-input"
                                 id="atgm-aiming-time"
-                                min="1"
+                                min="0"
 
 
                         >
                     </section>
                     <section class="parameter-section additional-parameter">
-                        <label for="tree-std">
+                        <label for="missile-number">
                             Количество ракет ПТРК
                         </label>
                         <input
                                 type="number"
                                 class="parameter additional-input"
                                 id="missile-number"
-                                min="1"
+                                min="0"
                         >
                     </section>
                     <section class="parameter-section additional-parameter">
-                        <label for="tree-std">
-                            Скорость полёта ПТУРа
+                        <label for="missile-speed">
+                            Скорость полёта ПТУРа, м/c
                         </label>
                         <input
                                 type="number"
                                 class="parameter additional-input"
                                 id="missile-speed"
-                                min="1"
+                                min="0"
                         >
                     </section>
                     <hr>
                     <section class="parameter-section additional-parameter">
-                        <label for="tree-mean">
+                        <label for="tank-reload-time">
                             Время перезарядки танка, с
                         </label>
                         <input
                                 type="number"
                                 class="parameter additional-input"
                                 id="tank-reload-time"
-                                min="1"
+                                min="0"
 
 
                         >
                     </section>
                     <section class="parameter-section additional-parameter">
-                        <label for="tree-mean">
+                        <label for="tank-aiming-time">
                             Время наведения танка, с
                         </label>
                         <input
                                 type="number"
                                 class="parameter additional-input"
                                 id="tank-aiming-time"
-                                min="1"
+                                min="0"
 
 
                         >
                     </section>
                     <section class="parameter-section additional-parameter">
-                        <label for="tree-std">
-                            Скорость полёта снаряда танка
+                        <label for="projectile-speed">
+                            Скорость полёта снаряда танка, м/с
                         </label>
                         <input
                                 type="number"
                                 class="parameter additional-input"
-                                id="trajectile-speed"
-                                min="1"
+                                id="projectile-speed"
+                                min="0"
                         >
                     </section>
                     <section class="parameter-section additional-parameter">
-                        <label for="tree-std">
+                        <label for="tank-reaction-time">
                             Скорость реакции танка, с
                         </label>
                         <input
                                 type="number"
                                 class="parameter additional-input"
                                 id="tank-reaction-time"
-                                min="1"
+                                min="0"
                         >
                     </section>
                     <hr>
@@ -392,8 +391,24 @@
                     </div>
                 </div>
                 <div class="table-wrapper">
-                    <p>Итоговая матрица вероятностей</p>
+                    <p>Цвета графика</p>
                     <div class="battle-table-section" id="result-table">
+                        <div>
+                            <input class="color-input" type="color" id="battleWin" name="battleWin"
+                                   value="#ed68b4">
+                            <label for="battleWin">1</label>
+                        </div>
+
+                        <div>
+                            <input class="color-input" type="color" id="battleTie" name="battleTie"
+                                   value="#87e65e">
+                            <label for="battleTie">0</label>
+                        </div>
+                        <div>
+                            <input class="color-input" type="color" id="battleLose" name="battleLose"
+                                   value="#4287f5">
+                            <label for="battleLose">-1</label>
+                        </div>
 
                     </div>
                 </div>

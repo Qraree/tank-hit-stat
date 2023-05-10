@@ -966,3 +966,7 @@ p {
     background-color: white;
     border: 1px solid black;
 }
+
+.color-input {
+    margin-bottom: 10px;
+}
