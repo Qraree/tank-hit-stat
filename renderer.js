@@ -176,6 +176,7 @@ const battleResultTable = document.querySelector('#result-table');
 
 
 const addTableRow = document.querySelector('#add-row');
+const deleteTableRow = document.querySelector('#delete-row');
 const addTableColumn = document.querySelector('#add-column');
 const getData = document.querySelector('#get-data');
 const beginBattleButton = document.querySelector('#battle-button');
@@ -390,7 +391,6 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
 
     let z = [];
 
-    // while (Z.length) z.push(Z.splice(0, Object.keys(tankData['1']).length))
     while (Z.length) z.push(Z.splice(0, Object.keys(tankData).length))
 
     console.log(Array.from(new Set(X)))
@@ -434,11 +434,17 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
             },
             xaxis: {
                 title: "Число помех на 1000м2",
-                nticks: Array.from(new Set(X)).length
+                tickmode: 'array',
+                tickvals: Array.from(new Set(X)),
+                ticktext: Array.from(new Set(X)),
+                // range: [Array.from(new Set(X))[0], Array.from(new Set(X))[Array.from(new Set(X)).length - 1]],
+                // nticks: Array.from(new Set(X)).length,
+                // dtick: 500
             },
             yaxis: {
                 title: "Дистанция",
-                nticks: Array.from(new Set(Y)).length
+                range: [Array.from(new Set(Y))[0], Array.from(new Set(Y))[Array.from(new Set(Y)).length - 1]],
+                nticks: Array.from(new Set(Y)).length,
             },
             zaxis: {
                 title: "Исход",
@@ -533,11 +539,16 @@ const getDataFromTable = (table, mode) => {
         }
     }
 
+    console.log(result);
+
     for (let property in data) {
         if (property !== "0") {
             let i = -1;
             for (let resultProperty in result) {
                 i++;
+                if (Number(data[property][landscapes[i]]) === 0) {
+                    continue
+                }
                 result[resultProperty][data[property][`distance${mode}`]] = Number(data[property][landscapes[i]]);
             }
         }
@@ -551,8 +562,13 @@ const getDataFromTable = (table, mode) => {
 addTableRow.addEventListener('click', () => {
     tankTable.addRow({});
     atgmTable.addRow({});
-    // resultTable.addRow({});
 
+})
+
+deleteTableRow.addEventListener('click', () => {
+    // tankTable.deleteRow(tankTable.getData().length - 1)
+    tankTable.deleteRow(1)
+    atgmTable.deleteRow(1)
 })
 
 addTableColumn.addEventListener('click', () => {
