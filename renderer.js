@@ -243,7 +243,7 @@ let atgmData = {
 const calculateBattle = (atgmProbability=0.2, tankProbability=0.2, distance=500, landscape=1) => {
 
     let time = -0.1;
-    let atgmMissileNumber = atgmMissileNumberInput.value
+    let atgmMissileNumber = Number(atgmMissileNumberInput.value)
 
     let confidenceProbabilityAtgm = 0;
     let confidenceProbabilityTank = 0;
@@ -251,11 +251,13 @@ const calculateBattle = (atgmProbability=0.2, tankProbability=0.2, distance=500,
     let probabilityValueAtgm = atgmProbability;
     let probabilityValueTank = tankProbability;
 
-    let atgmMissileSpeed = atgmMissileSpeedInput.value;
-    let tankProjectileSpeed = tankProjectileSpeedInput.value;
+    let atgmMissileSpeed = Number(atgmMissileSpeedInput.value);
+    let tankProjectileSpeed = Number(tankProjectileSpeedInput.value);
 
-    let atgmReloadTime = atgmReloadInput.value + atgmAimingInput.value;
-    let tankReloadTime = tankReloadInput.value + tankAimingInput.value;
+    let atgmReloadTime = Number(atgmReloadInput.value) + Number(atgmAimingInput.value);
+    let tankReloadTime = Number(tankReloadInput.value) + Number(tankAimingInput.value);
+    console.log(atgmReloadTime)
+    console.log(tankReloadTime)
 
     let atgmReload = atgmReloadTime + 1;
     let tankReload = tankReloadTime + 1;
@@ -270,7 +272,7 @@ const calculateBattle = (atgmProbability=0.2, tankProbability=0.2, distance=500,
     let tankProjectileFlight = 0;
 
     let firstMissileHit = false;
-    let tankReactionTime = tankReactionInput.value;
+    let tankReactionTime = Number(tankReactionInput.value);
     let tankReactionTimer = false;
 
     let step = 0.1;
@@ -393,9 +395,9 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
 
     while (Z.length) z.push(Z.splice(0, Object.keys(tankData).length))
 
-    console.log(Array.from(new Set(X)))
-    console.log(Array.from(new Set(Y)))
-    console.log(z)
+    // console.log(Array.from(new Set(X)))
+    // console.log(Array.from(new Set(Y)))
+    // console.log(z)
 
     // console.log(z)
 
@@ -423,7 +425,7 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
             },
         };
 
-    console.log(Array.from(new Set(Y)).length)
+    // console.log(Array.from(new Set(Y)).length)
 
     let layout = {
         scene: {
@@ -526,7 +528,7 @@ let atgmTable = new Tabulator(battleAtgmTable, {
 
 getData.addEventListener('click', () => {
     let result = getDataFromTable(atgmTable, 'Atgm')
-    console.log(result)
+    // console.log(result)
 })
 
 const getDataFromTable = (table, mode) => {
@@ -539,7 +541,7 @@ const getDataFromTable = (table, mode) => {
         }
     }
 
-    console.log(result);
+    // console.log(result);
 
     for (let property in data) {
         if (property !== "0") {
@@ -1408,7 +1410,7 @@ test.addEventListener('click', (e) => {
     })
 
     test.appendChild(content)
-    console.log(divStack);
+    // console.log(divStack);
 
 })
 
@@ -1769,7 +1771,7 @@ const showColorStack = () => {
 
     Plotly.newPlot(colorMapPlot, colorMapData, colorMaplayout);
 
-    console.log(summuryColorStack)
+    // console.log(summuryColorStack)
 }
 
 const throttleColorStack = throttle(showColorStack, 1000)
@@ -1810,7 +1812,7 @@ const handleGradientUpload = (e) => {
     const obj = JSON.parse(e.target.result);
     const gradient = obj.gradient;
     gp.clear();
-    console.log(gradient);
+    // console.log(gradient);
 
     gp.addHandler(0, 'blue');
     gp.addHandler(100, 'red');
