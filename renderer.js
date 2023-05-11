@@ -256,8 +256,7 @@ const calculateBattle = (atgmProbability=0.2, tankProbability=0.2, distance=500,
 
     let atgmReloadTime = Number(atgmReloadInput.value) + Number(atgmAimingInput.value);
     let tankReloadTime = Number(tankReloadInput.value) + Number(tankAimingInput.value);
-    console.log(atgmReloadTime)
-    console.log(tankReloadTime)
+
 
     let atgmReload = atgmReloadTime + 1;
     let tankReload = tankReloadTime + 1;
