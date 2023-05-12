@@ -886,8 +886,8 @@ const showArmorInfo = (armor) => {
         <div class="armor-info-table">
             <div>${armor.name}</div>
             <div>Толщина - ${armor.thickness} мм</div>
-            <div>Высота - ${armor.height} px</div>
-            <div>Ширина - ${armor.width} px</div>
+            <div>Высота - ${Math.round(armor.y_top_mm - armor.y_bottom_mm)} мм</div>
+            <div>Ширина - ${armor.x_right_mm - armor.x_left_mm} мм</div>
             <div>Пробитие - ${armor.hit === 1 ? 'Да' : 'Нет'}</div>
         </div>
     `
@@ -1473,7 +1473,7 @@ const addContent = (armor) => {
 
     let listItem = document.createElement('div')
     listItem.className = 'listItem';
-    listItem.innerHTML = `delta_${divStack.length} - ${100} мм`
+    listItem.innerHTML = `delta_${divStack.length} - ${armor.thickness} мм`
 
     let divColor;
 
