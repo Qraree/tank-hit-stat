@@ -17,6 +17,7 @@ const ROCK_COLOR = `rgba(37, 108, 199, 0.55)`
 let PLOT_COLORMAP = 'RdBu';
 let PLOT_TITLE_3D = 'Вероятность поражения танка'
 let PLOT_TITLE_2D =  'Вероятность поражения в картинной плоскости'
+let BATTLE_PLOT_TITLE = 'Исход сражения'
 
 
 const infoTip = document.querySelector('.info-tip');
@@ -34,6 +35,7 @@ const obstacleButton = document.querySelector('.obstacle');
 const deleteObstacle = document.querySelector('.delete-obstacle');
 const downloadArmorExcel = document.querySelector('.download-armor-excel');
 const simulation = document.querySelector('#simulation');
+const mockTank = document.querySelector('.mock-tank');
 
 const colorCheckBox = document.querySelector('#color-checkbox');
 let autoResizeColorBar = false;
@@ -70,6 +72,7 @@ const targetButton = document.querySelector('.target-button');
 const analyticsTab = document.querySelector('#analytics-mode');
 const monteCarloTab = document.querySelector('#monte-carlo-mode');
 const battleTab = document.querySelector('#battle-mode');
+const tanksTab = document.querySelector('#tanks-list-mode');
 const otherTab = document.querySelector('#other-mode');
 const settingsTab = document.querySelector('#settings-mode');
 
@@ -95,6 +98,7 @@ const tankHeight = document.querySelector('#height');
 
 const plotTitle3d = document.querySelector('#PlotName3d');
 const plotTitle2d = document.querySelector('#PlotName2d');
+const battlePlotTitle = document.querySelector('#battlePlotName');
 
 const treeNumber = document.querySelector('#tree-number');
 const treeMean = document.querySelector('#tree-mean');
@@ -105,6 +109,16 @@ const rockMeanHeight = document.querySelector('#rock-mean-height');
 const rockMeanWidth = document.querySelector('#rock-mean-width');
 const rockStdWidth = document.querySelector('#rock-std-width');
 const rockStdHeight = document.querySelector('#rock-std-height');
+
+const tankT80 = document.querySelector('#t-80');
+const tankT72 = document.querySelector('#t-72');
+const abrams = document.querySelector('#abrams');
+const leopard = document.querySelector('#leopard');
+
+const t80Info = document.querySelector('#t-80-info')
+const t72Info = document.querySelector('#t-72-info')
+const abramsInfo = document.querySelector('#abrams-info')
+const leopardInfo = document.querySelector('#leopard-info')
 
 const landscapeNumber = document.querySelector('#landscape-number');
 
@@ -132,8 +146,9 @@ tankProjectileSpeedInput.value = 800;
 tankReactionInput.value = 2;
 
 
-plotTitle3d.value = PLOT_TITLE_3D
-plotTitle2d.value = PLOT_TITLE_2D
+plotTitle3d.value = PLOT_TITLE_3D;
+plotTitle2d.value = PLOT_TITLE_2D;
+battlePlotTitle.value = BATTLE_PLOT_TITLE;
 
 treeMean.value = 250;
 treeStd.value = 40;
@@ -158,8 +173,7 @@ let windowWidth = FRONT_WINDOW_SIZE;
 const windowHeight = 491;
 
 const target = targetDivWrapper.querySelector('.target');
-const targetSigma1 = document.querySelector('#target-sigma1')
-const targetSigma2 = document.querySelector('#target-sigma2')
+
 
 let targetDisplay = false;
 
@@ -167,6 +181,7 @@ let targetDisplay = false;
 const monteCarloPlots = document.querySelector('#monte-carlo-plots');
 const analyticsPlots = document.querySelector('#analytics-plots');
 const battlePlots = document.querySelector('#battle-plots');
+const tanksList = document.querySelector('#tanks-list');
 const otherPlots = document.querySelector('#other-plots');
 const settings = document.querySelector('#settings');
 
@@ -176,9 +191,7 @@ const battleResultTable = document.querySelector('#result-table');
 
 
 const addTableRow = document.querySelector('#add-row');
-const deleteTableRow = document.querySelector('#delete-row');
 const addTableColumn = document.querySelector('#add-column');
-const getData = document.querySelector('#get-data');
 const beginBattleButton = document.querySelector('#battle-button');
 
 const battleWinColor = document.querySelector('#battleWin');
@@ -394,12 +407,6 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
 
     while (Z.length) z.push(Z.splice(0, Object.keys(tankData).length))
 
-    // console.log(Array.from(new Set(X)))
-    // console.log(Array.from(new Set(Y)))
-    // console.log(z)
-
-    // console.log(z)
-
     let data = {
             type: 'surface',
             x: Array.from(new Set(X)),
@@ -424,7 +431,6 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
             },
         };
 
-    // console.log(Array.from(new Set(Y)).length)
 
     let layout = {
         scene: {
@@ -454,7 +460,7 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
             }
         },
         title: {
-            text: "Исход сражения"
+            text: BATTLE_PLOT_TITLE
         }
     }
 
@@ -471,9 +477,9 @@ beginBattleButton.addEventListener('click', () => {
 
 let tableTankData = [
     {distanceTank:'', firstTank:"1", secondTank:'2', thirdTank:'3', forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'500', firstTank:"0.59", secondTank:'0.54', thirdTank:"0.45", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'1000', firstTank:"0.12", secondTank:'0.1', thirdTank:"0.07", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'1500', firstTank:"0.035", secondTank:'0.03', thirdTank:"0.02", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'500', firstTank:"0.59", secondTank:'0.42', thirdTank:"0.33", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'1000', firstTank:"0.34", secondTank:'0.23', thirdTank:"0.16", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'1500', firstTank:"0.1", secondTank:'0.06', thirdTank:"0.04", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
     {distanceTank:'2000', firstTank:"0.02", secondTank:'0.012', thirdTank:"0.008", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
 ];
 
@@ -520,15 +526,6 @@ let atgmTable = new Tabulator(battleAtgmTable, {
     columns: defaultAtgmColumns,
 });
 
-// let resultTable = new Tabulator(battleResultTable, {
-//     data:tabledata,
-//     columns: defaultColumns,
-// });
-
-getData.addEventListener('click', () => {
-    let result = getDataFromTable(atgmTable, 'Atgm')
-    // console.log(result)
-})
 
 const getDataFromTable = (table, mode) => {
     let data = table.getData();
@@ -566,11 +563,6 @@ addTableRow.addEventListener('click', () => {
 
 })
 
-deleteTableRow.addEventListener('click', () => {
-    // tankTable.deleteRow(tankTable.getData().length - 1)
-    tankTable.deleteRow(1)
-    atgmTable.deleteRow(1)
-})
 
 addTableColumn.addEventListener('click', () => {
     let newTankStringField = makeid(6);
@@ -595,6 +587,10 @@ plotTitle3d.addEventListener('change', (e) => {
 
 plotTitle2d.addEventListener('change', (e) => {
     PLOT_TITLE_2D = e.target.value;
+})
+
+battlePlotTitle.addEventListener('change', (e) => {
+    BATTLE_PLOT_TITLE = e.target.value;
 })
 
 const colorMapData = [{
@@ -659,6 +655,10 @@ const tabsArray = [
         plot: battlePlots,
     },
     {
+        tab: tanksTab,
+        plot: tanksList,
+    },
+    {
         tab: otherTab,
         plot: otherPlots,
     },
@@ -700,6 +700,11 @@ battleTab.addEventListener('click', () => {
     target.style.display = 'none';
 })
 
+tanksTab.addEventListener('click', () => {
+    changeTab(tanksTab)
+    target.style.display = 'none';
+})
+
 otherTab.addEventListener('click', () => {
     changeTab(otherTab)
     target.style.display = 'flex';
@@ -710,6 +715,34 @@ settingsTab.addEventListener('click', () => {
     target.style.display = 'none';
 })
 
+
+const tankTabsList = [t72Info, t80Info, abramsInfo, leopardInfo]
+
+const changeTankTab = (tab) => {
+    for (let tankTab of tankTabsList) {
+        if (tab === tankTab) {
+            tab.style.display = 'flex'
+        } else {
+            tankTab.style.display = 'none'
+        }
+    }
+}
+
+tankT80.addEventListener('click', () => {
+    changeTankTab(t80Info)
+})
+
+tankT72.addEventListener('click', () => {
+    changeTankTab(t72Info)
+})
+
+abrams.addEventListener('click', () => {
+    changeTankTab(abramsInfo)
+})
+
+leopard.addEventListener('click', () => {
+    changeTankTab(leopardInfo)
+})
 
 
 
@@ -765,12 +798,7 @@ fileInput.addEventListener('change', (e) => {
 ipcRenderer.on('photo-processed', (event, photo) => {
 })
 
-buttonShow.addEventListener('click', () => {
-
-    divStack.map((armor) => {
-        armor['hit'] = Number(inputArmor.value) - Number(armor.thickness) > 0 ? 1 : 0;
-    })
-
+const resizeTankWindow = () => {
     const sizeRatio = Number(tankHeight.value) / Number(tankWidth.value);
     windowWidth = windowHeight / sizeRatio;
     testContainer.style.width = `${windowHeight / sizeRatio}px`;
@@ -787,6 +815,13 @@ buttonShow.addEventListener('click', () => {
         standardDeviation = convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
 
     }, 300)
+}
+buttonShow.addEventListener('click', () => {
+
+    divStack.map((armor) => {
+        armor['hit'] = Number(inputArmor.value) - Number(armor.thickness) > 0 ? 1 : 0;
+    })
+    resizeTankWindow()
 
 })
 
@@ -835,7 +870,7 @@ downloadArmorExcel.addEventListener('click', () => {
     });
 })
 
-deleteArmor.addEventListener('click', () => {
+const deleteAllArmor = () => {
     for (let observer of observers) {
         observer.disconnect();
     }
@@ -848,7 +883,10 @@ deleteArmor.addEventListener('click', () => {
     list.replaceChildren();
     uploadArmor.value = '';
     deleteAllArmorChart(chart);
+}
 
+deleteArmor.addEventListener('click', () => {
+    deleteAllArmor();
 })
 
 downloadArmor.addEventListener('click', () => {
@@ -887,7 +925,7 @@ const showArmorInfo = (armor) => {
             <div>${armor.name}</div>
             <div>Толщина - ${armor.thickness} мм</div>
             <div>Высота - ${Math.round(armor.y_top_mm - armor.y_bottom_mm)} мм</div>
-            <div>Ширина - ${armor.x_right_mm - armor.x_left_mm} мм</div>
+            <div>Ширина - ${Math.round(armor.x_right_mm - armor.x_left_mm)} мм</div>
             <div>Пробитие - ${armor.hit === 1 ? 'Да' : 'Нет'}</div>
         </div>
     `
@@ -1570,10 +1608,14 @@ const handleArmorLoad = (e) => {
         addContent(armor);
     }
 }
-uploadArmor.addEventListener('change', (e) => {
+
+const uploadArmorFunc = (e) => {
     const reader = new FileReader();
     reader.onload = handleArmorLoad;
     reader.readAsText(e.target.files[0]);
+}
+uploadArmor.addEventListener('change', (e) => {
+    uploadArmorFunc(e);
 })
 
 const randomInInterval = (max, min=0) => {
@@ -1829,4 +1871,25 @@ uploadGradient.addEventListener('change', (e) => {
     const reader = new FileReader();
     reader.onload = handleGradientUpload;
     reader.readAsText(e.target.files[0]);
+})
+
+mockTank.addEventListener('click', () => {
+    deleteAllArmor();
+    message.style.display = "none";
+    preview.src = 'assets/tank_pered.png';
+    let obj;
+    fs.readFile('assets/armor.json', 'utf8', function (err, data) {
+        if (err) throw err;
+        obj = JSON.parse(data);
+        const table = obj.table;
+        for (let armor of table) {
+            addContent(armor);
+        }
+    });
+
+    tankHeight.value = 2882;
+    tankWidth.value = 3630;
+
+    resizeTankWindow()
+
 })
