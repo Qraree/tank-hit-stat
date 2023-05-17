@@ -10,6 +10,68 @@ const z_colormap = [[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
 const landscapesTank = ['firstTank', 'secondTank', 'thirdTank', 'forthTank', 'fifthTank', 'sixTank', 'sevenTank', 'eightTank'];
 const landscapesAtgm = ['firstAtgm', 'secondAtgm', 'thirdAtgm', 'forthAtgm', 'fifthAtgm', 'sixAtgm', 'sevenAtgm', 'eightAtgm'];
 
+const T72_ARMOR = {
+    FRONT: {
+        ARMOR_PATH: 'assets/armors/t-72/t-72-pered-armor.json',
+        PHOTO_PATH: 'assets/armors/t-72/t-72_pered.png',
+        WIDTH: 3630,
+        HEIGHT: 2885,
+    },
+    SIDE: {
+        ARMOR_PATH: 'assets/armors/t-72/t-72-side-armor.json',
+        PHOTO_PATH: 'assets/armors/t-72/t-72-side.png',
+        WIDTH: 7200,
+        HEIGHT: 2885,
+    }
+}
+
+const T80_ARMOR = {
+    FRONT: {
+        ARMOR_PATH: 'assets/armors/t-80/t-80-pered.json',
+        PHOTO_PATH: 'assets/armors/t-80/tank_pered.png',
+        WIDTH: 3630,
+        HEIGHT: 2682,
+    },
+    SIDE: {
+        ARMOR_PATH: 'assets/armors/t-80/t-80-side-armor.json',
+        PHOTO_PATH: 'assets/armors/t-80/t-80-side.png',
+        WIDTH: 7012,
+        HEIGHT: 2882,
+    }
+}
+
+const ABRAMS_ARMOR = {
+    FRONT: {
+        ARMOR_PATH: 'assets/armors/abrams/abrams-pered.json',
+        PHOTO_PATH: 'assets/armors/abrams/abrams_pered.png',
+        WIDTH: 3654,
+        HEIGHT: 3000,
+    },
+    SIDE: {
+        ARMOR_PATH: 'assets/armors/abrams/abrams-bok.json',
+        PHOTO_PATH: 'assets/armors/abrams/abrams_bok.png',
+        WIDTH: 7610,
+        HEIGHT: 3000,
+    }
+}
+
+const LEOPARD_ARMOR = {
+    FRONT: {
+        ARMOR_PATH: 'assets/armors/leopard/leopard-pered-armor.json',
+        PHOTO_PATH: 'assets/armors/leopard/leopard_pered.png',
+        WIDTH: 3700,
+        HEIGHT: 2864,
+    },
+    SIDE: {
+        ARMOR_PATH: 'assets/armors/leopard/leopard-side-armor.json',
+        PHOTO_PATH: 'assets/armors/leopard/leopard_bok.png',
+        WIDTH: 7672,
+        HEIGHT: 2864,
+    }
+}
+
+
+
 const MAIN_COLOR = '#333D79FF';
 const SECONDARY_COLOR = '#FAEBEFFF';
 const TREE_COLOR = `rgba(147, 28, 12, 0.66)`;
@@ -17,6 +79,16 @@ const ROCK_COLOR = `rgba(37, 108, 199, 0.55)`
 let PLOT_COLORMAP = 'RdBu';
 let PLOT_TITLE_3D = 'Вероятность поражения танка'
 let PLOT_TITLE_2D =  'Вероятность поражения в картинной плоскости'
+let BATTLE_PLOT_TITLE = 'Исход сражения'
+
+const setT72FrontArmor = document.querySelector('#set-t72-front');
+const setT72SideArmor = document.querySelector('#set-t72-side');
+const setT80FrontArmor = document.querySelector('#set-t80-front');
+const setT80SideArmor = document.querySelector('#set-t80-side');
+const setAbramsFrontArmor = document.querySelector('#set-abrams-front');
+const setAbramsSideArmor = document.querySelector('#set-abrams-side');
+const setLeopardFrontArmor = document.querySelector('#set-leopard-front');
+const setLeopardSideArmor = document.querySelector('#set-leopard-side');
 
 
 const infoTip = document.querySelector('.info-tip');
@@ -34,6 +106,7 @@ const obstacleButton = document.querySelector('.obstacle');
 const deleteObstacle = document.querySelector('.delete-obstacle');
 const downloadArmorExcel = document.querySelector('.download-armor-excel');
 const simulation = document.querySelector('#simulation');
+const mockTank = document.querySelector('.mock-tank');
 
 const colorCheckBox = document.querySelector('#color-checkbox');
 let autoResizeColorBar = false;
@@ -70,6 +143,7 @@ const targetButton = document.querySelector('.target-button');
 const analyticsTab = document.querySelector('#analytics-mode');
 const monteCarloTab = document.querySelector('#monte-carlo-mode');
 const battleTab = document.querySelector('#battle-mode');
+const tanksTab = document.querySelector('#tanks-list-mode');
 const otherTab = document.querySelector('#other-mode');
 const settingsTab = document.querySelector('#settings-mode');
 
@@ -95,6 +169,7 @@ const tankHeight = document.querySelector('#height');
 
 const plotTitle3d = document.querySelector('#PlotName3d');
 const plotTitle2d = document.querySelector('#PlotName2d');
+const battlePlotTitle = document.querySelector('#battlePlotName');
 
 const treeNumber = document.querySelector('#tree-number');
 const treeMean = document.querySelector('#tree-mean');
@@ -105,6 +180,16 @@ const rockMeanHeight = document.querySelector('#rock-mean-height');
 const rockMeanWidth = document.querySelector('#rock-mean-width');
 const rockStdWidth = document.querySelector('#rock-std-width');
 const rockStdHeight = document.querySelector('#rock-std-height');
+
+const tankT80 = document.querySelector('#t-80');
+const tankT72 = document.querySelector('#t-72');
+const abrams = document.querySelector('#abrams');
+const leopard = document.querySelector('#leopard');
+
+const t80Info = document.querySelector('#t-80-info')
+const t72Info = document.querySelector('#t-72-info')
+const abramsInfo = document.querySelector('#abrams-info')
+const leopardInfo = document.querySelector('#leopard-info')
 
 const landscapeNumber = document.querySelector('#landscape-number');
 
@@ -132,8 +217,9 @@ tankProjectileSpeedInput.value = 800;
 tankReactionInput.value = 2;
 
 
-plotTitle3d.value = PLOT_TITLE_3D
-plotTitle2d.value = PLOT_TITLE_2D
+plotTitle3d.value = PLOT_TITLE_3D;
+plotTitle2d.value = PLOT_TITLE_2D;
+battlePlotTitle.value = BATTLE_PLOT_TITLE;
 
 treeMean.value = 250;
 treeStd.value = 40;
@@ -158,8 +244,7 @@ let windowWidth = FRONT_WINDOW_SIZE;
 const windowHeight = 491;
 
 const target = targetDivWrapper.querySelector('.target');
-const targetSigma1 = document.querySelector('#target-sigma1')
-const targetSigma2 = document.querySelector('#target-sigma2')
+
 
 let targetDisplay = false;
 
@@ -167,6 +252,7 @@ let targetDisplay = false;
 const monteCarloPlots = document.querySelector('#monte-carlo-plots');
 const analyticsPlots = document.querySelector('#analytics-plots');
 const battlePlots = document.querySelector('#battle-plots');
+const tanksList = document.querySelector('#tanks-list');
 const otherPlots = document.querySelector('#other-plots');
 const settings = document.querySelector('#settings');
 
@@ -176,9 +262,7 @@ const battleResultTable = document.querySelector('#result-table');
 
 
 const addTableRow = document.querySelector('#add-row');
-const deleteTableRow = document.querySelector('#delete-row');
 const addTableColumn = document.querySelector('#add-column');
-const getData = document.querySelector('#get-data');
 const beginBattleButton = document.querySelector('#battle-button');
 
 const battleWinColor = document.querySelector('#battleWin');
@@ -394,12 +478,6 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
 
     while (Z.length) z.push(Z.splice(0, Object.keys(tankData).length))
 
-    // console.log(Array.from(new Set(X)))
-    // console.log(Array.from(new Set(Y)))
-    // console.log(z)
-
-    // console.log(z)
-
     let data = {
             type: 'surface',
             x: Array.from(new Set(X)),
@@ -424,7 +502,6 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
             },
         };
 
-    // console.log(Array.from(new Set(Y)).length)
 
     let layout = {
         scene: {
@@ -454,7 +531,7 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
             }
         },
         title: {
-            text: "Исход сражения"
+            text: BATTLE_PLOT_TITLE
         }
     }
 
@@ -471,9 +548,9 @@ beginBattleButton.addEventListener('click', () => {
 
 let tableTankData = [
     {distanceTank:'', firstTank:"1", secondTank:'2', thirdTank:'3', forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'500', firstTank:"0.59", secondTank:'0.54', thirdTank:"0.45", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'1000', firstTank:"0.12", secondTank:'0.1', thirdTank:"0.07", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'1500', firstTank:"0.035", secondTank:'0.03', thirdTank:"0.02", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'500', firstTank:"0.59", secondTank:'0.42', thirdTank:"0.33", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'1000', firstTank:"0.34", secondTank:'0.23', thirdTank:"0.16", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
+    {distanceTank:'1500', firstTank:"0.1", secondTank:'0.06', thirdTank:"0.04", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
     {distanceTank:'2000', firstTank:"0.02", secondTank:'0.012', thirdTank:"0.008", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
 ];
 
@@ -520,15 +597,6 @@ let atgmTable = new Tabulator(battleAtgmTable, {
     columns: defaultAtgmColumns,
 });
 
-// let resultTable = new Tabulator(battleResultTable, {
-//     data:tabledata,
-//     columns: defaultColumns,
-// });
-
-getData.addEventListener('click', () => {
-    let result = getDataFromTable(atgmTable, 'Atgm')
-    // console.log(result)
-})
 
 const getDataFromTable = (table, mode) => {
     let data = table.getData();
@@ -566,11 +634,6 @@ addTableRow.addEventListener('click', () => {
 
 })
 
-deleteTableRow.addEventListener('click', () => {
-    // tankTable.deleteRow(tankTable.getData().length - 1)
-    tankTable.deleteRow(1)
-    atgmTable.deleteRow(1)
-})
 
 addTableColumn.addEventListener('click', () => {
     let newTankStringField = makeid(6);
@@ -595,6 +658,10 @@ plotTitle3d.addEventListener('change', (e) => {
 
 plotTitle2d.addEventListener('change', (e) => {
     PLOT_TITLE_2D = e.target.value;
+})
+
+battlePlotTitle.addEventListener('change', (e) => {
+    BATTLE_PLOT_TITLE = e.target.value;
 })
 
 const colorMapData = [{
@@ -659,6 +726,10 @@ const tabsArray = [
         plot: battlePlots,
     },
     {
+        tab: tanksTab,
+        plot: tanksList,
+    },
+    {
         tab: otherTab,
         plot: otherPlots,
     },
@@ -700,6 +771,11 @@ battleTab.addEventListener('click', () => {
     target.style.display = 'none';
 })
 
+tanksTab.addEventListener('click', () => {
+    changeTab(tanksTab)
+    target.style.display = 'none';
+})
+
 otherTab.addEventListener('click', () => {
     changeTab(otherTab)
     target.style.display = 'flex';
@@ -710,6 +786,34 @@ settingsTab.addEventListener('click', () => {
     target.style.display = 'none';
 })
 
+
+const tankTabsList = [t72Info, t80Info, abramsInfo, leopardInfo]
+
+const changeTankTab = (tab) => {
+    for (let tankTab of tankTabsList) {
+        if (tab === tankTab) {
+            tab.style.display = 'flex'
+        } else {
+            tankTab.style.display = 'none'
+        }
+    }
+}
+
+tankT80.addEventListener('click', () => {
+    changeTankTab(t80Info)
+})
+
+tankT72.addEventListener('click', () => {
+    changeTankTab(t72Info)
+})
+
+abrams.addEventListener('click', () => {
+    changeTankTab(abramsInfo)
+})
+
+leopard.addEventListener('click', () => {
+    changeTankTab(leopardInfo)
+})
 
 
 
@@ -765,12 +869,7 @@ fileInput.addEventListener('change', (e) => {
 ipcRenderer.on('photo-processed', (event, photo) => {
 })
 
-buttonShow.addEventListener('click', () => {
-
-    divStack.map((armor) => {
-        armor['hit'] = Number(inputArmor.value) - Number(armor.thickness) > 0 ? 1 : 0;
-    })
-
+const resizeTankWindow = () => {
     const sizeRatio = Number(tankHeight.value) / Number(tankWidth.value);
     windowWidth = windowHeight / sizeRatio;
     testContainer.style.width = `${windowHeight / sizeRatio}px`;
@@ -787,6 +886,13 @@ buttonShow.addEventListener('click', () => {
         standardDeviation = convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
 
     }, 300)
+}
+buttonShow.addEventListener('click', () => {
+
+    divStack.map((armor) => {
+        armor['hit'] = Number(inputArmor.value) - Number(armor.thickness) > 0 ? 1 : 0;
+    })
+    resizeTankWindow()
 
 })
 
@@ -835,7 +941,7 @@ downloadArmorExcel.addEventListener('click', () => {
     });
 })
 
-deleteArmor.addEventListener('click', () => {
+const deleteAllArmor = () => {
     for (let observer of observers) {
         observer.disconnect();
     }
@@ -848,7 +954,10 @@ deleteArmor.addEventListener('click', () => {
     list.replaceChildren();
     uploadArmor.value = '';
     deleteAllArmorChart(chart);
+}
 
+deleteArmor.addEventListener('click', () => {
+    deleteAllArmor();
 })
 
 downloadArmor.addEventListener('click', () => {
@@ -887,7 +996,7 @@ const showArmorInfo = (armor) => {
             <div>${armor.name}</div>
             <div>Толщина - ${armor.thickness} мм</div>
             <div>Высота - ${Math.round(armor.y_top_mm - armor.y_bottom_mm)} мм</div>
-            <div>Ширина - ${armor.x_right_mm - armor.x_left_mm} мм</div>
+            <div>Ширина - ${Math.round(armor.x_right_mm - armor.x_left_mm)} мм</div>
             <div>Пробитие - ${armor.hit === 1 ? 'Да' : 'Нет'}</div>
         </div>
     `
@@ -1570,10 +1679,14 @@ const handleArmorLoad = (e) => {
         addContent(armor);
     }
 }
-uploadArmor.addEventListener('change', (e) => {
+
+const uploadArmorFunc = (e) => {
     const reader = new FileReader();
     reader.onload = handleArmorLoad;
     reader.readAsText(e.target.files[0]);
+}
+uploadArmor.addEventListener('change', (e) => {
+    uploadArmorFunc(e);
 })
 
 const randomInInterval = (max, min=0) => {
@@ -1829,4 +1942,61 @@ uploadGradient.addEventListener('change', (e) => {
     const reader = new FileReader();
     reader.onload = handleGradientUpload;
     reader.readAsText(e.target.files[0]);
+})
+
+const uploadCustomArmor = (photoPath, armorPath, width, height) => {
+    deleteAllArmor();
+    message.style.display = "none";
+    preview.src = photoPath;
+    let obj;
+    fs.readFile(armorPath, 'utf8', function (err, data) {
+        if (err) throw err;
+        obj = JSON.parse(data);
+        const table = obj.table;
+        for (let armor of table) {
+            addContent(armor);
+        }
+    });
+
+    tankWidth.value = width;
+    tankHeight.value = height;
+
+    resizeTankWindow()
+}
+
+mockTank.addEventListener('click', () => {
+    uploadCustomArmor(T80_ARMOR.FRONT.PHOTO_PATH, T80_ARMOR.FRONT.ARMOR_PATH, T80_ARMOR.FRONT.WIDTH, T80_ARMOR.FRONT.HEIGHT);
+
+})
+
+setT72FrontArmor.addEventListener('click', () => {
+    uploadCustomArmor(T72_ARMOR.FRONT.PHOTO_PATH, T72_ARMOR.FRONT.ARMOR_PATH, T72_ARMOR.FRONT.WIDTH, T72_ARMOR.FRONT.HEIGHT);
+})
+
+setT72SideArmor.addEventListener('click', () => {
+    uploadCustomArmor(T72_ARMOR.SIDE.PHOTO_PATH, T72_ARMOR.SIDE.ARMOR_PATH, T72_ARMOR.SIDE.WIDTH, T72_ARMOR.SIDE.HEIGHT);
+})
+
+setT80FrontArmor.addEventListener('click', () => {
+    uploadCustomArmor(T80_ARMOR.FRONT.PHOTO_PATH, T80_ARMOR.FRONT.ARMOR_PATH, T80_ARMOR.FRONT.WIDTH, T80_ARMOR.FRONT.HEIGHT);
+})
+
+setT80SideArmor.addEventListener('click', () => {
+    uploadCustomArmor(T80_ARMOR.SIDE.PHOTO_PATH, T80_ARMOR.SIDE.ARMOR_PATH, T80_ARMOR.SIDE.WIDTH, T80_ARMOR.SIDE.HEIGHT);
+})
+
+setAbramsFrontArmor.addEventListener('click', () => {
+    uploadCustomArmor(ABRAMS_ARMOR.FRONT.PHOTO_PATH, ABRAMS_ARMOR.FRONT.ARMOR_PATH, ABRAMS_ARMOR.FRONT.WIDTH, ABRAMS_ARMOR.FRONT.HEIGHT);
+})
+
+setAbramsSideArmor.addEventListener('click', () => {
+    uploadCustomArmor(ABRAMS_ARMOR.SIDE.PHOTO_PATH, ABRAMS_ARMOR.SIDE.ARMOR_PATH, ABRAMS_ARMOR.SIDE.WIDTH, ABRAMS_ARMOR.SIDE.HEIGHT);
+})
+
+setLeopardFrontArmor.addEventListener('click', () => {
+    uploadCustomArmor(LEOPARD_ARMOR.FRONT.PHOTO_PATH, LEOPARD_ARMOR.FRONT.ARMOR_PATH, LEOPARD_ARMOR.FRONT.WIDTH, LEOPARD_ARMOR.FRONT.HEIGHT);
+})
+
+setLeopardSideArmor.addEventListener('click', () => {
+    uploadCustomArmor(LEOPARD_ARMOR.SIDE.PHOTO_PATH, LEOPARD_ARMOR.SIDE.ARMOR_PATH, LEOPARD_ARMOR.SIDE.WIDTH, LEOPARD_ARMOR.SIDE.HEIGHT);
 })

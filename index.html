@@ -94,9 +94,10 @@
                         <button class="monte-carlo side-button big-side-button">Расчёт по Монте-Карло</button>
                         <button class="obstacle side-button">Новая местность</button>
                         <button class="delete-obstacle side-button">Удалить местность</button>
+                        <button class="download-armor-excel side-button big-side-button">Скачать броню в excel</button>
                     </div>
                     <div>
-                        <button class="download-armor-excel side-button big-side-button">Скачать броню в excel</button>
+                        <button class="mock-tank side-button big-side-button">Подставить пробный танк</button>
                     </div>
                 </div>
 
@@ -131,6 +132,7 @@
         <button class="tab" id="analytics-mode">Аналитический метод</button>
         <button class="tab" id="monte-carlo-mode">Метод Монте-Карло</button>
         <button class="tab" id="battle-mode">Бой</button>
+        <button class="tab" id="tanks-list-mode">Каталог</button>
         <button class="tab" id="other-mode">Другое</button>
         <button class="tab" id="settings-mode">Настройки</button>
     </div>
@@ -376,9 +378,7 @@
                 <div class="table-wrapper">
                     <div class="table-buttons">
                         <button class="white-button" id="add-row">Добавить ряд</button>
-                        <button class="white-button" id="delete-row">Удалить ряд</button>
                         <button class="white-button" id="add-column">Добавить столбец</button>
-                        <button class="white-button" id="get-data">Получить данные</button>
                     </div>
                     <p>Матрица вероятностей попаданий в ПТРК</p>
                     <div class="battle-table-section" id="tank-table">
@@ -391,28 +391,115 @@
 
                     </div>
                 </div>
-                <div class="table-wrapper">
-                    <p>Цвета графика</p>
-                    <div class="battle-table-section" id="result-table">
-                        <div>
-                            <input class="color-input" type="color" id="battleWin" name="battleWin"
-                                   value="#ed68b4">
-                            <label for="battleWin">1</label>
-                        </div>
+                <div class="table-wrapper battle-parameters">
+                    <div id="color-picker">
+                        <p>Цвета графика</p>
+                        <div class="battle-table-section" id="result-table">
+                            <div>
+                                <input class="color-input" type="color" id="battleWin" name="battleWin"
+                                       value="#ed68b4">
+                                <label for="battleWin">1</label>
+                            </div>
 
-                        <div>
-                            <input class="color-input" type="color" id="battleTie" name="battleTie"
-                                   value="#87e65e">
-                            <label for="battleTie">0</label>
-                        </div>
-                        <div>
-                            <input class="color-input" type="color" id="battleLose" name="battleLose"
-                                   value="#4287f5">
-                            <label for="battleLose">-1</label>
-                        </div>
+                            <div>
+                                <input class="color-input" type="color" id="battleTie" name="battleTie"
+                                       value="#87e65e">
+                                <label for="battleTie">0</label>
+                            </div>
+                            <div>
+                                <input class="color-input" type="color" id="battleLose" name="battleLose"
+                                       value="#4287f5">
+                                <label for="battleLose">-1</label>
+                            </div>
 
+                        </div>
+                    </div>
+                    <div>
+                        <section class="parameter-section additional-parameter">
+                            <label for="battlePlotName"><span id="plot-header">Заголовок графика</span></label>
+                            <textarea
+                                    class="text-area"
+                                    id="battlePlotName"
+                                    cols="30"
+                                    rows="3"
+                            >
+
+                        </textarea>
+                        </section>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div id="tanks-list" class="tanks">
+            <div class="tank-buttons-list">
+                <button class="tank-button" id="t-72">Т-72</button>
+                <button class="tank-button" id="t-80">Т-80</button>
+                <button class="tank-button" id="abrams">Абрамс</button>
+                <button class="tank-button" id="leopard">Леопард</button>
+            </div>
+            <div id="tank-info">
+                <div id="t-72-info" class="tank-info" >
+                    <div class="image-wrapper">
+                        <img src="assets/armors/t-72/t-72_angle.jpg" alt="T-72" class="tank-photo">
+                    </div>
+                    <div class="tank-info-text">
+                        <p>
+                            Т-72 «Урал» — советский основной танк. Самый массовый танк второго поколения. Принят на вооружение в Вооружённых Силах СССР с 1973 года. Т-72 разработан и производился Уралвагонзаводом в Нижнем Тагиле.
+                        </p>
+                    </div>
+                    <div class="upload-catalog-armor-wrapper">
+                        <button class="tank-button" id="set-t72-front">Установить лобовую броню</button>
+                        <button class="tank-button" id="set-t72-side">Установить бортовую броню</button>
+                    </div>
+                </div>
+
+                <div id="t-80-info" class="tank-info">
+                    <div class="image-wrapper">
+                        <img src="assets/armors/t-80/tank_ugol.png" alt="T-80" class="tank-photo">
+                    </div>
+                    <div class="tank-info-text">
+                        <p>
+                            Основной танк СССР 80-х и 90-х годов. Был принят на вооружение Советской армии 6 июля 1976 года, серийно изготавливался с 1976 по 1978 годы.
+
+                        </p>
+                    </div>
+                    <div class="upload-catalog-armor-wrapper">
+                        <button class="tank-button" id="set-t80-front">Установить лобовую броню</button>
+                        <button class="tank-button" id="set-t80-side">Установить бортовую броню</button>
+                    </div>
+                </div>
+                <div id="abrams-info" class="tank-info">
+                    <div class="image-wrapper">
+                        <img src="assets/armors/abrams/abrams_angle.png" alt="Abrams" class="tank-photo">
+                    </div>
+                    <div class="tank-info-text">
+                        <p>
+                            M1 Abrams — основной боевой танк США, серийно выпускается с 1980 года. Стоит на вооружении армии и морской пехоты США, а также вооружённых сил Египта, Австралии, Марокко и ряда ближневосточных государств. М1 «Абрамс» в настоящее время является одним из наиболее тяжёлых танков, его боевая масса превысила 62 т.
+                        </p>
+                    </div>
+                    <div class="upload-catalog-armor-wrapper">
+                        <button class="tank-button" id="set-abrams-front">Установить лобовую броню</button>
+                        <button class="tank-button" id="set-abrams-side">Установить бортовую броню</button>
+                    </div>
+                </div>
+                <div id="leopard-info" class="tank-info">
+                    <div class="image-wrapper">
+                        <img src="assets/armors/leopard/leopard_angle.png" alt="Leopard" class="tank-photo">
+                    </div>
+                    <div class="tank-info-text">
+                        <p>
+                            Леопард 2 – это немецкий основной боевой танк, пришедший на смену устаревшему Леопарду 1. Его базовый вариант был создан в конце 1970-х, но с тех пор танк множество раз модифицировался и улучшался, и последний его вариант является, по словам многих экспертов, лучшим танком в мире. В 1977 году было заказано серийное производство второго Леопарда, и в октябре 1979 первая машина была выпущена.
+
+                        </p>
+                    </div>
+                    <div class="upload-catalog-armor-wrapper">
+                        <button class="tank-button" id="set-leopard-front">Установить лобовую броню</button>
+                        <button class="tank-button" id="set-leopard-side">Установить бортовую броню</button>
+                    </div>
+                </div>
+            </div>
+            <div id="set-armor-wrapper">
+
             </div>
         </div>
         <div class="hit-stat" id="other-plots">

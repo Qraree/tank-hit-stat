@@ -25,6 +25,7 @@
     "excel4node": "^1.8.1",
     "grapick": "^0.1.13",
     "plotly.js-dist-min": "^2.21.0",
-    "tabulator-tables": "^5.4.4"
+    "tabulator-tables": "^5.4.4",
+    "uuid": "^9.0.0"
   }
 }

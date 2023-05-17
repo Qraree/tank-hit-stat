@@ -68,6 +68,11 @@ h1 {
     display: none;
 }
 
+#tanks-list {
+    display: none;
+    flex-direction: row;
+}
+
 #settings {
     display: none;
     flex-direction: column;
@@ -912,6 +917,23 @@ p {
     height: auto;
 }
 
+.battle-parameters {
+    display: flex;
+    flex-direction: row;
+}
+
+#result-table {
+    margin-top: 10px;
+}
+
+#color-picker {
+    margin-right: 10px;
+}
+
+#plot-header {
+    font-size: 16px;
+}
+
 .table-wrapper > p {
     margin-bottom: 5px;
 }
@@ -949,9 +971,6 @@ p {
     background-color: #8298cb;
 }
 
-/*.tabulator-row:first-child > .tabulator-editing {*/
-/*    background-color: white;*/
-/*}*/
 
 .tabulator-row > .tabulator-editing {
     background-color: white;
@@ -969,4 +988,66 @@ p {
 
 .color-input {
     margin-bottom: 10px;
+}
+
+.tank-button {
+    /*transition: 200ms all;*/
+    border-radius: 3px;
+    width: 100%;
+    padding: 10px 3px;
+    border-bottom: 2px solid white;
+}
+
+.tank-button:hover {
+    background-color: white;
+    color: var(--main-bg-color);
+}
+
+.tank-buttons-list {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid white;
+    padding: 10px;
+    width: 300px;
+    height: 300px;
+}
+
+#t-80-info, #abrams-info, #leopard-info {
+    display: none;
+}
+
+.tank-info {
+    display: flex;
+    flex-direction: row;
+    margin-left: 20px;
+    align-items: center;
+    height: 300px;
+    color: white;
+}
+
+.tank-info-text {
+    max-width: 200px;
+    overflow: hidden;
+    height: 200px;
+}
+
+.image-wrapper {
+    width: 400px;
+    border-radius: 5px;
+    overflow: hidden;
+    border: 2px solid white;
+    margin-right: 10px;
+}
+
+
+.tank-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.upload-catalog-armor-wrapper {
+    margin-left: 20px;
+    border: 2px solid white;
+    padding: 10px;
 }
