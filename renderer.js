@@ -10,6 +10,68 @@ const z_colormap = [[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
 const landscapesTank = ['firstTank', 'secondTank', 'thirdTank', 'forthTank', 'fifthTank', 'sixTank', 'sevenTank', 'eightTank'];
 const landscapesAtgm = ['firstAtgm', 'secondAtgm', 'thirdAtgm', 'forthAtgm', 'fifthAtgm', 'sixAtgm', 'sevenAtgm', 'eightAtgm'];
 
+const T72_ARMOR = {
+    FRONT: {
+        ARMOR_PATH: 'assets/armors/t-72/t-72-pered-armor.json',
+        PHOTO_PATH: 'assets/armors/t-72/t-72_pered.png',
+        WIDTH: 3630,
+        HEIGHT: 2885,
+    },
+    SIDE: {
+        ARMOR_PATH: 'assets/armors/t-72/t-72-side-armor.json',
+        PHOTO_PATH: 'assets/armors/t-72/t-72-side.png',
+        WIDTH: 7200,
+        HEIGHT: 2885,
+    }
+}
+
+const T80_ARMOR = {
+    FRONT: {
+        ARMOR_PATH: 'assets/armors/t-80/t-80-pered.json',
+        PHOTO_PATH: 'assets/armors/t-80/tank_pered.png',
+        WIDTH: 3800,
+        HEIGHT: 2885,
+    },
+    SIDE: {
+        ARMOR_PATH: 'assets/armors/t-80/t-80-side-armor.json',
+        PHOTO_PATH: 'assets/armors/t-80/t-80-side.png',
+        WIDTH: 7200,
+        HEIGHT: 2885,
+    }
+}
+
+const ABRAMS_ARMOR = {
+    FRONT: {
+        ARMOR_PATH: 'assets/armors/abrams/abrams-pered.json',
+        PHOTO_PATH: 'assets/armors/abrams/abrams_pered.png',
+        WIDTH: 3530,
+        HEIGHT: 2885,
+    },
+    SIDE: {
+        ARMOR_PATH: 'assets/armors/abrams/abrams-bok.json',
+        PHOTO_PATH: 'assets/armors/abrams/abrams_bok.png',
+        WIDTH: 7200,
+        HEIGHT: 2885,
+    }
+}
+
+const LEOPARD_ARMOR = {
+    FRONT: {
+        ARMOR_PATH: 'assets/armors/leopard/leopard-pered-armor.json',
+        PHOTO_PATH: 'assets/armors/leopard/leopard_pered.png',
+        WIDTH: 3630,
+        HEIGHT: 2885,
+    },
+    SIDE: {
+        ARMOR_PATH: 'assets/armors/leopard/leopard-side-armor.json',
+        PHOTO_PATH: 'assets/armors/leopard/leopard_bok.png',
+        WIDTH: 7200,
+        HEIGHT: 2885,
+    }
+}
+
+
+
 const MAIN_COLOR = '#333D79FF';
 const SECONDARY_COLOR = '#FAEBEFFF';
 const TREE_COLOR = `rgba(147, 28, 12, 0.66)`;
@@ -18,6 +80,15 @@ let PLOT_COLORMAP = 'RdBu';
 let PLOT_TITLE_3D = 'Вероятность поражения танка'
 let PLOT_TITLE_2D =  'Вероятность поражения в картинной плоскости'
 let BATTLE_PLOT_TITLE = 'Исход сражения'
+
+const setT72FrontArmor = document.querySelector('#set-t72-front');
+const setT72SideArmor = document.querySelector('#set-t72-side');
+const setT80FrontArmor = document.querySelector('#set-t80-front');
+const setT80SideArmor = document.querySelector('#set-t80-side');
+const setAbramsFrontArmor = document.querySelector('#set-abrams-front');
+const setAbramsSideArmor = document.querySelector('#set-abrams-side');
+const setLeopardFrontArmor = document.querySelector('#set-leopard-front');
+const setLeopardSideArmor = document.querySelector('#set-leopard-side');
 
 
 const infoTip = document.querySelector('.info-tip');
@@ -1873,12 +1944,12 @@ uploadGradient.addEventListener('change', (e) => {
     reader.readAsText(e.target.files[0]);
 })
 
-mockTank.addEventListener('click', () => {
+const uploadCustomArmor = (photoPath, armorPath, width, height) => {
     deleteAllArmor();
     message.style.display = "none";
-    preview.src = 'assets/tank_pered.png';
+    preview.src = photoPath;
     let obj;
-    fs.readFile('assets/armor.json', 'utf8', function (err, data) {
+    fs.readFile(armorPath, 'utf8', function (err, data) {
         if (err) throw err;
         obj = JSON.parse(data);
         const table = obj.table;
@@ -1887,9 +1958,45 @@ mockTank.addEventListener('click', () => {
         }
     });
 
-    tankHeight.value = 2882;
-    tankWidth.value = 3630;
+    tankWidth.value = width;
+    tankHeight.value = height;
 
     resizeTankWindow()
+}
 
+mockTank.addEventListener('click', () => {
+    uploadCustomArmor(T80_ARMOR.FRONT.PHOTO_PATH, T80_ARMOR.FRONT.ARMOR_PATH, T80_ARMOR.FRONT.WIDTH, T80_ARMOR.FRONT.HEIGHT);
+
+})
+
+setT72FrontArmor.addEventListener('click', () => {
+    uploadCustomArmor(T72_ARMOR.FRONT.PHOTO_PATH, T72_ARMOR.FRONT.ARMOR_PATH, T72_ARMOR.FRONT.WIDTH, T72_ARMOR.FRONT.HEIGHT);
+})
+
+setT72SideArmor.addEventListener('click', () => {
+    uploadCustomArmor(T72_ARMOR.SIDE.PHOTO_PATH, T72_ARMOR.SIDE.ARMOR_PATH, T72_ARMOR.SIDE.WIDTH, T72_ARMOR.SIDE.HEIGHT);
+})
+
+setT80FrontArmor.addEventListener('click', () => {
+    uploadCustomArmor(T80_ARMOR.FRONT.PHOTO_PATH, T80_ARMOR.FRONT.ARMOR_PATH, T80_ARMOR.FRONT.WIDTH, T80_ARMOR.FRONT.HEIGHT);
+})
+
+setT80SideArmor.addEventListener('click', () => {
+    uploadCustomArmor(T80_ARMOR.SIDE.PHOTO_PATH, T80_ARMOR.SIDE.ARMOR_PATH, T80_ARMOR.SIDE.WIDTH, T80_ARMOR.SIDE.HEIGHT);
+})
+
+setAbramsFrontArmor.addEventListener('click', () => {
+    uploadCustomArmor(ABRAMS_ARMOR.FRONT.PHOTO_PATH, ABRAMS_ARMOR.FRONT.ARMOR_PATH, ABRAMS_ARMOR.FRONT.WIDTH, ABRAMS_ARMOR.FRONT.HEIGHT);
+})
+
+setAbramsSideArmor.addEventListener('click', () => {
+    uploadCustomArmor(ABRAMS_ARMOR.SIDE.PHOTO_PATH, ABRAMS_ARMOR.SIDE.ARMOR_PATH, ABRAMS_ARMOR.SIDE.WIDTH, ABRAMS_ARMOR.SIDE.HEIGHT);
+})
+
+setLeopardFrontArmor.addEventListener('click', () => {
+    uploadCustomArmor(LEOPARD_ARMOR.FRONT.PHOTO_PATH, LEOPARD_ARMOR.FRONT.ARMOR_PATH, LEOPARD_ARMOR.FRONT.WIDTH, LEOPARD_ARMOR.FRONT.HEIGHT);
+})
+
+setLeopardSideArmor.addEventListener('click', () => {
+    uploadCustomArmor(LEOPARD_ARMOR.SIDE.PHOTO_PATH, LEOPARD_ARMOR.SIDE.ARMOR_PATH, LEOPARD_ARMOR.SIDE.WIDTH, LEOPARD_ARMOR.SIDE.HEIGHT);
 })
