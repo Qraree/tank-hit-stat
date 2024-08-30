@@ -30,7 +30,7 @@ onmessage = (e) => {
             const x_dot = gaussianRandom(x_dots[i], standardDeviation);
             const y_dot = gaussianRandom(y_dots[i], standardDeviation);
 
-            if (obstacles !== [] || obstacles !== undefined) {
+            if (obstacles.length !== 0 || obstacles !== undefined) {
                 for (let obstacle of obstacles) {
                     if (x_dot > obstacle.left
                         && x_dot < (obstacle.left + obstacle.width)

@@ -1,8 +1,12 @@
 'use strict';
 
-const {ipcRenderer} = require('electron');
+const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const xl = require('excel4node');
+const { T72_ARMOR, T80_ARMOR, ABRAMS_ARMOR, LEOPARD_ARMOR } = require('./src/constants/armors')
+const { tankData } = require('./src/constants/tank-battle-data')
+const { tableTankData, tableAtgmData, defaultTankColumns, defaultAtgmColumns } = require('./src/constants/default-table-columns')
+
 
 let colorStack = ['red', 'blue'];
 let summuryColorStack = [[0.0, 'red'], [1.0, 'blue']];
@@ -10,65 +14,6 @@ const z_colormap = [[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
 const landscapesTank = ['firstTank', 'secondTank', 'thirdTank', 'forthTank', 'fifthTank', 'sixTank', 'sevenTank', 'eightTank'];
 const landscapesAtgm = ['firstAtgm', 'secondAtgm', 'thirdAtgm', 'forthAtgm', 'fifthAtgm', 'sixAtgm', 'sevenAtgm', 'eightAtgm'];
 
-const T72_ARMOR = {
-    FRONT: {
-        ARMOR_PATH: 'assets/armors/t-72/t-72-pered-armor.json',
-        PHOTO_PATH: 'assets/armors/t-72/t-72_pered.png',
-        WIDTH: 3630,
-        HEIGHT: 2885,
-    },
-    SIDE: {
-        ARMOR_PATH: 'assets/armors/t-72/t-72-side-armor.json',
-        PHOTO_PATH: 'assets/armors/t-72/t-72-side.png',
-        WIDTH: 7200,
-        HEIGHT: 2885,
-    }
-}
-
-const T80_ARMOR = {
-    FRONT: {
-        ARMOR_PATH: 'assets/armors/t-80/t-80-pered.json',
-        PHOTO_PATH: 'assets/armors/t-80/tank_pered.png',
-        WIDTH: 3630,
-        HEIGHT: 2682,
-    },
-    SIDE: {
-        ARMOR_PATH: 'assets/armors/t-80/t-80-side-armor.json',
-        PHOTO_PATH: 'assets/armors/t-80/t-80-side.png',
-        WIDTH: 7012,
-        HEIGHT: 2882,
-    }
-}
-
-const ABRAMS_ARMOR = {
-    FRONT: {
-        ARMOR_PATH: 'assets/armors/abrams/abrams-pered.json',
-        PHOTO_PATH: 'assets/armors/abrams/abrams_pered.png',
-        WIDTH: 3654,
-        HEIGHT: 3000,
-    },
-    SIDE: {
-        ARMOR_PATH: 'assets/armors/abrams/abrams-bok.json',
-        PHOTO_PATH: 'assets/armors/abrams/abrams_bok.png',
-        WIDTH: 7610,
-        HEIGHT: 3000,
-    }
-}
-
-const LEOPARD_ARMOR = {
-    FRONT: {
-        ARMOR_PATH: 'assets/armors/leopard/leopard-pered-armor.json',
-        PHOTO_PATH: 'assets/armors/leopard/leopard_pered.png',
-        WIDTH: 3700,
-        HEIGHT: 2864,
-    },
-    SIDE: {
-        ARMOR_PATH: 'assets/armors/leopard/leopard-side-armor.json',
-        PHOTO_PATH: 'assets/armors/leopard/leopard_bok.png',
-        WIDTH: 7672,
-        HEIGHT: 2864,
-    }
-}
 
 
 
@@ -258,7 +203,7 @@ const settings = document.querySelector('#settings');
 
 const battleTankTable = document.querySelector('#tank-table');
 const battleAtgmTable = document.querySelector('#atgm-table');
-const battleResultTable = document.querySelector('#result-table');
+
 
 
 const addTableRow = document.querySelector('#add-row');
@@ -281,47 +226,11 @@ const makeid = (length) => {
     return result;
 }
 
-let tankData = {
-    "1": {
-        "500": 0.59,
-        "1000": 0.12,
-        "1500": 0.035,
-        "2000": 0.02,
-    },
-    "2": {
-        "500": 0.54,
-        "1000": 0.1,
-        "1500": 0.02,
-        "2000": 0.008,
-    },
-    "3": {
-        "500": 0.45,
-        "1000": 0.07,
-        "1500": 0.01,
-        "2000": 0.008,
-    }
-}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////         BATTLE       ////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-let atgmData = {
-    "1": {
-        "500": 0.63,
-        "1000": 0.33,
-        "1500": 0.182,
-        "2000": 0.1,
-    },
-    "2": {
-        "500": 0.57,
-        "1000": 0.28,
-        "1500": 0.14,
-        "2000": 0.08,
-    },
-    "3": {
-        "500": 0.52,
-        "1000": 0.23,
-        "1500": 0.11,
-        "2000": 0.09,
-    },
-}
 
 
 const calculateBattle = (atgmProbability=0.2, tankProbability=0.2, distance=500, landscape=1) => {
@@ -515,9 +424,7 @@ const make_battle_plot = (outcomeTable, X, Y, Z) => {
                 tickmode: 'array',
                 tickvals: Array.from(new Set(X)),
                 ticktext: Array.from(new Set(X)),
-                // range: [Array.from(new Set(X))[0], Array.from(new Set(X))[Array.from(new Set(X)).length - 1]],
-                // nticks: Array.from(new Set(X)).length,
-                // dtick: 500
+
             },
             yaxis: {
                 title: "Дистанция",
@@ -546,46 +453,6 @@ beginBattleButton.addEventListener('click', () => {
 })
 
 
-let tableTankData = [
-    {distanceTank:'', firstTank:"1", secondTank:'2', thirdTank:'3', forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'500', firstTank:"0.59", secondTank:'0.42', thirdTank:"0.33", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'1000', firstTank:"0.34", secondTank:'0.23', thirdTank:"0.16", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'1500', firstTank:"0.1", secondTank:'0.06', thirdTank:"0.04", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-    {distanceTank:'2000', firstTank:"0.02", secondTank:'0.012', thirdTank:"0.008", forthTank: '', fifthTank: '', sixTank: '', sevenTank: '', eightTank: ''},
-];
-
-let tableAtgmData = [
-    {distanceAtgm:'', firstAtgm:"1", secondAtgm:'2', thirdAtgm:'3', forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
-    {distanceAtgm:'500', firstAtgm:"", secondAtgm:'', thirdAtgm:"", forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
-    {distanceAtgm:'1000', firstAtgm:"", secondAtgm:'', thirdAtgm:"", forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
-    {distanceAtgm:'1500', firstAtgm:"", secondAtgm:'', thirdAtgm:"", forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
-    {distanceAtgm:'2000', firstAtgm:"", secondAtgm:'', thirdAtgm:"", forthAtgm: '', fifthAtgm: '', sixAtgm: '', sevenAtgm: '', eightAtgm: ''},
-];
-
-const defaultTankColumns = [
-    {title: '-', field: 'distanceTank', editor: 'input'},
-    {title: '-', field: 'firstTank', editor: 'input'},
-    {title: '-', field: 'secondTank', editor: 'input'},
-    {title: '-', field: 'thirdTank', editor: 'input'},
-    {title: '-', field: 'forthTank', editor: 'input'},
-    {title: '-', field: 'fifthTank', editor: 'input'},
-    {title: '-', field: 'sixTank', editor: 'input'},
-    {title: '-', field: 'sevenTank', editor: 'input'},
-    {title: '-', field: 'eightTank', editor: 'input'},
-]
-
-const defaultAtgmColumns = [
-    {title: '-', field: 'distanceAtgm', editor: 'input'},
-    {title: '-', field: 'firstAtgm', editor: 'input'},
-    {title: '-', field: 'secondAtgm', editor: 'input'},
-    {title: '-', field: 'thirdAtgm', editor: 'input'},
-    {title: '-', field: 'forthAtgm', editor: 'input'},
-    {title: '-', field: 'fifthAtgm', editor: 'input'},
-    {title: '-', field: 'sixAtgm', editor: 'input'},
-    {title: '-', field: 'sevenAtgm', editor: 'input'},
-    {title: '-', field: 'eightAtgm', editor: 'input'},
-]
-
 //define table
 let tankTable = new Tabulator(battleTankTable, {
     data:tableTankData,
@@ -608,7 +475,6 @@ const getDataFromTable = (table, mode) => {
         }
     }
 
-    // console.log(result);
 
     for (let property in data) {
         if (property !== "0") {
@@ -648,8 +514,10 @@ addTableColumn.addEventListener('click', () => {
 
 
 
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 plotTitle3d.addEventListener('change', (e) => {
@@ -1843,8 +1711,6 @@ function throttle(callee, timeout) {
     }
 }
 
-const parseColorString = (str) => {
-}
 
 let percentageColorStack = [0, 100];
 
@@ -1883,7 +1749,6 @@ const showColorStack = () => {
 
     Plotly.newPlot(colorMapPlot, colorMapData, colorMaplayout);
 
-    // console.log(summuryColorStack)
 }
 
 const throttleColorStack = throttle(showColorStack, 1000)
@@ -1924,7 +1789,6 @@ const handleGradientUpload = (e) => {
     const obj = JSON.parse(e.target.result);
     const gradient = obj.gradient;
     gp.clear();
-    // console.log(gradient);
 
     gp.addHandler(0, 'blue');
     gp.addHandler(100, 'red');
