@@ -125,7 +125,7 @@ h3 {
     border-radius: 5px;
     padding: 5px;
     border: 1px solid #ffffff;
-    opacity: 0;
+    opacity: 1;
 }
 
 #probability-table {
@@ -829,9 +829,6 @@ p {
     color: var(--main-bg-color);
 }
 
-.armor-table-row {
-
-}
 
 .colormap-label {
     color: white;

@@ -1,5 +1,10 @@
+const xl = require('excel4node');
 
 class ExcelService {
+
+    constructor(armorExcelAlert) {
+        this.armorExcelAlert = armorExcelAlert
+    }
 
     exportData(divStack) {
         const divStackList = ["x_left_mm", "x_right_mm", "y_top_mm", "y_bottom_mm", "thickness"];
@@ -20,10 +25,10 @@ class ExcelService {
         }
     
         wb.write('armor_excel.xlsx', () => {
-            armorExcelAlert.style.display = 'block';
+            this.armorExcelAlert.style.display = 'block';
     
             setTimeout(() => {
-                armorExcelAlert.style.display = 'none';
+                this.armorExcelAlert.style.display = 'none';
             }, 2000)
         });
     }

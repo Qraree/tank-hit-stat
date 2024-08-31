@@ -24,4 +24,9 @@ const gaussianRandom = (mean=0, stdev=1) => {
     return z * stdev + mean;
 }
 
-module.exports = { normalcdf, gaussianRandom }
+const randomInInterval = (max, min=0) => {
+    return Math.floor((Math.random() * (max - min)) + min);
+}
+
+
+module.exports = { normalcdf, gaussianRandom, randomInInterval }

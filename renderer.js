@@ -2,12 +2,16 @@
 
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
-const xl = require('excel4node');
 const { T72_ARMOR, T80_ARMOR, ABRAMS_ARMOR, LEOPARD_ARMOR } = require('./src/constants/armors')
-const { tankData } = require('./src/constants/tank-battle-data')
-const { tableTankData, tableAtgmData, defaultTankColumns, defaultAtgmColumns } = require('./src/constants/default-table-columns')
+const { colormap_array } = require('./src/utils/colormap')
 const { ExcelService } = require('./src/modules/excel/excel.service')
-const { gaussianRandom, normalcdf } = require('./src/utils/math')
+const { PlotService } = require('./src/modules/plot/plot.service')
+const { TankBattleService } = require('./src/modules/battle/tank-battle.service')
+const { ConvertationService } = require('./src/utils/convert')
+const { ArmorService } = require('./src/modules/armor/armor.service')
+
+const { gaussianRandom, randomInInterval } = require('./src/utils/math')
+const { throttle, addTwoArrays } = require('./src/utils/common')
 
 const { Chart, registerables  } = require('chart.js')
 Chart.register(...registerables);
@@ -15,9 +19,10 @@ Chart.register(...registerables);
 
 let colorStack = ['red', 'blue'];
 let summuryColorStack = [[0.0, 'red'], [1.0, 'blue']];
-const z_colormap = [[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51], [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52], [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53], [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54], [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55], [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56], [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57], [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58], [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59], [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60], [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61], [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62], [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63], [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64], [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65], [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66], [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67], [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68], [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69], [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70], [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71], [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72], [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73], [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74], [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75], [27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76], [28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77], [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78], [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79], [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80], [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81], [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82], [34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83], [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84], [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85], [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86], [38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87], [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88], [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89], [41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90], [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91], [43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92], [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93], [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94], [46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95], [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96], [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97], [49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98], [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99], [51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100]];
-const landscapesTank = ['firstTank', 'secondTank', 'thirdTank', 'forthTank', 'fifthTank', 'sixTank', 'sevenTank', 'eightTank'];
-const landscapesAtgm = ['firstAtgm', 'secondAtgm', 'thirdAtgm', 'forthAtgm', 'fifthAtgm', 'sixAtgm', 'sevenAtgm', 'eightAtgm'];
+
+const z_colormap = colormap_array(1, 50);
+
+
 const TREE_COLOR = `rgba(147, 28, 12, 0.66)`;
 const ROCK_COLOR = `rgba(37, 108, 199, 0.55)`
 let PLOT_COLORMAP = 'RdBu';
@@ -123,28 +128,6 @@ const landscapeNumber = document.querySelector('#landscape-number');
 const battlePlot = document.querySelector('#battle-plot');
 
 
-//////////////////// BATTLE INPUTS ///////////////////////////
-const atgmReloadInput = document.querySelector('#atgm-reload-time');
-const atgmAimingInput = document.querySelector('#atgm-aiming-time');
-const atgmMissileNumberInput = document.querySelector('#missile-number');
-const atgmMissileSpeedInput = document.querySelector('#missile-speed');
-const tankReloadInput = document.querySelector('#tank-reload-time');
-const tankAimingInput = document.querySelector('#tank-aiming-time');
-const tankProjectileSpeedInput = document.querySelector('#projectile-speed');
-const tankReactionInput = document.querySelector('#tank-reaction-time');
-
-
-atgmReloadInput.value = 15;
-atgmAimingInput.value = 5;
-atgmMissileNumberInput.value = 4;
-atgmMissileSpeedInput.value = 200;
-tankReloadInput.value = 8;
-tankAimingInput.value = 5;
-tankProjectileSpeedInput.value = 800;
-tankReactionInput.value = 2;
-
-////////////////////////////////////////////////////////////////////////
-
 plotTitle3d.value = PLOT_TITLE_3D;
 plotTitle2d.value = PLOT_TITLE_2D;
 battlePlotTitle.value = BATTLE_PLOT_TITLE;
@@ -176,13 +159,11 @@ const target = targetDivWrapper.querySelector('.target');
 
 let targetDisplay = false;
 
-
-const battleTankTable = document.querySelector('#tank-table');
-const battleAtgmTable = document.querySelector('#atgm-table');
+const convertationService = new ConvertationService(windowWidth, windowHeight, tankWidth, tankHeight)
 
 
 
-const addTableRow = document.querySelector('#add-row');
+
 const addTableColumn = document.querySelector('#add-column');
 const beginBattleButton = document.querySelector('#battle-button');
 
@@ -190,304 +171,54 @@ const battleWinColor = document.querySelector('#battleWin');
 const battleTieColor = document.querySelector('#battleTie');
 const battleLoseColor = document.querySelector('#battleLose');
 
-const makeid = (length) => {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        counter += 1;
-    }
-    return result;
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////         BATTLE       ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const atgmReloadInput = document.querySelector('#atgm-reload-time');
+const atgmAimingInput = document.querySelector('#atgm-aiming-time');
+const atgmMissileNumberInput = document.querySelector('#missile-number');
+const atgmMissileSpeedInput = document.querySelector('#missile-speed');
+const tankReloadInput = document.querySelector('#tank-reload-time');
+const tankAimingInput = document.querySelector('#tank-aiming-time');
+const tankProjectileSpeedInput = document.querySelector('#projectile-speed');
+const tankReactionInput = document.querySelector('#tank-reaction-time');
+
+const battleTankTable = document.querySelector('#tank-table');
+const battleAtgmTable = document.querySelector('#atgm-table');
 
 
-const calculateBattle = (atgmProbability=0.2, tankProbability=0.2, distance=500, landscape=1) => {
-
-    let time = -0.1;
-    let atgmMissileNumber = Number(atgmMissileNumberInput.value)
-
-    let confidenceProbabilityAtgm = 0;
-    let confidenceProbabilityTank = 0;
-
-    let probabilityValueAtgm = atgmProbability;
-    let probabilityValueTank = tankProbability;
-
-    let atgmMissileSpeed = Number(atgmMissileSpeedInput.value);
-    let tankProjectileSpeed = Number(tankProjectileSpeedInput.value);
-
-    let atgmReloadTime = Number(atgmReloadInput.value) + Number(atgmAimingInput.value);
-    let tankReloadTime = Number(tankReloadInput.value) + Number(tankAimingInput.value);
+const tankBattleService = new TankBattleService(
+    atgmReloadInput, 
+    atgmAimingInput ,
+    atgmMissileNumberInput,
+    atgmMissileSpeedInput,
+    tankReloadInput,
+    tankAimingInput,
+    tankProjectileSpeedInput,
+    tankReactionInput,
+    battleTankTable,
+    battleAtgmTable,
+)
 
 
-    let atgmReload = atgmReloadTime + 1;
-    let tankReload = tankReloadTime + 1;
-
-    let atgmFire = false;
-    let tankFire = false;
-
-    let atgmMissileFlightTime = distance / atgmMissileSpeed;
-    let tankProjectileFlightTime = distance / tankProjectileSpeed;
-
-    let atgmMissileFlight = 0;
-    let tankProjectileFlight = 0;
-
-    let firstMissileHit = false;
-    let tankReactionTime = Number(tankReactionInput.value);
-    let tankReactionTimer = false;
-
-    let step = 0.1;
-
-    while (true) {
-        time += step;
-        time = Math.round(time * 100) / 100;
-
-
-        if (tankReactionTimer) {
-            tankReactionTime -= step;
-        }
-
-        if (atgmReload >= atgmReloadTime && atgmFire === false && atgmMissileNumber !== 0) {
-            atgmMissileNumber -= 1;
-            atgmFire = true;
-            atgmReload = 0;
-            atgmMissileFlight = 0;
-        } else {
-            if (atgmFire === false) {
-                atgmReload += step;
-            }
-        }
-
-        if (firstMissileHit === true && tankReactionTime <= 0) {
-            if (tankReload >= tankReloadTime && tankFire === false) {
-                tankFire = true;
-                tankReactionTimer = false;
-                tankReload = 0;
-                tankProjectileFlight = 0;
-            } else {
-                if (tankFire === false) {
-                    tankReload += step;
-                }
-            }
-        }
-
-        if (atgmFire) {
-            if (atgmMissileFlight >= atgmMissileFlightTime) {
-
-                if (firstMissileHit === false) {
-                    firstMissileHit = true;
-                    tankReactionTimer = true;
-                }
-
-                if (atgmMissileNumber === 0) {
-                    return 0
-                }
-
-                atgmFire = false;
-                confidenceProbabilityAtgm += probabilityValueAtgm;
-
-            } else {
-                atgmMissileFlight += step;
-                atgmReload += step;
-            }
-        }
-
-        if (tankFire) {
-            if (tankProjectileFlight >= tankProjectileFlightTime) {
-                tankFire = false;
-                confidenceProbabilityTank += probabilityValueTank;
-            } else {
-                tankProjectileFlight += step;
-                tankReload += step;
-            }
-        }
-
-        if (confidenceProbabilityAtgm >= 0.95 && confidenceProbabilityTank >= 0.95) {
-            return 0
-        }
-
-        if (confidenceProbabilityAtgm >= 0.95) {
-            if (tankProjectileFlight >= tankProjectileFlightTime) {
-                return 1
-            }
-            return 1
-        }
-
-        if (confidenceProbabilityTank >= 0.95) {
-            if (atgmMissileFlight >= atgmMissileFlightTime) {
-                return -1
-            }
-            return -1
-        }
-
-    }
-}
-
-const makeOutcomeTable = (atgmTable, tankTable) => {
-    let outcomeTable = {};
-
-    let X = [];
-    let Y = [];
-    let Z = [];
-
-    for (let tankProperty in tankTable) {
-        outcomeTable[tankProperty] = {};
-        for (let valueProperty in tankTable[tankProperty]) {
-            let outcome = calculateBattle(atgmTable[tankProperty][valueProperty], tankTable[tankProperty][valueProperty], Number(valueProperty), Number(tankProperty));
-            X.push(Number(tankProperty));
-            Y.push(Number(valueProperty));
-            outcomeTable[tankProperty][valueProperty] = outcome;
-
-        }
-    }
-
-    for (let outcomeProperty in outcomeTable['1']) {
-        for (let outcomeFirstProperty in outcomeTable) {
-            Z.push(outcomeTable[outcomeFirstProperty][outcomeProperty])
-        }
-    }
-
-    return [outcomeTable, X, Y, Z]
-}
-
-const make_battle_plot = (outcomeTable, X, Y, Z) => {
-
-    let z = [];
-
-    while (Z.length) z.push(Z.splice(0, Object.keys(tankData).length))
-
-    let data = {
-            type: 'surface',
-            x: Array.from(new Set(X)),
-            y: Array.from(new Set(Y)),
-            z: z,
-            cmax: 1,
-            cmin: -1,
-            opacity:1,
-            colorscale: [[0, `${battleLoseColor.value}`],
-                [0.45, `${battleLoseColor.value}`],
-                [0.45, `${battleTieColor.value}`],
-                [0.55, `${battleTieColor.value}`],
-                [0.55, `${battleWinColor.value}`],
-                [1, `${battleWinColor.value}`]],
-            contours: {
-                "x": {
-                    "show": true,
-                },
-                "y": {
-                    "show": true,
-                }
-            },
-        };
-
-
-    let layout = {
-        scene: {
-            aspectratio: {
-                "x": 1,
-                "y": 1,
-                "z": 0.5
-            },
-            xaxis: {
-                title: "Число помех на 1000м2",
-                tickmode: 'array',
-                tickvals: Array.from(new Set(X)),
-                ticktext: Array.from(new Set(X)),
-
-            },
-            yaxis: {
-                title: "Дистанция",
-                range: [Array.from(new Set(Y))[0], Array.from(new Set(Y))[Array.from(new Set(Y)).length - 1]],
-                nticks: Array.from(new Set(Y)).length,
-            },
-            zaxis: {
-                title: "Исход",
-                range: [-1, 1],
-                dtick: 1
-            }
-        },
-        title: {
-            text: BATTLE_PLOT_TITLE
-        }
-    }
-
-    Plotly.newPlot(battlePlot, [data], layout);
-}
-
+const plotService = new PlotService(
+    battleLoseColor, 
+    battleTieColor, 
+    battleWinColor, 
+    battlePlot, 
+    tankWidth, 
+    tankHeight
+)
 beginBattleButton.addEventListener('click', () => {
-    const atgmDataTable = getDataFromTable(atgmTable, 'Atgm');
-    const tankDataTable = getDataFromTable(tankTable, 'Tank');
-    const [outcomeTable, X, Y, Z] = makeOutcomeTable(atgmDataTable, tankDataTable);
-    make_battle_plot(outcomeTable, X, Y, Z);
+    const [X, Y, Z] = tankBattleService.makeOutcomeTable();
+    plotService.makeBattlePlot(X, Y, Z);
 })
 
 
-//define table
-let tankTable = new Tabulator(battleTankTable, {
-    data:tableTankData,
-    columns: defaultTankColumns,
-});
-
-let atgmTable = new Tabulator(battleAtgmTable, {
-    data:tableAtgmData,
-    columns: defaultAtgmColumns,
-});
-
-
-const getDataFromTable = (table, mode) => {
-    let data = table.getData();
-    let result = {}
-    let landscapes = mode === 'Tank' ? landscapesTank : landscapesAtgm
-    for (let landscape of landscapes) {
-        if (data['0'][`${landscape}`] !== "") {
-            result[`${data['0'][`${landscape}`]}`] = {}
-        }
-    }
-
-
-    for (let property in data) {
-        if (property !== "0") {
-            let i = -1;
-            for (let resultProperty in result) {
-                i++;
-                if (Number(data[property][landscapes[i]]) === 0) {
-                    continue
-                }
-                result[resultProperty][data[property][`distance${mode}`]] = Number(data[property][landscapes[i]]);
-            }
-        }
-    }
-
-    return result
-}
-
-
-
-addTableRow.addEventListener('click', () => {
-    tankTable.addRow({});
-    atgmTable.addRow({});
-
-})
-
-
-addTableColumn.addEventListener('click', () => {
-    let newTankStringField = makeid(6);
-    let newAtgmStringField = makeid(6);
-
-
-    tankTable.addColumn({title:"-", field:newTankStringField, editor: "input"}, false);
-    atgmTable.addColumn({title:"-", field:newAtgmStringField, editor: "input"}, false);
-    // resultTable.addColumn({title:"-", field:newStringField, editor: "input"}, false);
-
-})
-
+addTableColumn.addEventListener('click', tankBattleService.addColumnToTable)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -555,11 +286,6 @@ const OBSTACLE_NAMES = {
 }
 
 
-
-
-
-
-
 widthTip.addEventListener('mouseenter', () => {
     testContainer.style.borderBottomColor = 'red';
 })
@@ -582,10 +308,6 @@ targetButton.addEventListener('click', () => {
     target.style.opacity = targetDisplay ? 0 : 1;
     targetDisplay = !targetDisplay;
 })
-
-const convert_mm_px = (mmValue, mmParameter, pxParameter) => {
-    return (mmValue / mmParameter) * pxParameter
-}
 
 let standardDeviation;
 
@@ -625,7 +347,7 @@ const resizeTankWindow = () => {
             }
         }
 
-        standardDeviation = convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
+        standardDeviation = convertationService.convert_mm_px(Number(inputStandardDeviation.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
 
     }, 300)
 }
@@ -652,12 +374,16 @@ let obstacles = [];
 let divStack = [];
 let observers = [];
 
+const armorService = new ArmorService(divStack)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////// EXCEL //////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const excelService = new ExcelService()
+const excelService = new ExcelService(armorExcelAlert)
 downloadArmorExcel.addEventListener('click', () => excelService.exportData(divStack))
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const deleteAllArmor = () => {
     for (let observer of observers) {
@@ -727,10 +453,18 @@ const range = function(start, stop, step){
 };
 
 
+//////////////////////////////////////////////////////////////////////////////
+///////////////////////////// DOTS //////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
-// DOTS
-
-
+const dropGridDot = (x, y) => {
+    let dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.style.backgroundColor = 'red';
+    dot.style.top = `${x}px`;
+    dot.style.left = `${y}px`;
+    testContainer.appendChild(dot)
+}
 
 
 const makeDotGrid = () => {
@@ -753,75 +487,9 @@ const makeDotGrid = () => {
     return [front_dots_x, front_dots_y]
 }
 
-const plotResults = (resultArray, threeDimDiv, twoDimDiv) => {
-
-    const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
-    const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
-
-    let x_step = windowWidth / 20
-    let x = range(0, dot_width, dot_width / x_step);
-    let y = range(0, dot_height, dot_height / 25);
-
-    let z = [];
-
-    let layout = {
-        title: PLOT_TITLE_3D,
-        scene: {
-            zaxis: {
-                title: 'P',
-                range: fixedProbabilityScale ? [0, 1] : 'none',
-            },
-            camera: {
-                eye: {
-                    x: 1.86, y: 0.88, z: -0.64}}},
-        width: 500,
-        height: 500,
-
-    };
-
-
-
-
-    while (resultArray.length) z.push(resultArray.splice(0, 25))
-    z = z[0].map((_, colIndex) => z.map(row => row[colIndex]));
-    z = z.reverse();
-
-
-    let layout2d = {
-        title: PLOT_TITLE_2D,
-    }
-
-    let data2d = [
-        {
-            z: z,
-            x: x,
-            y: y,
-            zauto: autoResizeColorBar,
-            zmax: 1,
-            zmin: 0,
-            type: 'heatmap',
-            hoverongaps: false,
-            colorscale: PLOT_COLORMAP !== 'gradient' ? PLOT_COLORMAP : summuryColorStack,
-        }
-    ];
-
-
-    Plotly.newPlot(twoDimDiv, data2d, layout2d, {displayModeBar: false});
-
-    const data_z = {
-        x: x,
-        y:y,
-        z: z,
-        cauto: autoResizeColorBar,
-        cmax: 1,
-        cmin: 0,
-        opacity:1,
-        type: 'surface',
-        colorscale: PLOT_COLORMAP !== 'gradient' ? PLOT_COLORMAP : summuryColorStack,
-    };
-    Plotly.newPlot(threeDimDiv, [data_z], layout);
-}
-
+//////////////////////////////////////////////////////////////////////////////
+///////////////////////////// COMPUTE //////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 const analyticComputation = () => {
     const analyticWorker = new Worker("./src/modules/analytic/analytic-compute.worker.js");
@@ -829,7 +497,17 @@ const analyticComputation = () => {
 
     analyticWorker.postMessage([front_dots_x, front_dots_y, Number(standardDeviation), divStack]);
     analyticWorker.onmessage = (e) => {
-        plotResults(e.data, plotlyDiv, plotlyDiv2d);
+    plotService.plotResults(
+        e.data, 
+        plotlyDiv, 
+        plotlyDiv2d, 
+        windowWidth, 
+        windowHeight, 
+        fixedProbabilityScale, 
+        PLOT_TITLE_3D, 
+        PLOT_COLORMAP
+    );
+    analyticWorker.terminate();
     }
 }
 
@@ -842,29 +520,24 @@ const monteCarloComputation = () => {
     monteCarloWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
 
     monteCarloWorker.onmessage = (e) => {
-        plotResults(e.data, monteCarlo3d, monteCarlo2d);
+        plotService.plotResults(
+            e.data, 
+            monteCarlo3d, 
+            monteCarlo2d, 
+            windowWidth, 
+            windowHeight, 
+            fixedProbabilityScale, 
+            PLOT_TITLE_3D, 
+            PLOT_COLORMAP
+        );
         monteCarloWorker.terminate();
     }
 }
 
-
-
-const dropGridDot = (x, y) => {
-    let dot = document.createElement('div');
-    dot.className = 'dot';
-    dot.style.backgroundColor = 'red';
-    dot.style.top = `${x}px`;
-    dot.style.left = `${y}px`;
-    testContainer.appendChild(dot)
-}
-
-
 buttonGrid.addEventListener('click', analyticComputation)
-monteCarlo.addEventListener('click', () => {
-    monteCarloComputation(false);
-})
+monteCarlo.addEventListener('click', monteCarloComputation)
 
-
+///////////////////////////////////////////////////////////////////////////////////////
 
 function dragElement(elmnt) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -898,12 +571,12 @@ function dragElement(elmnt) {
             divStack[index].right = (elmnt.offsetLeft - pos1) + divStack[index].width;
             divStack[index].bottom = (elmnt.offsetTop - pos2) + divStack[index].height;
 
-            divStack[index].x_left_mm = convert_px_to_mm(elmnt.offsetLeft - pos1, true);
-            divStack[index].x_right_mm = convert_px_to_mm(elmnt.offsetLeft - pos1, true) +
-                convert_px_distance_to_mm(divStack[index].width, true);
-            divStack[index].y_top_mm = convert_px_to_mm(elmnt.offsetTop - pos2, false);
-            divStack[index].y_bottom_mm = convert_px_to_mm(elmnt.offsetTop - pos2, false) -
-                convert_px_distance_to_mm(divStack[index].height, false)
+            divStack[index].x_left_mm = convertationService.convert_px_to_mm(elmnt.offsetLeft - pos1, true);
+            divStack[index].x_right_mm = convertationService.convert_px_to_mm(elmnt.offsetLeft - pos1, true) +
+                convertationService.convert_px_distance_to_mm(divStack[index].width, true);
+            divStack[index].y_top_mm = convertationService.convert_px_to_mm(elmnt.offsetTop - pos2, false);
+            divStack[index].y_bottom_mm = convertationService.convert_px_to_mm(elmnt.offsetTop - pos2, false) -
+                convertationService.convert_px_distance_to_mm(divStack[index].height, false)
         }
     }
 
@@ -913,335 +586,13 @@ function dragElement(elmnt) {
     }
 }
 
-const convert_px_to_mm = (px, left=true) => {
-    let mmSize;
+test.addEventListener('click', (e) => armorService.addNewArmor(e, divStack))
+uploadArmor.addEventListener('change', (e) => armorService.uploadArmorFunc(e, divStack))
 
-    if (left) {
-        mmSize = (px / windowWidth) * Number(tankWidth.value);
-    } else {
-        mmSize = Number(tankHeight.value) - ((px / windowHeight) * Number(tankHeight.value));
-    }
 
-    return mmSize
-}
-
-const convert_px_distance_to_mm = (px, left=true) => {
-    let mmDistance;
-
-    if (left) {
-        mmDistance = (px * Number(tankWidth.value)) / windowWidth;
-    } else {
-        mmDistance = (px * Number(tankHeight.value)) / windowHeight;
-    }
-    return mmDistance;
-}
-
-test.addEventListener('click', (e) => {
-    let content = document.createElement('div');
-
-
-    content.className = 'content';
-    content.style.top = `${e.offsetY}px`;
-    content.style.left = `${e.offsetX}px`;
-    content.style.overflow = 'hidden';
-    content.style.resize = 'both';
-    content.innerHTML = '' +
-        '<div class="dragHeader">' +
-        '<div class="dragHeaderCircle"></div>' +
-        '<div class="dragHeaderCircle"></div>' +
-        '<div class="dragHeaderCircle"></div>' +
-        '</div>' +
-        '<div class="contentValue">' +
-        `<span class="delta">&#948;<span class="index">${divStack.length+1}</span> = </span>` +
-        '<div class="value">100</div>' +
-        '<input class="input"/>' +
-        '<span class="delta">mm</span>' +
-        '</div>'
-
-
-
-    divStack.push({
-        index: divStack.length,
-        name: `delta_${divStack.length+1}`,
-        thickness: 100,
-        hit: 1,
-        height: 100,
-        width: 200,
-        top: e.offsetY,
-        left: e.offsetX,
-        x_left_mm: convert_px_to_mm(e.offsetX, true),
-        x_right_mm: convert_px_to_mm(e.offsetX, true) + convert_px_distance_to_mm(200, true),
-        y_top_mm: convert_px_to_mm(e.offsetY, false),
-        y_bottom_mm: convert_px_to_mm(e.offsetY, false) - convert_px_distance_to_mm(100, false),
-    })
-
-
-    showArmorInfo(divStack[divStack.length - 1])
-
-    let contentValue = content.querySelector('.contentValue')
-    let input = contentValue.querySelector('.input')
-    let value = contentValue.querySelector('.value')
-
-    let listItem = document.createElement('div')
-    listItem.className = 'listItem';
-    listItem.innerHTML = `delta_${divStack.length} - ${100} мм`
-
-    let divColor;
-
-    listItem.addEventListener('mouseenter', () => {
-        let index = getIndex(list, listItem)
-        divColor = test.childNodes[index+1].style.backgroundColor;
-        listItem.style.backgroundColor = 'rgba(39,39,147,0.78)'
-        test.childNodes[index+1].style.backgroundColor = 'rgba(55, 55, 196, 0.78)'
-
-    })
-
-    listItem.addEventListener('mouseleave', () => {
-        let index = getIndex(list, listItem)
-        listItem.style.backgroundColor = '#333D79FF'
-        test.childNodes[index+1].style.backgroundColor = divColor;
-    })
-
-    listItem.addEventListener('click', () => {
-        let index = getIndex(list, listItem)
-        showArmorInfo(divStack[index])
-    })
-
-    list.appendChild(listItem)
-
-
-    contentValue.addEventListener('click', () => {
-        input.value = value.innerHTML;
-        value.classList.add('valueHide');
-        input.classList.add('inputShow');
-
-    })
-
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            input.classList.remove('inputShow');
-            value.classList.remove('valueHide');
-            value.innerHTML = input.value;
-
-            let index = Array.prototype.indexOf.call(test.children, content);
-            listItem.innerHTML = `delta_${index + 1} - ${input.value} мм`
-            divStack[index].thickness = Number(input.value);
-            divStack[index].hit = (Number(inputArmor.value) - Number(input.value)) > 0 ? 1 : 0;
-
-            showArmorInfo(divStack[index])
-
-
-            if (Number(value.innerHTML) > 500) {
-                content.style.backgroundColor = `rgba(255, ${255-((Number(value.innerHTML)-500)/500*255)}, 0, 0.8)`
-            } else {
-                content.style.backgroundColor = `rgba(${Number(value.innerHTML)/500*255}, 255, 0, 0.8)`
-            }
-        }
-    })
-
-
-    dragElement(content);
-
-    // RESIZING_CONTENT_WINDOW //
-
-    const onresize = (dom_elem, callback) => {
-        const resizeObserver = new ResizeObserver(() => callback() );
-        resizeObserver.observe(dom_elem);
-        observers.push(resizeObserver);
-    };
-
-    onresize(content, function () {
-        let index = Array.prototype.indexOf.call(test.children, content);
-        divStack[index].height = content.offsetHeight;
-        divStack[index].width = content.offsetWidth;
-        divStack[index].bottom = content.offsetHeight + divStack[index].top;
-        divStack[index].right = divStack[index].left + content.offsetWidth;
-        divStack[index].x_right_mm = divStack[index].x_left_mm + convert_px_distance_to_mm(content.offsetWidth, true);
-        divStack[index].y_bottom_mm = divStack[index].y_top_mm - convert_px_distance_to_mm(content.offsetHeight, false);
-    });
-
-
-    content.addEventListener('click', (e) => {
-        e.stopPropagation()
-    })
-
-    content.addEventListener('mousedown', (e) => {
-        e.stopPropagation()
-    })
-
-    test.appendChild(content)
-
-})
-
-
-
-const addContent = (armor) => {
-    let content = document.createElement('div');
-
-    divStack.push({
-        index: armor.index,
-        name: armor.name,
-        thickness: armor.thickness,
-        hit: armor.hit,
-        height: armor.height,
-        width: armor.width,
-        top: armor.top,
-        left: armor.left,
-        x_left_mm: convert_px_to_mm(armor.left, true),
-        x_right_mm: convert_px_to_mm(armor.left, true) + convert_px_distance_to_mm(armor.width, true),
-        y_top_mm: convert_px_to_mm(armor.top, false),
-        y_bottom_mm: convert_px_to_mm(armor.top, false) - convert_px_distance_to_mm(armor.height, false)
-    })
-
-
-    content.className = 'content';
-    content.style.top = `${armor.top}px`;
-    content.style.left = `${armor.left}px`;
-    content.style.width = `${armor.width}px`;
-    content.style.height = `${armor.height}px`;
-    content.style.overflow = 'hidden';
-    content.style.resize = 'both';
-    content.innerHTML = '' +
-        '<div class="dragHeader">' +
-        '<div class="dragHeaderCircle"></div>' +
-        '<div class="dragHeaderCircle"></div>' +
-        '<div class="dragHeaderCircle"></div>' +
-        '</div>' +
-        '<div class="contentValue">' +
-        `<span class="delta">&#948;<span class="index">${divStack.length}</span> = </span>` +
-        '<div class="value">100</div>' +
-        '<input class="input"/>' +
-        '<span class="delta">mm</span>' +
-        '</div>'
-
-
-
-    showArmorInfo(divStack[divStack.length-1])
-
-    let contentValue = content.querySelector('.contentValue')
-    let input = contentValue.querySelector('.input')
-    let value = contentValue.querySelector('.value')
-
-    value.innerHTML = `${armor.thickness}`;
-
-    if (Number(value.innerHTML) > 500) {
-        content.style.backgroundColor = `rgba(255, ${255-((Number(value.innerHTML)-500)/500*255)}, 0, 0.8)`
-    } else {
-        content.style.backgroundColor = `rgba(${Number(value.innerHTML)/500*255}, 255, 0, 0.8)`
-    }
-
-    let listItem = document.createElement('div')
-    listItem.className = 'listItem';
-    listItem.innerHTML = `delta_${divStack.length} - ${armor.thickness} мм`
-
-    let divColor;
-
-    listItem.addEventListener('mouseenter', () => {
-        let index = getIndex(list, listItem)
-        divColor = test.childNodes[index+1].style.backgroundColor;
-        listItem.style.backgroundColor = 'rgba(39,39,147,0.78)'
-        test.childNodes[index+1].style.backgroundColor = 'rgba(55, 55, 196, 0.78)'
-
-    })
-
-    listItem.addEventListener('mouseleave', () => {
-        let index = getIndex(list, listItem)
-        listItem.style.backgroundColor = '#333D79FF'
-        test.childNodes[index+1].style.backgroundColor = divColor;
-    })
-
-    listItem.addEventListener('click', () => {
-        let index = getIndex(list, listItem)
-        showArmorInfo(divStack[index])
-    })
-
-    list.appendChild(listItem)
-
-
-    contentValue.addEventListener('click', () => {
-        input.value = value.innerHTML;
-        value.classList.add('valueHide');
-        input.classList.add('inputShow');
-
-    })
-
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            input.classList.remove('inputShow');
-            value.classList.remove('valueHide');
-            value.innerHTML = input.value;
-
-            let index = Array.prototype.indexOf.call(test.children, content);
-            listItem.innerHTML = `delta_${index + 1} - ${input.value} мм`
-            divStack[index].thickness = Number(input.value);
-            divStack[index].hit = (Number(inputArmor.value) - Number(input.value)) > 0 ? 1 : 0;
-
-            showArmorInfo(divStack[index])
-
-
-            if (Number(value.innerHTML) > 500) {
-                content.style.backgroundColor = `rgba(255, ${255-((Number(value.innerHTML)-500)/500*255)}, 0, 0.8)`
-            } else {
-                content.style.backgroundColor = `rgba(${Number(value.innerHTML)/500*255}, 255, 0, 0.8)`
-            }
-        }
-    })
-
-
-    dragElement(content);
-
-    // RESIZING_CONTENT_WINDOW //
-
-    const onresize = (dom_elem, callback) => {
-        const resizeObserver = new ResizeObserver(() => callback() );
-        resizeObserver.observe(dom_elem);
-        observers.push(resizeObserver);
-
-    };
-
-    onresize(content, function () {
-        let index = Array.prototype.indexOf.call(test.children, content);
-        divStack[index].height = content.offsetHeight;
-        divStack[index].width = content.offsetWidth;
-        divStack[index].bottom = content.offsetHeight + divStack[index].top;
-        divStack[index].right = divStack[index].left + content.offsetWidth;
-
-        divStack[index].x_right_mm = divStack[index].x_left_mm + convert_px_distance_to_mm(content.offsetWidth, true);
-        divStack[index].y_bottom_mm = divStack[index].y_top_mm - convert_px_distance_to_mm(content.offsetHeight, false);
-    });
-
-
-    content.addEventListener('click', (e) => {
-        e.stopPropagation()
-    })
-
-    content.addEventListener('mousedown', (e) => {
-        e.stopPropagation()
-    })
-
-    test.appendChild(content)
-}
-
-const handleArmorLoad = (e) => {
-    const obj = JSON.parse(e.target.result);
-    const table = obj.table;
-    for (let armor of table) {
-        addContent(armor);
-    }
-}
-
-const uploadArmorFunc = (e) => {
-    const reader = new FileReader();
-    reader.onload = handleArmorLoad;
-    reader.readAsText(e.target.files[0]);
-}
-uploadArmor.addEventListener('change', (e) => {
-    uploadArmorFunc(e);
-})
-
-const randomInInterval = (max, min=0) => {
-    return Math.floor((Math.random() * (max - min)) + min);
-}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////// GENERATE OBSTACLE //////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const generateObstacle = (name=OBSTACLE_NAMES.TREE, draw=true) => {
     let obstacle = document.createElement('div');
@@ -1250,15 +601,15 @@ const generateObstacle = (name=OBSTACLE_NAMES.TREE, draw=true) => {
     let heightRandom;
 
     if (name === OBSTACLE_NAMES.TREE) {
-        const mean = convert_mm_px(Number(treeMean.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
-        const std = convert_mm_px(Number(treeStd.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
+        const mean = convertationService.convert_mm_px(Number(treeMean.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
+        const std = convertationService.convert_mm_px(Number(treeStd.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
         leftRandom = randomInInterval(10, windowWidth - 100)
         widthRandom = gaussianRandom(mean, std);
     } else {
-        const meanWidth = convert_mm_px(Number(rockMeanWidth.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
-        const stdWidth = convert_mm_px(Number(rockStdWidth.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
-        const meanHeight = convert_mm_px(Number(rockMeanHeight.value), tankHeight.value ? tankHeight.value : test.clientHeight, test.clientHeight);
-        const stdHeight = convert_mm_px(Number(rockStdHeight.value), tankHeight.value ? tankHeight.value : test.clientHeight, test.clientHeight)
+        const meanWidth = convertationService.convert_mm_px(Number(rockMeanWidth.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth);
+        const stdWidth = convertationService.convert_mm_px(Number(rockStdWidth.value), tankWidth.value ? tankWidth.value : test.clientWidth, test.clientWidth)
+        const meanHeight = convertationService.convert_mm_px(Number(rockMeanHeight.value), tankHeight.value ? tankHeight.value : test.clientHeight, test.clientHeight);
+        const stdHeight = convertationService.convert_mm_px(Number(rockStdHeight.value), tankHeight.value ? tankHeight.value : test.clientHeight, test.clientHeight)
         leftRandom = randomInInterval(10, windowWidth - (meanWidth))
         widthRandom = gaussianRandom(meanWidth, stdWidth);
         heightRandom = gaussianRandom(meanHeight, stdHeight);
@@ -1291,7 +642,7 @@ const deleteObstacles = () => {
     obstacles = [];
 }
 
-obstacleButton.addEventListener('click', (e) => {
+const generateNewTerrain = () => {
     deleteObstacles();
 
     if (Number(treeNumber.value) >= 1 && Number(treeNumber.value) < 11) {
@@ -1305,29 +656,22 @@ obstacleButton.addEventListener('click', (e) => {
             generateObstacle(OBSTACLE_NAMES.ROCK);
         }
     }
-
-})
-
-deleteObstacle.addEventListener('click', () => {
-    deleteObstacles();
-})
-
-const addTwoArrays = (a, b) => {
-    if (a.length === 0 || b.length === 0) {
-        return a.length === 0 ? b : a
-    }
-
-    return a.map((e, i) => e + b[i])
 }
 
-let mySecondWorker;
-simulation.addEventListener('click', () => {
+obstacleButton.addEventListener('click', generateNewTerrain)
+deleteObstacle.addEventListener('click', deleteObstacles)
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const monteCarloSimulation = () => {
     loader.style.display = 'block';
     let summaryProbability = [];
     let workerP = 0;
     let forP = 0;
 
-    mySecondWorker = new Worker("worker.js");
+    const simulationWorker = new Worker("worker.js");
     const [front_x_dots, front_y_dots] = makeDotGrid();
 
     for (let i = 0; i < Number(landscapeNumber.value); i++) {
@@ -1347,25 +691,36 @@ simulation.addEventListener('click', () => {
         }
 
 
-        mySecondWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
+        simulationWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
         forP += 1;
 
 
-        mySecondWorker.onmessage = (e) => {
+        simulationWorker.onmessage = (e) => {
             summaryProbability = addTwoArrays(summaryProbability, e.data)
             workerP += 1;
 
             if (workerP === Number(landscapeNumber.value)) {
-                mySecondWorker.terminate();
+                simulationWorker.terminate();
                 summaryProbability = summaryProbability.map(e => e / workerP);
-                plotResults(summaryProbability, monteCarlo3d, monteCarlo2d)
+                plotService.plotResults(
+                    summaryProbability, 
+                    monteCarlo3d, 
+                    monteCarlo2d, 
+                    windowWidth, 
+                    windowHeight, 
+                    fixedProbabilityScale, 
+                    PLOT_TITLE_3D, 
+                    PLOT_COLORMAP
+                );
+                
                 loader.style.display = 'none';
             }
         }
 
     }
+}
 
-})
+simulation.addEventListener('click', monteCarloSimulation)
 
 
 deleteLastArmor.addEventListener('click', () => {
@@ -1377,20 +732,6 @@ deleteLastArmor.addEventListener('click', () => {
     uploadArmor.value = '';
 })
 
-function throttle(callee, timeout) {
-    let timer = null
-
-    return function perform(...args) {
-        if (timer) return
-
-        timer = setTimeout(() => {
-            callee(...args)
-
-            clearTimeout(timer)
-            timer = null
-        }, timeout)
-    }
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// COLOR SETTINGS ///////////////////////////////////////////////////////
@@ -1513,7 +854,7 @@ const uploadCustomArmor = (photoPath, armorPath, width, height) => {
         obj = JSON.parse(data);
         const table = obj.table;
         for (let armor of table) {
-            addContent(armor);
+            armorService.addExistingArmor(armor, divStack);
         }
     });
 
