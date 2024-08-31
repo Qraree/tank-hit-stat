@@ -6,7 +6,11 @@ const xl = require('excel4node');
 const { T72_ARMOR, T80_ARMOR, ABRAMS_ARMOR, LEOPARD_ARMOR } = require('./src/constants/armors')
 const { tankData } = require('./src/constants/tank-battle-data')
 const { tableTankData, tableAtgmData, defaultTankColumns, defaultAtgmColumns } = require('./src/constants/default-table-columns')
+const { ExcelService } = require('./src/modules/excel/excel.service')
+const { gaussianRandom, normalcdf } = require('./src/utils/math')
 
+const { Chart, registerables  } = require('chart.js')
+Chart.register(...registerables);
 
 
 let colorStack = ['red', 'blue'];
@@ -14,12 +18,6 @@ let summuryColorStack = [[0.0, 'red'], [1.0, 'blue']];
 const z_colormap = [[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51], [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52], [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53], [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54], [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55], [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56], [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57], [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58], [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59], [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60], [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61], [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62], [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63], [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64], [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65], [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66], [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67], [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68], [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69], [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70], [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71], [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72], [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73], [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74], [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75], [27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76], [28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77], [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78], [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79], [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80], [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81], [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82], [34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83], [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84], [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85], [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86], [38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87], [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88], [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89], [41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90], [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91], [43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92], [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93], [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94], [46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95], [47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96], [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97], [49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98], [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99], [51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100]];
 const landscapesTank = ['firstTank', 'secondTank', 'thirdTank', 'forthTank', 'fifthTank', 'sixTank', 'sevenTank', 'eightTank'];
 const landscapesAtgm = ['firstAtgm', 'secondAtgm', 'thirdAtgm', 'forthAtgm', 'fifthAtgm', 'sixAtgm', 'sevenAtgm', 'eightAtgm'];
-
-
-
-
-
-
 const TREE_COLOR = `rgba(147, 28, 12, 0.66)`;
 const ROCK_COLOR = `rgba(37, 108, 199, 0.55)`
 let PLOT_COLORMAP = 'RdBu';
@@ -38,9 +36,6 @@ const setLeopardSideArmor = document.querySelector('#set-leopard-side');
 
 
 const infoTip = document.querySelector('.info-tip');
-const button = document.querySelector('.drop1');
-const buttonDropHundred = document.querySelector('.drop100');
-const buttonReset = document.querySelector('.reset');
 const buttonShow = document.querySelector('.console');
 const buttonGrid = document.querySelector('.grid');
 const downloadArmor = document.querySelector('.download-armor');
@@ -122,41 +117,33 @@ const rockMeanWidth = document.querySelector('#rock-mean-width');
 const rockStdWidth = document.querySelector('#rock-std-width');
 const rockStdHeight = document.querySelector('#rock-std-height');
 
-const tankT80 = document.querySelector('#t-80');
-const tankT72 = document.querySelector('#t-72');
-const abrams = document.querySelector('#abrams');
-const leopard = document.querySelector('#leopard');
-
-const t80Info = document.querySelector('#t-80-info')
-const t72Info = document.querySelector('#t-72-info')
-const abramsInfo = document.querySelector('#abrams-info')
-const leopardInfo = document.querySelector('#leopard-info')
 
 const landscapeNumber = document.querySelector('#landscape-number');
 
 const battlePlot = document.querySelector('#battle-plot');
 
+
+//////////////////// BATTLE INPUTS ///////////////////////////
 const atgmReloadInput = document.querySelector('#atgm-reload-time');
 const atgmAimingInput = document.querySelector('#atgm-aiming-time');
 const atgmMissileNumberInput = document.querySelector('#missile-number');
 const atgmMissileSpeedInput = document.querySelector('#missile-speed');
+const tankReloadInput = document.querySelector('#tank-reload-time');
+const tankAimingInput = document.querySelector('#tank-aiming-time');
+const tankProjectileSpeedInput = document.querySelector('#projectile-speed');
+const tankReactionInput = document.querySelector('#tank-reaction-time');
 
 
 atgmReloadInput.value = 15;
 atgmAimingInput.value = 5;
 atgmMissileNumberInput.value = 4;
 atgmMissileSpeedInput.value = 200;
-
-const tankReloadInput = document.querySelector('#tank-reload-time');
-const tankAimingInput = document.querySelector('#tank-aiming-time');
-const tankProjectileSpeedInput = document.querySelector('#projectile-speed');
-const tankReactionInput = document.querySelector('#tank-reaction-time');
-
 tankReloadInput.value = 8;
 tankAimingInput.value = 5;
 tankProjectileSpeedInput.value = 800;
 tankReactionInput.value = 2;
 
+////////////////////////////////////////////////////////////////////////
 
 plotTitle3d.value = PLOT_TITLE_3D;
 plotTitle2d.value = PLOT_TITLE_2D;
@@ -567,37 +554,8 @@ const OBSTACLE_NAMES = {
     ROCK: 'rock',
 }
 
-// TABS
 
 
-
-const tankTabsList = [t72Info, t80Info, abramsInfo, leopardInfo]
-
-const changeTankTab = (tab) => {
-    for (let tankTab of tankTabsList) {
-        if (tab === tankTab) {
-            tab.style.display = 'flex'
-        } else {
-            tankTab.style.display = 'none'
-        }
-    }
-}
-
-tankT80.addEventListener('click', () => {
-    changeTankTab(t80Info)
-})
-
-tankT72.addEventListener('click', () => {
-    changeTankTab(t72Info)
-})
-
-abrams.addEventListener('click', () => {
-    changeTankTab(abramsInfo)
-})
-
-leopard.addEventListener('click', () => {
-    changeTankTab(leopardInfo)
-})
 
 
 
@@ -680,9 +638,6 @@ buttonShow.addEventListener('click', () => {
 
 })
 
-
-
-
 dragElement(target)
 
 target.addEventListener('click', (e) => {
@@ -695,35 +650,14 @@ target.addEventListener('mousedown', (e) => {
 
 let obstacles = [];
 let divStack = [];
-const stack = [];
 let observers = [];
 
-downloadArmorExcel.addEventListener('click', () => {
-    const divStackList = ["x_left_mm", "x_right_mm", "y_top_mm", "y_bottom_mm", "thickness"];
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////// EXCEL //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    const wb = new xl.Workbook();
-    const ws = wb.addWorksheet('Sheet 1');
-
-    ws.cell(1,1).string('X-Лев');
-    ws.cell(1,2).string('X-Прав');
-    ws.cell(1,3).string('Y-Вверх');
-    ws.cell(1,4).string('Y-Низ');
-    ws.cell(1,5).string('Толщина');
-
-    for (let i = 0; i < divStack.length; i++) {
-        for (let j = 0; j < 5; j++) {
-            ws.cell(i+2, j+1).number(divStack[i][divStackList[j]])
-        }
-    }
-
-    wb.write('armor_excel.xlsx', () => {
-        armorExcelAlert.style.display = 'block';
-
-        setTimeout(() => {
-            armorExcelAlert.style.display = 'none';
-        }, 2000)
-    });
-})
+const excelService = new ExcelService()
+downloadArmorExcel.addEventListener('click', () => excelService.exportData(divStack))
 
 const deleteAllArmor = () => {
     for (let observer of observers) {
@@ -737,7 +671,6 @@ const deleteAllArmor = () => {
     armorInfo.innerHTML = '';
     list.replaceChildren();
     uploadArmor.value = '';
-    deleteAllArmorChart(chart);
 }
 
 deleteArmor.addEventListener('click', () => {
@@ -759,12 +692,6 @@ downloadArmor.addEventListener('click', () => {
     })
 
 })
-
-
-
-const ctx = document.querySelector('.plot');
-const canvas = ctx.querySelector('#canvas');
-
 
 
 const getIndex = (parent, child) => {
@@ -790,60 +717,6 @@ const showArmorInfo = (armor) => {
 }
 
 
-// PLOT DATA
-
-const addData = (chart, label, data) => {
-    chart.data.labels.push(label);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(data);
-    });
-    chart.update();
-}
-
-const deleteAllArmorChart = (chart) => {
-    chart.data.labels = [];
-    chart.data.datasets = [];
-    chart.update();
-}
-
-const deleteLastArmorChart = (chart) => {
-    chart.data.labels.pop();
-    chart.data.datasets.pop();
-    chart.update();
-}
-
-const updateData = (chart, label) => {
-    let index = chart.data.labels.indexOf(label);
-    chart.data.datasets[0].data[index] += 1;
-    chart.update();
-}
-
-const clearAllData = (chart) => {
-    chart.data.datasets[0].data = chart.data.datasets[0].data.map(() => 0)
-    chart.update();
-}
-
-
-let chart = new Chart(canvas, {
-    type: 'bar',
-    data: {
-        labels: stack.map(element => element.name),
-        datasets: [{
-            label: 'Количество попаданий',
-            data: stack.map(element => element.value),
-            borderWidth: 1,
-            backgroundColor: 'rgba(55, 55, 196, 0.78)'
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
-
 const range = function(start, stop, step){
     step = step || 1;
     const arr = [];
@@ -853,78 +726,12 @@ const range = function(start, stop, step){
     return arr;
 };
 
-// MATH
-
-
-const normalcdf = (x) => {
-    const mean = 0;
-    const sigma = 1;
-    const z = (x-mean)/Math.sqrt(2*sigma*sigma);
-    const t = 1/(1+0.3275911*Math.abs(z));
-    const a1 =  0.254829592;
-    const a2 = -0.284496736;
-    const a3 =  1.421413741;
-    const a4 = -1.453152027;
-    const a5 =  1.061405429;
-    const erf = 1-(((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*Math.exp(-z*z);
-    let sign = 1;
-    if(z < 0)
-    {
-        sign = -1;
-    }
-    return (1/2)*(1+sign*erf) - 0.5;
-}
-
-const gaussianRandom = (mean=0, stdev=1) => {
-    let u = 1 - Math.random();
-    let v = Math.random();
-    let z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-    return z * stdev + mean;
-}
-
-const computeProbability = (x_dots, y_dots, standardDeviation) => {
-    return new Promise(function (resolve) {
-        let probabilities = []
-        for (let i = 0; i < x_dots.length; i++) {
-            const dotProbabilities = [];
-            for (let armor of divStack) {
-                const hitProbabilityX = normalcdf((armor.right - x_dots[i]) / standardDeviation) - normalcdf((armor.left - x_dots[i]) / standardDeviation)
-                const hitProbabilityY = normalcdf((armor.bottom - y_dots[i]) / standardDeviation) - normalcdf((armor.top - y_dots[i]) / standardDeviation)
-                const hitProbability = hitProbabilityX * hitProbabilityY;
-                const penetrationProbability = hitProbability * Number(armor['hit']);
-                dotProbabilities.push(penetrationProbability);
-            }
-            const sum = dotProbabilities.reduce((partialSum, a) => partialSum + a, 0)
-            probabilities.push(sum)
-        }
-        resolve(probabilities)
-    })
-    // todo this
-}
-
 
 
 // DOTS
 
-const resetDots = () => {
-    const contentArray = testContainer.querySelectorAll('.image-content-section');
-    testContainer.replaceChildren(...contentArray)
-    clearAllData(chart);
 
-}
 
-const isDotInContent = (dotTop, dotLeft) => {
-    for (let div of divStack) {
-        if (dotLeft > div.left
-            && dotLeft < (div.left + div.width)
-            && dotTop > div.top
-            && dotTop < (div.top + div.height)
-        ) {
-
-            updateData(chart, div.name)
-        }
-    }
-}
 
 const makeDotGrid = () => {
     const tank_front_dots_x = range(0, windowWidth, 20)
@@ -1017,35 +824,32 @@ const plotResults = (resultArray, threeDimDiv, twoDimDiv) => {
 
 
 const analyticComputation = () => {
-    // todo optimize
-
+    const analyticWorker = new Worker("./src/modules/analytic/analytic-compute.worker.js");
     const [front_dots_x, front_dots_y] = makeDotGrid();
 
-    computeProbability(front_dots_x, front_dots_y, Number(standardDeviation)).then((result) => {
-        plotResults(result, plotlyDiv, plotlyDiv2d);
-
-    })
+    analyticWorker.postMessage([front_dots_x, front_dots_y, Number(standardDeviation), divStack]);
+    analyticWorker.onmessage = (e) => {
+        plotResults(e.data, plotlyDiv, plotlyDiv2d);
+    }
 }
 
-let myWorker;
 
 const monteCarloComputation = () => {
 
-    myWorker = new Worker("worker.js");
+    const monteCarloWorker = new Worker("worker.js");
      const [front_x_dots, front_y_dots] = makeDotGrid();
 
-    myWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
+    monteCarloWorker.postMessage([front_x_dots, front_y_dots, standardDeviation, divStack, obstacles]);
 
-    myWorker.onmessage = (e) => {
+    monteCarloWorker.onmessage = (e) => {
         plotResults(e.data, monteCarlo3d, monteCarlo2d);
-        myWorker.terminate();
+        monteCarloWorker.terminate();
     }
 }
 
 
 
 const dropGridDot = (x, y) => {
-    // isDotInContent(x, y)
     let dot = document.createElement('div');
     dot.className = 'dot';
     dot.style.backgroundColor = 'red';
@@ -1055,37 +859,6 @@ const dropGridDot = (x, y) => {
 }
 
 
-const dropDot = () => {
-
-    const targetLeft = target.offsetLeft + (target.clientWidth / 2);
-    const targetTop = target.offsetTop + (target.clientHeight / 2);
-
-    let randomX = Math.floor(gaussianRandom(targetLeft, 40));
-    let randomY = Math.floor(gaussianRandom(targetTop, 40));
-
-    isDotInContent(randomY, randomX)
-
-    let dot = document.createElement('div');
-    dot.className = 'dot'
-    dot.style.top = `${randomY}px`;
-    dot.style.left = `${randomX}px`;
-
-
-    testContainer.appendChild(dot)
-
-}
-
-const dropDots = (number) => {
-    for (let i = 0; i < number; i++) {
-        dropDot()
-    }
-
-}
-
-
-button.addEventListener('click', dropDot)
-buttonDropHundred.addEventListener('click', () => dropDots(100))
-buttonReset.addEventListener('click', resetDots)
 buttonGrid.addEventListener('click', analyticComputation)
 monteCarlo.addEventListener('click', () => {
     monteCarloComputation(false);
@@ -1166,7 +939,6 @@ const convert_px_distance_to_mm = (px, left=true) => {
 test.addEventListener('click', (e) => {
     let content = document.createElement('div');
 
-    addData(chart, `delta_${divStack.length+1}`, 0)
 
     content.className = 'content';
     content.style.top = `${e.offsetY}px`;
@@ -1237,10 +1009,6 @@ test.addEventListener('click', (e) => {
 
     list.appendChild(listItem)
 
-    // const armorTableRow = document.createElement('div');
-    // armorTableRow.classList.add('')
-
-
 
     contentValue.addEventListener('click', () => {
         input.value = value.innerHTML;
@@ -1302,7 +1070,6 @@ test.addEventListener('click', (e) => {
     })
 
     test.appendChild(content)
-    // console.log(divStack);
 
 })
 
@@ -1326,7 +1093,6 @@ const addContent = (armor) => {
         y_bottom_mm: convert_px_to_mm(armor.top, false) - convert_px_distance_to_mm(armor.height, false)
     })
 
-    addData(chart, `delta_${divStack.length}`, 0)
 
     content.className = 'content';
     content.style.top = `${armor.top}px`;
@@ -1609,7 +1375,6 @@ deleteLastArmor.addEventListener('click', () => {
     divStack.pop();
     list.removeChild(list.lastChild);
     uploadArmor.value = '';
-    deleteLastArmorChart(chart);
 })
 
 function throttle(callee, timeout) {
@@ -1626,6 +1391,10 @@ function throttle(callee, timeout) {
         }, timeout)
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////// COLOR SETTINGS ///////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 let percentageColorStack = [0, 100];
@@ -1724,6 +1493,16 @@ uploadGradient.addEventListener('change', (e) => {
     reader.readAsText(e.target.files[0]);
 })
 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// CUSTOM ARMOR ///////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
 const uploadCustomArmor = (photoPath, armorPath, width, height) => {
     deleteAllArmor();
     message.style.display = "none";
@@ -1780,3 +1559,7 @@ setLeopardFrontArmor.addEventListener('click', () => {
 setLeopardSideArmor.addEventListener('click', () => {
     uploadCustomArmor(LEOPARD_ARMOR.SIDE.PHOTO_PATH, LEOPARD_ARMOR.SIDE.ARMOR_PATH, LEOPARD_ARMOR.SIDE.WIDTH, LEOPARD_ARMOR.SIDE.HEIGHT);
 })
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
