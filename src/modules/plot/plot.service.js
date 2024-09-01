@@ -1,4 +1,5 @@
 const { tankData } = require('../../constants/tank-battle-data')
+const { range } = require('../../utils/common')
 
 class PlotService {
     constructor (
@@ -89,11 +90,15 @@ class PlotService {
         windowHeight,
         fixedProbabilityScale,
         PLOT_TITLE_3D,
-        PLOT_COLORMAP
+        PLOT_COLORMAP,
+        autoResizeColorBar,
+        summuryColorStack,
+        tankWidth,
+        tankHeight
     ) {
 
-        const dot_width = this.tankWidth.value ? Number(this.tankWidth.value) : windowWidth;
-        const dot_height = this.tankHeight.value ? Number(this.tankHeight.value) : windowHeight;
+        const dot_width = tankWidth.value ? Number(tankWidth.value) : windowWidth;
+        const dot_height = tankHeight.value ? Number(tankHeight.value) : windowHeight;
     
         let x_step = windowWidth / 20
         let x = range(0, dot_width, dot_width / x_step);
@@ -125,7 +130,7 @@ class PlotService {
     
     
         let layout2d = {
-            title: PLOT_TITLE_2D,
+            title: PLOT_TITLE_3D,
         }
     
         let data2d = [
@@ -142,7 +147,6 @@ class PlotService {
             }
         ];
     
-    
         Plotly.newPlot(twoDimDiv, data2d, layout2d, {displayModeBar: false});
     
         const data_z = {
@@ -156,6 +160,8 @@ class PlotService {
             type: 'surface',
             colorscale: PLOT_COLORMAP !== 'gradient' ? PLOT_COLORMAP : summuryColorStack,
         };
+
+
         Plotly.newPlot(threeDimDiv, [data_z], layout);
     }
 }

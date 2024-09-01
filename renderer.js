@@ -9,9 +9,10 @@ const { PlotService } = require('./src/modules/plot/plot.service')
 const { TankBattleService } = require('./src/modules/battle/tank-battle.service')
 const { ConvertationService } = require('./src/utils/convert')
 const { ArmorService } = require('./src/modules/armor/armor.service')
+const { GradientService } = require('./src/modules/gradient/gradient.service')
 
 const { gaussianRandom, randomInInterval } = require('./src/utils/math')
-const { throttle, addTwoArrays } = require('./src/utils/common')
+const { throttle, addTwoArrays, range } = require('./src/utils/common')
 
 const { Chart, registerables  } = require('chart.js')
 Chart.register(...registerables);
@@ -154,22 +155,7 @@ const SIDE_WINDOW_SIZE = 850;
 let windowWidth = FRONT_WINDOW_SIZE;
 const windowHeight = 491;
 
-const target = targetDivWrapper.querySelector('.target');
-
-
-let targetDisplay = false;
-
 const convertationService = new ConvertationService(windowWidth, windowHeight, tankWidth, tankHeight)
-
-
-
-
-const addTableColumn = document.querySelector('#add-column');
-const beginBattleButton = document.querySelector('#battle-button');
-
-const battleWinColor = document.querySelector('#battleWin');
-const battleTieColor = document.querySelector('#battleTie');
-const battleLoseColor = document.querySelector('#battleLose');
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,6 +171,12 @@ const tankReloadInput = document.querySelector('#tank-reload-time');
 const tankAimingInput = document.querySelector('#tank-aiming-time');
 const tankProjectileSpeedInput = document.querySelector('#projectile-speed');
 const tankReactionInput = document.querySelector('#tank-reaction-time');
+
+const addTableColumn = document.querySelector('#add-column');
+const beginBattleButton = document.querySelector('#battle-button');
+const battleWinColor = document.querySelector('#battleWin');
+const battleTieColor = document.querySelector('#battleTie');
+const battleLoseColor = document.querySelector('#battleLose');
 
 const battleTankTable = document.querySelector('#tank-table');
 const battleAtgmTable = document.querySelector('#atgm-table');
@@ -303,12 +295,6 @@ heightTip.addEventListener('mouseleave', () => {
 })
 
 
-
-targetButton.addEventListener('click', () => {
-    target.style.opacity = targetDisplay ? 0 : 1;
-    targetDisplay = !targetDisplay;
-})
-
 let standardDeviation;
 
 function getBase64(file) {
@@ -351,6 +337,7 @@ const resizeTankWindow = () => {
 
     }, 300)
 }
+
 buttonShow.addEventListener('click', () => {
 
     divStack.map((armor) => {
@@ -360,21 +347,12 @@ buttonShow.addEventListener('click', () => {
 
 })
 
-dragElement(target)
-
-target.addEventListener('click', (e) => {
-    e.stopPropagation()
-})
-
-target.addEventListener('mousedown', (e) => {
-    e.stopPropagation()
-})
 
 let obstacles = [];
 let divStack = [];
 let observers = [];
 
-const armorService = new ArmorService(divStack)
+const armorService = new ArmorService(convertationService)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////// EXCEL //////////////////////////////////////////////////////////
@@ -382,75 +360,6 @@ const armorService = new ArmorService(divStack)
 
 const excelService = new ExcelService(armorExcelAlert)
 downloadArmorExcel.addEventListener('click', () => excelService.exportData(divStack))
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const deleteAllArmor = () => {
-    for (let observer of observers) {
-        observer.disconnect();
-    }
-    while (test.childNodes.length !== 1) {
-        test.removeChild(test.lastChild);
-    }
-    divStack = [];
-    observers = [];
-    armorInfo.innerHTML = '';
-    list.replaceChildren();
-    uploadArmor.value = '';
-}
-
-deleteArmor.addEventListener('click', () => {
-    deleteAllArmor();
-})
-
-downloadArmor.addEventListener('click', () => {
-    const obj = {
-        table: divStack,
-    };
-
-    const json = JSON.stringify(obj);
-    fs.writeFile('armor.json', json, 'utf-8', () => {
-        armorAlert.style.display = 'block';
-
-        setTimeout(() => {
-            armorAlert.style.display = 'none';
-        }, 2000)
-    })
-
-})
-
-
-const getIndex = (parent, child) => {
-    return Array.prototype.indexOf.call(parent.children, child);
-}
-
-const showArmorInfo = (armor) => {
-
-
-    armorInfo.innerHTML = `
-    
-        <div class="armor-info-table">
-            <div>${armor.name}</div>
-            <div>Толщина - ${armor.thickness} мм</div>
-            <div>Высота - ${Math.round(armor.y_top_mm - armor.y_bottom_mm)} мм</div>
-            <div>Ширина - ${Math.round(armor.x_right_mm - armor.x_left_mm)} мм</div>
-            <div>Пробитие - ${armor.hit === 1 ? 'Да' : 'Нет'}</div>
-        </div>
-    `
-
-    armorInfo.style.opacity = 1;
-
-}
-
-
-const range = function(start, stop, step){
-    step = step || 1;
-    const arr = [];
-    for (let i=start;i<stop;i+=step) {
-        arr.push(i);
-    }
-    return arr;
-};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -505,7 +414,12 @@ const analyticComputation = () => {
         windowHeight, 
         fixedProbabilityScale, 
         PLOT_TITLE_3D, 
-        PLOT_COLORMAP
+        PLOT_COLORMAP,
+        autoResizeColorBar,
+        summuryColorStack,
+        tankWidth,
+        tankHeight
+        
     );
     analyticWorker.terminate();
     }
@@ -528,7 +442,11 @@ const monteCarloComputation = () => {
             windowHeight, 
             fixedProbabilityScale, 
             PLOT_TITLE_3D, 
-            PLOT_COLORMAP
+            PLOT_COLORMAP,
+            autoResizeColorBar,
+            summuryColorStack,
+            tankWidth,
+            tankHeight
         );
         monteCarloWorker.terminate();
     }
@@ -539,55 +457,12 @@ monteCarlo.addEventListener('click', monteCarloComputation)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-function dragElement(elmnt) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    if (elmnt.querySelector('.dragHeader')) {
-        elmnt.querySelector('.dragHeader').onmousedown = dragMouseDown;
-    } else {
-        elmnt.onmousedown = dragMouseDown;
-    }
-
-    function dragMouseDown(e) {
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-    }
-
-    function elementDrag(e) {
-        e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-        if (elmnt.className !== 'target') {
-            let parent = elmnt.parentNode;
-            let index = Array.prototype.indexOf.call(parent.children, elmnt);
-            divStack[index].top = elmnt.offsetTop - pos2;
-            divStack[index].left = elmnt.offsetLeft - pos1;
-            divStack[index].right = (elmnt.offsetLeft - pos1) + divStack[index].width;
-            divStack[index].bottom = (elmnt.offsetTop - pos2) + divStack[index].height;
-
-            divStack[index].x_left_mm = convertationService.convert_px_to_mm(elmnt.offsetLeft - pos1, true);
-            divStack[index].x_right_mm = convertationService.convert_px_to_mm(elmnt.offsetLeft - pos1, true) +
-                convertationService.convert_px_distance_to_mm(divStack[index].width, true);
-            divStack[index].y_top_mm = convertationService.convert_px_to_mm(elmnt.offsetTop - pos2, false);
-            divStack[index].y_bottom_mm = convertationService.convert_px_to_mm(elmnt.offsetTop - pos2, false) -
-                convertationService.convert_px_distance_to_mm(divStack[index].height, false)
-        }
-    }
-
-    function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-    }
-}
-
+deleteArmor.addEventListener('click', () => armorService.deleteAllArmor(observers, test, divStack, armorInfo, list, uploadArmor))
+downloadArmor.addEventListener('click', () => armorService.downloadArmor(divStack, armorAlert))
 test.addEventListener('click', (e) => armorService.addNewArmor(e, divStack))
 uploadArmor.addEventListener('change', (e) => armorService.uploadArmorFunc(e, divStack))
+deleteLastArmor.addEventListener('click', () => armorService.deleteLastArmor(observers, test, divStack, list, uploadArmor))
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -710,7 +585,11 @@ const monteCarloSimulation = () => {
                     windowHeight, 
                     fixedProbabilityScale, 
                     PLOT_TITLE_3D, 
-                    PLOT_COLORMAP
+                    PLOT_COLORMAP,
+                    autoResizeColorBar,
+                    summuryColorStack,
+                    tankWidth,
+                    tankHeight
                 );
                 
                 loader.style.display = 'none';
@@ -721,16 +600,6 @@ const monteCarloSimulation = () => {
 }
 
 simulation.addEventListener('click', monteCarloSimulation)
-
-
-deleteLastArmor.addEventListener('click', () => {
-    observers[observers.length - 1].disconnect();
-    observers.pop();
-    test.removeChild(test.lastChild);
-    divStack.pop();
-    list.removeChild(list.lastChild);
-    uploadArmor.value = '';
-})
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -840,67 +709,48 @@ uploadGradient.addEventListener('change', (e) => {
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////// CUSTOM ARMOR ///////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////
-
-const uploadCustomArmor = (photoPath, armorPath, width, height) => {
-    deleteAllArmor();
-    message.style.display = "none";
-    preview.src = photoPath;
-    let obj;
-    fs.readFile(armorPath, 'utf8', function (err, data) {
-        if (err) throw err;
-        obj = JSON.parse(data);
-        const table = obj.table;
-        for (let armor of table) {
-            armorService.addExistingArmor(armor, divStack);
-        }
-    });
-
-    tankWidth.value = width;
-    tankHeight.value = height;
-
-    resizeTankWindow()
-}
 
 mockTank.addEventListener('click', () => {
-    uploadCustomArmor(T80_ARMOR.FRONT.PHOTO_PATH, T80_ARMOR.FRONT.ARMOR_PATH, T80_ARMOR.FRONT.WIDTH, T80_ARMOR.FRONT.HEIGHT);
-
+    armorService.uploadCustomArmor(T80_ARMOR.FRONT.PHOTO_PATH, T80_ARMOR.FRONT.ARMOR_PATH, T80_ARMOR.FRONT.WIDTH, T80_ARMOR.FRONT.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
 
 setT72FrontArmor.addEventListener('click', () => {
-    uploadCustomArmor(T72_ARMOR.FRONT.PHOTO_PATH, T72_ARMOR.FRONT.ARMOR_PATH, T72_ARMOR.FRONT.WIDTH, T72_ARMOR.FRONT.HEIGHT);
+    armorService.uploadCustomArmor(T72_ARMOR.FRONT.PHOTO_PATH, T72_ARMOR.FRONT.ARMOR_PATH, T72_ARMOR.FRONT.WIDTH, T72_ARMOR.FRONT.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
 
 setT72SideArmor.addEventListener('click', () => {
-    uploadCustomArmor(T72_ARMOR.SIDE.PHOTO_PATH, T72_ARMOR.SIDE.ARMOR_PATH, T72_ARMOR.SIDE.WIDTH, T72_ARMOR.SIDE.HEIGHT);
+    armorService.uploadCustomArmor(T72_ARMOR.SIDE.PHOTO_PATH, T72_ARMOR.SIDE.ARMOR_PATH, T72_ARMOR.SIDE.WIDTH, T72_ARMOR.SIDE.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
 
 setT80FrontArmor.addEventListener('click', () => {
-    uploadCustomArmor(T80_ARMOR.FRONT.PHOTO_PATH, T80_ARMOR.FRONT.ARMOR_PATH, T80_ARMOR.FRONT.WIDTH, T80_ARMOR.FRONT.HEIGHT);
+    armorService.uploadCustomArmor(T80_ARMOR.FRONT.PHOTO_PATH, T80_ARMOR.FRONT.ARMOR_PATH, T80_ARMOR.FRONT.WIDTH, T80_ARMOR.FRONT.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
 
 setT80SideArmor.addEventListener('click', () => {
-    uploadCustomArmor(T80_ARMOR.SIDE.PHOTO_PATH, T80_ARMOR.SIDE.ARMOR_PATH, T80_ARMOR.SIDE.WIDTH, T80_ARMOR.SIDE.HEIGHT);
+    armorService.uploadCustomArmor(T80_ARMOR.SIDE.PHOTO_PATH, T80_ARMOR.SIDE.ARMOR_PATH, T80_ARMOR.SIDE.WIDTH, T80_ARMOR.SIDE.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
 
 setAbramsFrontArmor.addEventListener('click', () => {
-    uploadCustomArmor(ABRAMS_ARMOR.FRONT.PHOTO_PATH, ABRAMS_ARMOR.FRONT.ARMOR_PATH, ABRAMS_ARMOR.FRONT.WIDTH, ABRAMS_ARMOR.FRONT.HEIGHT);
+    armorService.uploadCustomArmor(ABRAMS_ARMOR.FRONT.PHOTO_PATH, ABRAMS_ARMOR.FRONT.ARMOR_PATH, ABRAMS_ARMOR.FRONT.WIDTH, ABRAMS_ARMOR.FRONT.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
 
 setAbramsSideArmor.addEventListener('click', () => {
-    uploadCustomArmor(ABRAMS_ARMOR.SIDE.PHOTO_PATH, ABRAMS_ARMOR.SIDE.ARMOR_PATH, ABRAMS_ARMOR.SIDE.WIDTH, ABRAMS_ARMOR.SIDE.HEIGHT);
+    armorService.uploadCustomArmor(ABRAMS_ARMOR.SIDE.PHOTO_PATH, ABRAMS_ARMOR.SIDE.ARMOR_PATH, ABRAMS_ARMOR.SIDE.WIDTH, ABRAMS_ARMOR.SIDE.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
 
 setLeopardFrontArmor.addEventListener('click', () => {
-    uploadCustomArmor(LEOPARD_ARMOR.FRONT.PHOTO_PATH, LEOPARD_ARMOR.FRONT.ARMOR_PATH, LEOPARD_ARMOR.FRONT.WIDTH, LEOPARD_ARMOR.FRONT.HEIGHT);
+    armorService.uploadCustomArmor(LEOPARD_ARMOR.FRONT.PHOTO_PATH, LEOPARD_ARMOR.FRONT.ARMOR_PATH, LEOPARD_ARMOR.FRONT.WIDTH, LEOPARD_ARMOR.FRONT.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
 
 setLeopardSideArmor.addEventListener('click', () => {
-    uploadCustomArmor(LEOPARD_ARMOR.SIDE.PHOTO_PATH, LEOPARD_ARMOR.SIDE.ARMOR_PATH, LEOPARD_ARMOR.SIDE.WIDTH, LEOPARD_ARMOR.SIDE.HEIGHT);
+    armorService.uploadCustomArmor(LEOPARD_ARMOR.SIDE.PHOTO_PATH, LEOPARD_ARMOR.SIDE.ARMOR_PATH, LEOPARD_ARMOR.SIDE.WIDTH, LEOPARD_ARMOR.SIDE.HEIGHT, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor);
+    resizeTankWindow()
 })
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////

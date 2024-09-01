@@ -21,5 +21,15 @@ const addTwoArrays = (a, b) => {
     return a.map((e, i) => e + b[i])
 }
 
+const range = function(start, stop, step){
+    step = step || 1;
+    const arr = [];
+    for (let i=start;i<stop;i+=step) {
+        arr.push(i);
+    }
+    return arr;
+};
 
-module.exports = { throttle, addTwoArrays }
+
+
+module.exports = { throttle, addTwoArrays, range }

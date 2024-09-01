@@ -1,9 +1,48 @@
 class ArmorService {
+    constructor(convertationService) {
+        this.convertationService = convertationService
+    }
 
+    downloadArmor(divStack, armorAlert) {
+        const obj = {
+            table: divStack,
+        };
+    
+        const json = JSON.stringify(obj);
+        fs.writeFile('armor.json', json, 'utf-8', () => {
+            armorAlert.style.display = 'block';
+    
+            setTimeout(() => {
+                armorAlert.style.display = 'none';
+            }, 2000)
+        })
+    }
   
+    uploadCustomArmor(photoPath, armorPath, width, height, message, preview, divStack, tankWidth, tankHeight, observers, test, armorInfo, list, uploadArmor) {
+        this.deleteAllArmor(observers, test, divStack, armorInfo, list, uploadArmor);
+        message.style.display = "none";
+        preview.src = photoPath;
+        let obj;
+        fs.readFile(armorPath, 'utf8',  (err, data) => {
+            if (err) throw err;
+            obj = JSON.parse(data);
+            const table = obj.table;
+            this.addArmorFromTable(table, divStack)
+        });
+    
+        tankWidth.value = width;
+        tankHeight.value = height;
+    
+        resizeTankWindow()
+    }
+
     handleArmorLoad(e, divStack) {
         const obj = JSON.parse(e.target.result);
         const table = obj.table;
+        this.addArmorFromTable(table, divStack)
+    }
+
+    addArmorFromTable(table, divStack) {
         for (let armor of table) {
             this.addExistingArmor(armor, divStack);
         }
@@ -14,6 +53,33 @@ class ArmorService {
         reader.onload = (e) => this.handleArmorLoad(e, divStack);
         reader.readAsText(e.target.files[0]);
     }
+
+    deleteLastArmor(observers, test, divStack, list, uploadArmor) {
+        observers[observers.length - 1].disconnect();
+        observers.pop();
+        test.removeChild(test.lastChild);
+        divStack.pop();
+        list.removeChild(list.lastChild);
+        uploadArmor.value = '';
+    }
+
+    
+
+    deleteAllArmor(observers, test, divStack, armorInfo, list, uploadArmor) {
+        for (let observer of observers) {
+            observer.disconnect();
+        }
+        while (test.childNodes.length !== 1) {
+            test.removeChild(test.lastChild);
+        }
+        divStack = [];
+        observers = [];
+        armorInfo.innerHTML = '';
+        list.replaceChildren();
+        uploadArmor.value = '';
+    }
+    
+    
 
     addNewArmor(e, divStack) {
         let content = document.createElement('div');
@@ -27,10 +93,10 @@ class ArmorService {
             width: 200,
             top: e.offsetY,
             left: e.offsetX,
-            x_left_mm: convertationService.convert_px_to_mm(e.offsetX, true),
-            x_right_mm: convertationService.convert_px_to_mm(e.offsetX, true) + convertationService.convert_px_distance_to_mm(200, true),
-            y_top_mm: convertationService.convert_px_to_mm(e.offsetY, false),
-            y_bottom_mm: convertationService.convert_px_to_mm(e.offsetY, false) - convertationService.convert_px_distance_to_mm(100, false),
+            x_left_mm: this.convertationService.convert_px_to_mm(e.offsetX, true),
+            x_right_mm: this.convertationService.convert_px_to_mm(e.offsetX, true) + this.convertationService.convert_px_distance_to_mm(200, true),
+            y_top_mm: this.convertationService.convert_px_to_mm(e.offsetY, false),
+            y_bottom_mm: this.convertationService.convert_px_to_mm(e.offsetY, false) - this.convertationService.convert_px_distance_to_mm(100, false),
         })
     
     
@@ -52,7 +118,7 @@ class ArmorService {
             '<span class="delta">mm</span>' +
             '</div>'
     
-        showArmorInfo(divStack[divStack.length - 1])
+        this.showArmorInfo(divStack[divStack.length - 1])
     
         let contentValue = content.querySelector('.contentValue')
         let input = contentValue.querySelector('.input')
@@ -62,7 +128,7 @@ class ArmorService {
         listItem.className = 'listItem';
         listItem.innerHTML = `delta_${divStack.length} - ${100} мм`
     
-        this.AddListenersToArmor(listItem, input, value, contentValue, content)
+        this.AddListenersToArmor(listItem, input, value, contentValue, content, divStack)
     }
 
     addExistingArmor(armor, divStack) {
@@ -77,10 +143,10 @@ class ArmorService {
             width: armor.width,
             top: armor.top,
             left: armor.left,
-            x_left_mm: convertationService.convert_px_to_mm(armor.left, true),
-            x_right_mm: convertationService.convert_px_to_mm(armor.left, true) + convertationService.convert_px_distance_to_mm(armor.width, true),
-            y_top_mm: convertationService.convert_px_to_mm(armor.top, false),
-            y_bottom_mm: convertationService.convert_px_to_mm(armor.top, false) - convertationService.convert_px_distance_to_mm(armor.height, false)
+            x_left_mm: this.convertationService.convert_px_to_mm(armor.left, true),
+            x_right_mm: this.convertationService.convert_px_to_mm(armor.left, true) + this.convertationService.convert_px_distance_to_mm(armor.width, true),
+            y_top_mm: this.convertationService.convert_px_to_mm(armor.top, false),
+            y_bottom_mm: this.convertationService.convert_px_to_mm(armor.top, false) - this.convertationService.convert_px_distance_to_mm(armor.height, false)
         })
     
     
@@ -106,7 +172,7 @@ class ArmorService {
     
     
     
-        showArmorInfo(divStack[divStack.length-1])
+        this.showArmorInfo(divStack[divStack.length-1])
     
         let contentValue = content.querySelector('.contentValue')
         let input = contentValue.querySelector('.input')
@@ -124,14 +190,14 @@ class ArmorService {
         listItem.className = 'listItem';
         listItem.innerHTML = `delta_${divStack.length} - ${armor.thickness} мм`
     
-        this.AddListenersToArmor(listItem, input, value, contentValue, content)
+        this.AddListenersToArmor(listItem, input, value, contentValue, content, divStack)
     }
 
-    AddListenersToArmor(listItem, input, value, contentValue, content) {
+    AddListenersToArmor(listItem, input, value, contentValue, content, divStack) {
         let divColor;
     
         listItem.addEventListener('mouseenter', () => {
-            let index = getIndex(list, listItem)
+            let index = this.getIndex(list, listItem)
             divColor = test.childNodes[index+1].style.backgroundColor;
             listItem.style.backgroundColor = 'rgba(39,39,147,0.78)'
             test.childNodes[index+1].style.backgroundColor = 'rgba(55, 55, 196, 0.78)'
@@ -139,14 +205,14 @@ class ArmorService {
         })
     
         listItem.addEventListener('mouseleave', () => {
-            let index = getIndex(list, listItem)
+            let index = this.getIndex(list, listItem)
             listItem.style.backgroundColor = '#333D79FF'
             test.childNodes[index+1].style.backgroundColor = divColor;
         })
     
         listItem.addEventListener('click', () => {
-            let index = getIndex(list, listItem)
-            showArmorInfo(divStack[index])
+            let index = this.getIndex(list, listItem)
+            this.showArmorInfo(divStack[index])
         })
     
         list.appendChild(listItem)
@@ -170,7 +236,7 @@ class ArmorService {
                 divStack[index].thickness = Number(input.value);
                 divStack[index].hit = (Number(inputArmor.value) - Number(input.value)) > 0 ? 1 : 0;
     
-                showArmorInfo(divStack[index])
+                this.showArmorInfo(divStack[index])
     
     
                 if (Number(value.innerHTML) > 500) {
@@ -184,7 +250,7 @@ class ArmorService {
         
     
     
-        dragElement(content);
+        this.dragElement(content, divStack);
     
         // RESIZING_CONTENT_WINDOW //
     
@@ -194,14 +260,14 @@ class ArmorService {
             observers.push(resizeObserver);
         };
     
-        onresize(content, function () {
+        onresize(content, () => {
             let index = Array.prototype.indexOf.call(test.children, content);
             divStack[index].height = content.offsetHeight;
             divStack[index].width = content.offsetWidth;
             divStack[index].bottom = content.offsetHeight + divStack[index].top;
             divStack[index].right = divStack[index].left + content.offsetWidth;
-            divStack[index].x_right_mm = divStack[index].x_left_mm + convertationService.convert_px_distance_to_mm(content.offsetWidth, true);
-            divStack[index].y_bottom_mm = divStack[index].y_top_mm - convertationService.convert_px_distance_to_mm(content.offsetHeight, false);
+            divStack[index].x_right_mm = divStack[index].x_left_mm + this.convertationService.convert_px_distance_to_mm(content.offsetWidth, true);
+            divStack[index].y_bottom_mm = divStack[index].y_top_mm - this.convertationService.convert_px_distance_to_mm(content.offsetHeight, false);
         });
     
     
@@ -214,6 +280,75 @@ class ArmorService {
         })
     
         test.appendChild(content)
+    }
+
+    getIndex(parent, child) {
+        return Array.prototype.indexOf.call(parent.children, child);
+    }
+
+    showArmorInfo(armor) {
+
+
+        armorInfo.innerHTML = `
+        
+            <div class="armor-info-table">
+                <div>${armor.name}</div>
+                <div>Толщина - ${armor.thickness} мм</div>
+                <div>Высота - ${Math.round(armor.y_top_mm - armor.y_bottom_mm)} мм</div>
+                <div>Ширина - ${Math.round(armor.x_right_mm - armor.x_left_mm)} мм</div>
+                <div>Пробитие - ${armor.hit === 1 ? 'Да' : 'Нет'}</div>
+            </div>
+        `
+    
+        armorInfo.style.opacity = 1;
+    
+    }
+
+    dragElement(elmnt, divStack) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (elmnt.querySelector('.dragHeader')) {
+            elmnt.querySelector('.dragHeader').onmousedown = dragMouseDown;
+        } else {
+            elmnt.onmousedown = dragMouseDown;
+        }
+    
+        function dragMouseDown(e) {
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+    
+        const elementDrag = (e) => {
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            if (elmnt.className !== 'target') {
+                let parent = elmnt.parentNode;
+                let index = Array.prototype.indexOf.call(parent.children, elmnt);
+                divStack[index].top = elmnt.offsetTop - pos2;
+                divStack[index].left = elmnt.offsetLeft - pos1;
+                divStack[index].right = (elmnt.offsetLeft - pos1) + divStack[index].width;
+                divStack[index].bottom = (elmnt.offsetTop - pos2) + divStack[index].height;
+    
+                divStack[index].x_left_mm = this.convertationService.convert_px_to_mm(elmnt.offsetLeft - pos1, true);
+                divStack[index].x_right_mm = this.convertationService.convert_px_to_mm(elmnt.offsetLeft - pos1, true) +
+                    this.convertationService.convert_px_distance_to_mm(divStack[index].width, true);
+                divStack[index].y_top_mm = this.convertationService.convert_px_to_mm(elmnt.offsetTop - pos2, false);
+                divStack[index].y_bottom_mm = this.convertationService.convert_px_to_mm(elmnt.offsetTop - pos2, false) -
+                    this.convertationService.convert_px_distance_to_mm(divStack[index].height, false)
+            }
+        }
+    
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
     }
 }
 
